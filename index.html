@@ -6,14 +6,13 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-  <meta name="apple-mobile-web-app-title" content="NierAssistent" />
-  <title>NierAssistent</title>
-  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <meta name="apple-mobile-web-app-title" content="Sunny's NierRobot" />
+  <title>Sunny's NierRobot</title>
+  <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
       --bg: #0d1117;
       --surface: #161b22;
-      --surface2: #1c2330;
       --border: #30363d;
       --accent: #4fc3f7;
       --accent-dim: #1a3a4a;
@@ -24,7 +23,6 @@
       --ai-bg: #1c2330;
       --ai-border: #30363d;
       --danger: #f85149;
-      --success: #3fb950;
       --radius: 16px;
       --radius-sm: 10px;
     }
@@ -49,65 +47,59 @@
       height: -webkit-fill-available;
       max-width: 680px;
       margin: 0 auto;
-      position: relative;
     }
 
-    /* ── Header ── */
+    /* Header */
     #header {
-      padding: 16px 20px 12px;
+      padding: 14px 20px 12px;
       background: var(--bg);
       border-bottom: 1px solid var(--border);
       display: flex;
       align-items: center;
       gap: 12px;
       flex-shrink: 0;
-      position: relative;
       z-index: 10;
     }
 
-    .kidney-icon {
-      width: 38px;
-      height: 38px;
-      background: linear-gradient(135deg, #4fc3f7, #0288d1);
+    .header-dot {
+      width: 10px;
+      height: 10px;
       border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
+      background: var(--accent);
+      box-shadow: 0 0 10px rgba(79,195,247,0.6);
       flex-shrink: 0;
-      box-shadow: 0 0 16px rgba(79, 195, 247, 0.3);
     }
 
-    .header-text h1 {
+    #header h1 {
       font-family: 'Crimson Pro', serif;
-      font-size: 20px;
+      font-size: 19px;
       font-weight: 600;
       color: var(--text);
-      letter-spacing: -0.3px;
+      letter-spacing: -0.2px;
     }
 
-    .header-text p {
-      font-size: 11px;
-      color: var(--text-muted);
-      font-weight: 300;
-    }
-
-    #settings-btn {
+    #header-actions {
       margin-left: auto;
+      display: flex;
+      gap: 8px;
+    }
+
+    .hdr-btn {
       background: none;
       border: 1px solid var(--border);
       color: var(--text-muted);
       border-radius: var(--radius-sm);
-      padding: 6px 10px;
-      font-size: 13px;
+      padding: 5px 11px;
+      font-size: 12px;
       cursor: pointer;
       transition: all 0.2s;
       font-family: 'DM Sans', sans-serif;
+      white-space: nowrap;
     }
 
-    #settings-btn:hover { border-color: var(--accent); color: var(--accent); }
+    .hdr-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── API Key Screen ── */
+    /* API Key Screen */
     #api-screen {
       display: none;
       flex-direction: column;
@@ -121,14 +113,9 @@
 
     #api-screen.visible { display: flex; }
 
-    #api-screen .lock-icon {
-      font-size: 48px;
-      filter: drop-shadow(0 0 20px rgba(79, 195, 247, 0.4));
-    }
-
     #api-screen h2 {
       font-family: 'Crimson Pro', serif;
-      font-size: 26px;
+      font-size: 24px;
       font-weight: 600;
     }
 
@@ -139,10 +126,7 @@
       line-height: 1.7;
     }
 
-    #api-screen a {
-      color: var(--accent);
-      text-decoration: none;
-    }
+    #api-screen a { color: var(--accent); text-decoration: none; }
 
     .api-input-wrap {
       width: 100%;
@@ -193,7 +177,103 @@
       text-align: left;
     }
 
-    /* ── Chat area ── */
+    /* History panel */
+    #history-panel {
+      display: none;
+      flex-direction: column;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    #history-panel.visible { display: flex; }
+
+    #history-list {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    #history-list::-webkit-scrollbar { width: 4px; }
+    #history-list::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+    .history-empty {
+      color: var(--text-muted);
+      font-size: 14px;
+      text-align: center;
+      padding: 40px 0;
+    }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      cursor: pointer;
+      transition: border-color 0.18s;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: 10px;
+    }
+
+    .history-item:hover { border-color: var(--accent); }
+
+    .history-item-text { flex: 1; min-width: 0; }
+
+    .history-item-preview {
+      font-size: 13px;
+      color: var(--text);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-date {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-top: 3px;
+    }
+
+    .history-item-del {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      cursor: pointer;
+      font-size: 16px;
+      padding: 0 2px;
+      flex-shrink: 0;
+      line-height: 1;
+      transition: color 0.18s;
+    }
+
+    .history-item-del:hover { color: var(--danger); }
+
+    .history-actions {
+      padding: 12px 16px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      gap: 8px;
+    }
+
+    .history-actions button {
+      flex: 1;
+      padding: 10px;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      font-weight: 500;
+      transition: opacity 0.2s;
+    }
+
+    .btn-new { background: var(--accent); color: #0d1117; border: none; }
+    .btn-back { background: none; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-new:hover, .btn-back:hover { opacity: 0.8; }
+
+    /* Chat area */
     #chat-area {
       flex: 1;
       overflow-y: auto;
@@ -206,78 +286,34 @@
     }
 
     #chat-area::-webkit-scrollbar { width: 4px; }
-    #chat-area::-webkit-scrollbar-track { background: transparent; }
     #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
 
-    /* ── Welcome state ── */
+    /* Welcome */
     #welcome {
       display: flex;
       flex-direction: column;
       align-items: center;
       text-align: center;
-      padding: 24px 8px;
-      gap: 12px;
-    }
-
-    #welcome .big-icon {
-      font-size: 52px;
-      margin-bottom: 4px;
-      filter: drop-shadow(0 0 24px rgba(79, 195, 247, 0.5));
+      padding: 40px 8px 24px;
     }
 
     #welcome h2 {
       font-family: 'Crimson Pro', serif;
-      font-size: 24px;
+      font-size: 22px;
       font-weight: 400;
-      font-style: italic;
-      color: var(--text);
-    }
-
-    #welcome p {
-      font-size: 13px;
       color: var(--text-muted);
-      max-width: 280px;
-      line-height: 1.7;
     }
 
-    .suggestions {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      width: 100%;
-      margin-top: 8px;
-    }
-
-    .suggestion-btn {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 16px;
-      color: var(--text);
-      font-size: 13px;
-      cursor: pointer;
-      text-align: left;
-      font-family: 'DM Sans', sans-serif;
-      transition: all 0.18s;
-      line-height: 1.4;
-    }
-
-    .suggestion-btn:hover, .suggestion-btn:active {
-      border-color: var(--accent);
-      background: var(--accent-dim);
-      color: var(--accent);
-    }
-
-    /* ── Messages ── */
+    /* Messages */
     .msg {
       display: flex;
       flex-direction: column;
       gap: 4px;
-      animation: fadeUp 0.25s ease;
+      animation: fadeUp 0.22s ease;
     }
 
     @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(8px); }
+      from { opacity: 0; transform: translateY(6px); }
       to   { opacity: 1; transform: translateY(0); }
     }
 
@@ -289,8 +325,7 @@
       padding: 12px 16px;
       border-radius: var(--radius);
       font-size: 14px;
-      line-height: 1.65;
-      white-space: pre-wrap;
+      line-height: 1.7;
       word-break: break-word;
     }
 
@@ -299,6 +334,7 @@
       border: 1px solid var(--user-border);
       border-bottom-right-radius: 4px;
       color: #c9e7f7;
+      white-space: pre-wrap;
     }
 
     .msg.ai .bubble {
@@ -306,6 +342,57 @@
       border: 1px solid var(--ai-border);
       border-bottom-left-radius: 4px;
       color: var(--text);
+    }
+
+    /* Markdown styles inside AI bubble */
+    .bubble h1, .bubble h2, .bubble h3 {
+      font-family: 'Crimson Pro', serif;
+      font-weight: 600;
+      margin: 14px 0 6px;
+      color: var(--text);
+      line-height: 1.3;
+    }
+
+    .bubble h1 { font-size: 18px; }
+    .bubble h2 { font-size: 16px; }
+    .bubble h3 { font-size: 15px; color: var(--accent); }
+
+    .bubble p { margin-bottom: 10px; }
+    .bubble p:last-child { margin-bottom: 0; }
+    .bubble strong { font-weight: 600; color: #d0e8f5; }
+    .bubble em { font-style: italic; color: #b0c8d8; }
+
+    .bubble ul, .bubble ol {
+      padding-left: 18px;
+      margin: 6px 0 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 3px;
+    }
+
+    .bubble li { font-size: 14px; line-height: 1.6; }
+
+    .bubble code {
+      font-family: monospace;
+      font-size: 12px;
+      background: rgba(79,195,247,0.1);
+      border: 1px solid rgba(79,195,247,0.2);
+      border-radius: 4px;
+      padding: 1px 5px;
+    }
+
+    .bubble blockquote {
+      border-left: 3px solid var(--accent);
+      padding-left: 12px;
+      color: var(--text-muted);
+      margin: 8px 0;
+      font-style: italic;
+    }
+
+    .bubble hr {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 12px 0;
     }
 
     .msg-label {
@@ -340,18 +427,7 @@
       40% { opacity: 1; transform: scale(1.3); }
     }
 
-    /* ── Disclaimer banner ── */
-    #disclaimer {
-      background: linear-gradient(135deg, #1a1a2e, #16213e);
-      border-top: 1px solid #2a2a4a;
-      padding: 8px 16px;
-      font-size: 11px;
-      color: #6b7080;
-      text-align: center;
-      flex-shrink: 0;
-    }
-
-    /* ── Input bar ── */
+    /* Input bar */
     #input-bar {
       padding: 12px 16px;
       padding-bottom: calc(12px + env(safe-area-inset-bottom));
@@ -396,16 +472,15 @@
       justify-content: center;
       flex-shrink: 0;
       transition: all 0.2s;
-      box-shadow: 0 0 12px rgba(79, 195, 247, 0.3);
+      box-shadow: 0 0 12px rgba(79,195,247,0.25);
     }
 
     #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
     #send-btn:active { transform: scale(0.95); }
-    #send-btn:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
     #send-btn svg { width: 20px; height: 20px; fill: #0d1117; }
 
-    /* ── Error toast ── */
+    /* Error toast */
     #error-toast {
       position: fixed;
       bottom: 90px;
@@ -427,7 +502,7 @@
 
     #error-toast.show { opacity: 1; }
 
-    /* ── Settings modal ── */
+    /* Settings modal */
     #settings-modal {
       display: none;
       position: fixed;
@@ -496,26 +571,8 @@
       transition: opacity 0.2s;
     }
 
-    .btn-save {
-      background: var(--accent);
-      color: #0d1117;
-      border: none;
-    }
-
-    .btn-cancel {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--text-muted);
-    }
-
-    .btn-clear {
-      background: none;
-      border: 1px solid var(--danger);
-      color: var(--danger);
-      flex: none;
-      padding: 12px 16px;
-    }
-
+    .btn-save { background: var(--accent); color: #0d1117; border: none; }
+    .btn-cancel { background: none; border: 1px solid var(--border); color: var(--text-muted); }
     .modal-actions button:hover { opacity: 0.8; }
   </style>
 </head>
@@ -523,60 +580,47 @@
 
 <div id="app">
 
-  <!-- Header -->
   <div id="header">
-    <div class="kidney-icon">🫘</div>
-    <div class="header-text">
-      <h1>NierAssistent</h1>
-      <p>Persoonlijke gids voor niertransplantatie</p>
+    <div class="header-dot"></div>
+    <h1>Sunny's NierRobot</h1>
+    <div id="header-actions">
+      <button class="hdr-btn" onclick="showHistory()">Gesprekken</button>
+      <button class="hdr-btn" onclick="openSettings()">Sleutel</button>
     </div>
-    <button id="settings-btn" onclick="openSettings()">⚙ API sleutel</button>
   </div>
 
-  <!-- API Key Setup Screen -->
   <div id="api-screen">
-    <div class="lock-icon">🔑</div>
     <h2>API sleutel instellen</h2>
     <p>
-      De NierAssistent werkt via de Claude API van Anthropic.
-      Je hebt een persoonlijke API sleutel nodig om te starten.
-      <br><br>
-      Maak er gratis één aan op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.
-      Je betaalt alleen per gebruik (~€0,01 per gesprek).
+      De NierRobot werkt via de Claude API van Anthropic.
+      Maak een gratis sleutel aan op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.
+      Je betaalt alleen per gebruik.
     </p>
     <div class="api-input-wrap">
       <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
-      <button onclick="saveApiKey()">Opslaan & starten</button>
+      <button onclick="saveApiKey()">Opslaan en starten</button>
     </div>
     <div class="privacy-note">
-      🔒 Je sleutel wordt alleen lokaal op jouw telefoon opgeslagen (localStorage). Hij wordt nooit verzonden naar een server van ons — alleen rechtstreeks naar Anthropic.
+      Je sleutel wordt alleen lokaal op jouw telefoon opgeslagen. Hij wordt nooit verzonden naar een tussenliggende server — alleen rechtstreeks naar Anthropic.
     </div>
   </div>
 
-  <!-- Chat area -->
+  <div id="history-panel">
+    <div id="history-list"></div>
+    <div class="history-actions">
+      <button class="btn-back" onclick="hideHistory()">Terug</button>
+      <button class="btn-new" onclick="newConversation()">Nieuw gesprek</button>
+    </div>
+  </div>
+
   <div id="chat-area">
     <div id="welcome">
-      <div class="big-icon">🫘</div>
       <h2>Waar kan ik je mee helpen?</h2>
-      <p>Stel me alles over nieren, niertransplantatie, herstel, medicatie of voeding.</p>
-      <div class="suggestions">
-        <button class="suggestion-btn" onclick="useSuggestion(this)">💊 Wat zijn de bijwerkingen van tacrolimus?</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🥗 Wat mag ik eten na een niertransplantatie?</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">📊 Wat zegt mijn creatinine-waarde over de nierfunctie?</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🏃 Wanneer mag ik weer sporten na de transplantatie?</button>
-        <button class="suggestion-btn" onclick="useSuggestion(this)">🌡️ Welke symptomen zijn een alarmsignaal voor afstoting?</button>
-      </div>
     </div>
   </div>
 
-  <!-- Disclaimer -->
-  <div id="disclaimer">
-    ⚕️ Informatief — geen medisch advies. Raadpleeg altijd je behandelend arts.
-  </div>
-
-  <!-- Input bar -->
   <div id="input-bar">
-    <textarea id="user-input" placeholder="Stel een vraag over nieren…" rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <textarea id="user-input" placeholder="Stel een vraag..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button id="send-btn" onclick="sendMessage()" aria-label="Verstuur">
       <svg viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
         <path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/>
@@ -586,10 +630,8 @@
 
 </div>
 
-<!-- Error toast -->
 <div id="error-toast"></div>
 
-<!-- Settings modal -->
 <div id="settings-modal" onclick="closeSettingsOutside(event)">
   <div class="modal-box">
     <h3>Instellingen</h3>
@@ -599,241 +641,349 @@
     </div>
     <div class="modal-actions">
       <button class="btn-cancel" onclick="closeSettings()">Annuleer</button>
-      <button class="btn-clear" onclick="clearHistory()">🗑 Gesprek wissen</button>
       <button class="btn-save" onclick="saveFromSettings()">Opslaan</button>
     </div>
   </div>
 </div>
 
 <script>
-  // ── State ──
-  let apiKey = localStorage.getItem('nk_api_key') || '';
-  let history = [];
-  let isLoading = false;
+let apiKey = localStorage.getItem('nk_api_key') || '';
+let currentHistory = [];
+let isLoading = false;
+let currentConvId = null;
 
-  const SYSTEM_PROMPT = `Je bent een vriendelijke, deskundige medische assistent gespecialiseerd in niertransplantatie en nierziekten. Je helpt patiënten, donoren en hun naasten met begrijpelijke uitleg over:
+const SYSTEM_PROMPT = `Je bent een gespecialiseerde medische kennisassistent op het gebied van niertransplantatie en nefrologie. Je hebt diepgaande kennis van de klinische praktijk, internationale richtlijnen (KDIGO, ERBP) en actueel wetenschappelijk onderzoek.
 
-- Niertransplantatie (voor, tijdens en na de operatie)
-- Herstelproces en wat te verwachten
-- Immunosuppressieve medicatie (tacrolimus, mycophenolaat, prednison etc.)
-- Laboratoriumwaarden (creatinine, eGFR, tacrolimus-spiegel etc.)
-- Voeding en leefstijl na transplantatie
-- Complicaties en alarmsignalen
-- JJ-stent en katheter gerelateerde vragen
-- Donortraject en levende donatie
-- Infectierisico's en vaccinaties bij immunosuppressie
-- Terugkeer naar dagelijkse activiteiten en sport
+KERNPRINCIPES
 
-Je communiceert altijd in helder, begrijpelijk Nederlands. Je bent warm, geruststellend en geduldig. Je legt medische termen altijd uit in gewone taal.
+Wetenschappelijke grondslag: Baseer antwoorden uitsluitend op gevestigde medische kennis, gepubliceerde richtlijnen en klinisch bewijs. Noem bij voorkeur de bron of het kader waarop een antwoord is gebaseerd (bijv. "Volgens de KDIGO 2022-richtlijn..."). Als iets onzeker of debateerbaar is in de literatuur, zeg dat dan expliciet.
 
-BELANGRIJK: Sluit elk antwoord dat kan leiden tot medische beslissingen af met een korte herinnering dat de gebruiker altijd zijn behandelend team raadpleegt voor persoonlijk advies. Doe dit beknopt en niet aanmatigend — één zin is genoeg.
+Eerlijkheid over onzekerheid: Als je iets niet zeker weet, of als het antwoord sterk afhangt van individuele patiëntfactoren, zeg dat dan direct. Speculeer niet. Zeg liever "dat hangt af van..." of "hierover bestaat geen eenduidig bewijs" dan een stellig maar onzeker antwoord te geven.
 
-Je bent GEEN vervanging voor een arts. Geef geen diagnoses. Verwijs bij urgente klachten altijd direct naar de behandelaar of spoedeisende hulp.`;
+Geen diagnostiek: Interpreteer geen individuele labwaarden als definitieve diagnose. Je kunt uitleggen wat een waarde betekent en wat klinische drempelwaarden zijn, maar de conclusie voor een individuele patiënt ligt altijd bij het behandelend team.
 
-  // ── Init ──
-  function init() {
-    if (!apiKey) {
-      document.getElementById('api-screen').classList.add('visible');
-      document.getElementById('chat-area').style.display = 'none';
-      document.getElementById('input-bar').style.display = 'none';
-      document.getElementById('disclaimer').style.display = 'none';
-    } else {
-      document.getElementById('api-screen').classList.remove('visible');
-      document.getElementById('chat-area').style.display = 'flex';
-      document.getElementById('input-bar').style.display = 'flex';
-      document.getElementById('disclaimer').style.display = 'block';
-    }
+KENNISGEBIEDEN
+
+Je kunt grondig en kritisch antwoorden over:
+- Immunosuppressieve schema's: tacrolimus, cyclosporine, mycophenolaat mofetil/natrium, azathioprine, prednison, everolimus/sirolimus — werkingsmechanisme, doseringslogica, therapeutisch drugsmonitoring (streefspiegels), bijwerkingen en interacties
+- Afstoting: hyperacuut, acuut cellulair, antilichaam-gemedieerd (AMR) — pathofysiologie, diagnostiek, behandeling
+- Laboratoriumwaarden: creatinine, eGFR (CKD-EPI), tacrolimus dalspiegel, urineanalyse, biopsieresultaten
+- Herstelverloop: eerste dagen, weken en maanden na transplantatie — wat normaal is, wat niet
+- Chirurgische aspecten: de operatieprocedure, ureterale anastomose, JJ-stent (indicatie, duur, verwijderingsprocedure), vasculaire anastomose
+- Infectierisico's onder immunosuppressie: CMV, BK-virus, PCP, schimmelinfecties, bacteriële infecties — profylaxe en behandeling
+- Voeding na transplantatie: kalium, fosfaat, natrium, grapefruitinteractie, voedingsmiddelen om te vermijden
+- Leefstijl en herstel: bewegen, werken, reizen, vaccinaties, zonbescherming, seksualiteit, fertiliteit
+- Levende donatie: het donortraject, laparoscopische nefrectomie, risico's voor de donor, langetermijnuitkomsten
+- Lange termijn: chronische transplantaatschade, cardiovasculair risico, maligniteitsrisico onder immunosuppressie, therapietrouw
+
+COMMUNICATIESTIJL
+
+Schrijf in helder, begrijpelijk Nederlands. Gebruik geen medisch jargon zonder uitleg. Wees direct en informatief — niet geruststellend om gerust te stellen, maar accuraat. Als iets medisch relevant is om te melden, meld het ook.
+
+Schrijf bij voorkeur in lopende tekst. Gebruik opsommingstekens alleen als de inhoud dat echt vereist.
+
+Sluit een antwoord met mogelijke klinische implicaties altijd af met één korte, niet-betuttelende zin die verwijst naar het behandelend team — maar alleen als dat inhoudelijk relevant is.
+
+GRENZEN
+
+Geef geen diagnoses. Schrijf geen medicatie voor en pas geen doseringen aan. Bij symptomen die kunnen wijzen op acute complicaties — koorts boven 38 graden, plotselinge daling nierfunctie, pijn ter plaatse van het transplantaat, ernstige infectieverschijnselen — verwijs direct en duidelijk naar spoedeisende zorg of het transplantatiecentrum.`;
+
+// Markdown parser
+function parseMarkdown(text) {
+  let html = text
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+
+  // Headings
+  html = html.replace(/^### (.+)$/gm, '<h3>$1</h3>');
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  html = html.replace(/^# (.+)$/gm, '<h1>$1</h1>');
+
+  // Bold + italic
+  html = html.replace(/\*\*\*(.+?)\*\*\*/g, '<strong><em>$1</em></strong>');
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  html = html.replace(/\*(.+?)\*/g, '<em>$1</em>');
+  html = html.replace(/_([^_]+)_/g, '<em>$1</em>');
+
+  // Inline code
+  html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+
+  // HR
+  html = html.replace(/^---$/gm, '<hr>');
+
+  // Unordered lists — capture full blocks
+  html = html.replace(/((?:^[-*+] .+$\n?)+)/gm, match => {
+    const items = match.trim().split('\n')
+      .map(l => `<li>${l.replace(/^[-*+] /, '')}</li>`).join('');
+    return `<ul>${items}</ul>\n`;
+  });
+
+  // Ordered lists
+  html = html.replace(/((?:^\d+\. .+$\n?)+)/gm, match => {
+    const items = match.trim().split('\n')
+      .map(l => `<li>${l.replace(/^\d+\. /, '')}</li>`).join('');
+    return `<ol>${items}</ol>\n`;
+  });
+
+  // Paragraphs
+  html = html.split(/\n{2,}/).map(block => {
+    block = block.trim();
+    if (!block) return '';
+    if (/^<(h[1-3]|ul|ol|blockquote|hr|pre)/.test(block)) return block;
+    return `<p>${block.replace(/\n/g, '<br>')}</p>`;
+  }).join('');
+
+  return html;
+}
+
+// Conversation storage
+function getConversations() {
+  try { return JSON.parse(localStorage.getItem('nk_convs') || '[]'); } catch { return []; }
+}
+
+function saveConversations(convs) {
+  localStorage.setItem('nk_convs', JSON.stringify(convs));
+}
+
+function saveCurrentConversation() {
+  if (!currentConvId || currentHistory.length === 0) return;
+  const convs = getConversations();
+  const idx = convs.findIndex(c => c.id === currentConvId);
+  const firstUserMsg = currentHistory.find(m => m.role === 'user')?.content || 'Gesprek';
+  const preview = firstUserMsg.slice(0, 60) + (firstUserMsg.length > 60 ? '...' : '');
+  const conv = { id: currentConvId, preview, date: Date.now(), messages: currentHistory };
+  if (idx >= 0) convs[idx] = conv;
+  else convs.unshift(conv);
+  saveConversations(convs.slice(0, 30));
+}
+
+function newConversation() {
+  currentHistory = [];
+  currentConvId = 'conv_' + Date.now();
+  const chat = document.getElementById('chat-area');
+  chat.innerHTML = '<div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>';
+  hideHistory();
+}
+
+function loadConversation(id) {
+  const conv = getConversations().find(c => c.id === id);
+  if (!conv) return;
+  currentConvId = conv.id;
+  currentHistory = conv.messages;
+  const chat = document.getElementById('chat-area');
+  chat.innerHTML = '';
+  currentHistory.forEach(msg => renderMessage(msg.role === 'user' ? 'user' : 'ai', msg.content));
+  hideHistory();
+  setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 50);
+}
+
+function deleteConversation(id, e) {
+  e.stopPropagation();
+  saveConversations(getConversations().filter(c => c.id !== id));
+  renderHistoryList();
+}
+
+function showHistory() {
+  renderHistoryList();
+  document.getElementById('history-panel').classList.add('visible');
+  document.getElementById('chat-area').style.display = 'none';
+  document.getElementById('input-bar').style.display = 'none';
+}
+
+function hideHistory() {
+  document.getElementById('history-panel').classList.remove('visible');
+  document.getElementById('chat-area').style.display = 'flex';
+  document.getElementById('input-bar').style.display = 'flex';
+}
+
+function escapeHtml(t) {
+  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function renderHistoryList() {
+  const convs = getConversations();
+  const list = document.getElementById('history-list');
+  if (convs.length === 0) {
+    list.innerHTML = '<div class="history-empty">Nog geen opgeslagen gesprekken.</div>';
+    return;
   }
+  list.innerHTML = convs.map(c => {
+    const d = new Date(c.date);
+    const dateStr = d.toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+    return `<div class="history-item" onclick="loadConversation('${c.id}')">
+      <div class="history-item-text">
+        <div class="history-item-preview">${escapeHtml(c.preview)}</div>
+        <div class="history-item-date">${dateStr}</div>
+      </div>
+      <button class="history-item-del" onclick="deleteConversation('${c.id}', event)" title="Verwijderen">&times;</button>
+    </div>`;
+  }).join('');
+}
 
-  // ── API Key ──
-  function saveApiKey() {
-    const val = document.getElementById('api-key-input').value.trim();
-    if (!val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
-    apiKey = val;
-    localStorage.setItem('nk_api_key', apiKey);
-    init();
+// Init
+function init() {
+  currentConvId = 'conv_' + Date.now();
+  if (!apiKey) {
+    document.getElementById('api-screen').classList.add('visible');
+    document.getElementById('chat-area').style.display = 'none';
+    document.getElementById('input-bar').style.display = 'none';
+  } else {
+    document.getElementById('api-screen').classList.remove('visible');
+    document.getElementById('chat-area').style.display = 'flex';
+    document.getElementById('input-bar').style.display = 'flex';
   }
+}
 
-  function openSettings() {
-    document.getElementById('settings-key-input').value = apiKey;
-    document.getElementById('settings-modal').classList.add('open');
-  }
-
-  function closeSettings() {
-    document.getElementById('settings-modal').classList.remove('open');
-  }
-
-  function closeSettingsOutside(e) {
-    if (e.target === document.getElementById('settings-modal')) closeSettings();
-  }
-
-  function saveFromSettings() {
-    const val = document.getElementById('settings-key-input').value.trim();
-    if (val && !val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
-    if (val) {
-      apiKey = val;
-      localStorage.setItem('nk_api_key', apiKey);
-    }
-    closeSettings();
-  }
-
-  function clearHistory() {
-    history = [];
-    const chat = document.getElementById('chat-area');
-    chat.innerHTML = `
-      <div id="welcome">
-        <div class="big-icon">🫘</div>
-        <h2>Gesprek gewist</h2>
-        <p>Stel gerust een nieuwe vraag.</p>
-        <div class="suggestions">
-          <button class="suggestion-btn" onclick="useSuggestion(this)">💊 Wat zijn de bijwerkingen van tacrolimus?</button>
-          <button class="suggestion-btn" onclick="useSuggestion(this)">🥗 Wat mag ik eten na een niertransplantatie?</button>
-          <button class="suggestion-btn" onclick="useSuggestion(this)">📊 Wat zegt mijn creatinine-waarde over de nierfunctie?</button>
-          <button class="suggestion-btn" onclick="useSuggestion(this)">🏃 Wanneer mag ik weer sporten na de transplantatie?</button>
-          <button class="suggestion-btn" onclick="useSuggestion(this)">🌡️ Welke symptomen zijn een alarmsignaal voor afstoting?</button>
-        </div>
-      </div>`;
-    closeSettings();
-  }
-
-  // ── Messaging ──
-  function useSuggestion(btn) {
-    const text = btn.textContent.replace(/^[^\s]+\s/, '');
-    document.getElementById('user-input').value = text;
-    sendMessage();
-  }
-
-  function handleKey(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }
-
-  function autoResize(el) {
-    el.style.height = 'auto';
-    el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-  }
-
-  function appendMessage(role, text) {
-    const welcome = document.getElementById('welcome');
-    if (welcome) welcome.remove();
-
-    const chat = document.getElementById('chat-area');
-    const div = document.createElement('div');
-    div.className = `msg ${role}`;
-
-    const label = document.createElement('div');
-    label.className = 'msg-label';
-    label.textContent = role === 'user' ? 'Jij' : 'NierAssistent';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble';
-    bubble.textContent = text;
-
-    div.appendChild(label);
-    div.appendChild(bubble);
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return bubble;
-  }
-
-  function showTyping() {
-    const welcome = document.getElementById('welcome');
-    if (welcome) welcome.remove();
-
-    const chat = document.getElementById('chat-area');
-    const div = document.createElement('div');
-    div.className = 'msg ai';
-    div.id = 'typing-indicator';
-
-    const label = document.createElement('div');
-    label.className = 'msg-label';
-    label.textContent = 'NierAssistent';
-
-    const bubble = document.createElement('div');
-    bubble.className = 'bubble typing-bubble';
-    bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
-
-    div.appendChild(label);
-    div.appendChild(bubble);
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-
-  function removeTyping() {
-    const t = document.getElementById('typing-indicator');
-    if (t) t.remove();
-  }
-
-  function showError(msg) {
-    const toast = document.getElementById('error-toast');
-    toast.textContent = msg;
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3500);
-  }
-
-  async function sendMessage() {
-    if (isLoading) return;
-    if (!apiKey) return showError('Stel eerst een API sleutel in');
-
-    const input = document.getElementById('user-input');
-    const text = input.value.trim();
-    if (!text) return;
-
-    input.value = '';
-    input.style.height = 'auto';
-    isLoading = true;
-    document.getElementById('send-btn').disabled = true;
-
-    appendMessage('user', text);
-    history.push({ role: 'user', content: text });
-
-    showTyping();
-
-    try {
-      const res = await fetch('https://api.anthropic.com/v1/messages', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'x-api-key': apiKey,
-          'anthropic-version': '2023-06-01',
-          'anthropic-dangerous-direct-browser-access': 'true'
-        },
-        body: JSON.stringify({
-          model: 'claude-sonnet-4-20250514',
-          max_tokens: 1024,
-          system: SYSTEM_PROMPT,
-          messages: history
-        })
-      });
-
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err?.error?.message || `API fout: ${res.status}`);
-      }
-
-      const data = await res.json();
-      const reply = data.content?.[0]?.text || '(geen antwoord)';
-
-      removeTyping();
-      appendMessage('ai', reply);
-      history.push({ role: 'assistant', content: reply });
-
-    } catch (err) {
-      removeTyping();
-      showError(err.message || 'Er ging iets mis. Probeer opnieuw.');
-      // Remove last user message from history on error
-      history.pop();
-    } finally {
-      isLoading = false;
-      document.getElementById('send-btn').disabled = false;
-      document.getElementById('user-input').focus();
-    }
-  }
-
-  // ── Boot ──
+function saveApiKey() {
+  const val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
+  apiKey = val;
+  localStorage.setItem('nk_api_key', apiKey);
   init();
+}
+
+function openSettings() {
+  document.getElementById('settings-key-input').value = apiKey;
+  document.getElementById('settings-modal').classList.add('open');
+}
+
+function closeSettings() {
+  document.getElementById('settings-modal').classList.remove('open');
+}
+
+function closeSettingsOutside(e) {
+  if (e.target === document.getElementById('settings-modal')) closeSettings();
+}
+
+function saveFromSettings() {
+  const val = document.getElementById('settings-key-input').value.trim();
+  if (val && !val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
+  if (val) { apiKey = val; localStorage.setItem('nk_api_key', apiKey); }
+  closeSettings();
+}
+
+function handleKey(e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
+}
+
+function autoResize(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
+}
+
+function renderMessage(role, text) {
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = `msg ${role}`;
+
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = role === 'user' ? 'Jij' : 'NierRobot';
+
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble';
+  if (role === 'ai') bubble.innerHTML = parseMarkdown(text);
+  else bubble.textContent = text;
+
+  div.appendChild(label);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function showTyping() {
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+  const chat = document.getElementById('chat-area');
+  const div = document.createElement('div');
+  div.className = 'msg ai';
+  div.id = 'typing-indicator';
+  const label = document.createElement('div');
+  label.className = 'msg-label';
+  label.textContent = 'NierRobot';
+  const bubble = document.createElement('div');
+  bubble.className = 'bubble typing-bubble';
+  bubble.innerHTML = '<div class="dot"></div><div class="dot"></div><div class="dot"></div>';
+  div.appendChild(label);
+  div.appendChild(bubble);
+  chat.appendChild(div);
+  chat.scrollTop = chat.scrollHeight;
+}
+
+function removeTyping() {
+  const t = document.getElementById('typing-indicator');
+  if (t) t.remove();
+}
+
+function showError(msg) {
+  const toast = document.getElementById('error-toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+async function sendMessage() {
+  if (isLoading) return;
+  if (!apiKey) return showError('Stel eerst een API sleutel in');
+  const input = document.getElementById('user-input');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const welcome = document.getElementById('welcome');
+  if (welcome) welcome.remove();
+
+  input.value = '';
+  input.style.height = 'auto';
+  isLoading = true;
+  document.getElementById('send-btn').disabled = true;
+
+  renderMessage('user', text);
+  currentHistory.push({ role: 'user', content: text });
+  showTyping();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': apiKey,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1500,
+        system: SYSTEM_PROMPT,
+        messages: currentHistory
+      })
+    });
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      throw new Error(err?.error?.message || `API fout: ${res.status}`);
+    }
+
+    const data = await res.json();
+    const reply = data.content?.[0]?.text || '(geen antwoord)';
+
+    removeTyping();
+    renderMessage('ai', reply);
+    currentHistory.push({ role: 'assistant', content: reply });
+    saveCurrentConversation();
+
+  } catch (err) {
+    removeTyping();
+    showError(err.message || 'Er ging iets mis. Probeer opnieuw.');
+    currentHistory.pop();
+  } finally {
+    isLoading = false;
+    document.getElementById('send-btn').disabled = false;
+    document.getElementById('user-input').focus();
+  }
+}
+
+init();
 </script>
 </body>
 </html>

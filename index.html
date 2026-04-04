@@ -9,6 +9,7 @@
   <meta name="apple-mobile-web-app-title" content="Sunny's NierRobot" />
   <title>Sunny's NierRobot</title>
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
       --bg: #0d1117; --surface: #161b22; --surface2: #1c2330;
@@ -30,162 +31,106 @@
       height: 100vh; height: -webkit-fill-available;
       max-width: 680px; margin: 0 auto;
     }
-
     /* Header */
     #header {
       padding: 10px 12px 8px; background: var(--bg);
       border-bottom: 1px solid var(--border);
       display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 10;
     }
-    .header-dot {
-      width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
-      box-shadow: 0 0 10px rgba(79,195,247,0.6); flex-shrink: 0;
-    }
-    #header h1 {
-      font-family: 'Crimson Pro', serif; font-size: 17px; font-weight: 600;
-      color: var(--text); letter-spacing: -0.2px; white-space: nowrap;
-    }
+    .header-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 10px rgba(79,195,247,0.6); flex-shrink: 0; }
+    #header h1 { font-family: 'Crimson Pro', serif; font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; white-space: nowrap; }
     #header-actions { margin-left: auto; display: flex; gap: 4px; flex-wrap: nowrap; }
-    .hdr-btn {
-      background: none; border: 1px solid var(--border); color: var(--text-muted);
-      border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer;
-      transition: all 0.2s; font-family: 'DM Sans', sans-serif; white-space: nowrap;
-    }
+    .hdr-btn { background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer; transition: all 0.2s; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
     .hdr-btn:hover { border-color: var(--accent); color: var(--accent); }
     .hdr-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
-
     /* Panels */
     .panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
     .panel.visible { display: flex; }
-    .panel-header {
-      padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
-      font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 600; flex-shrink: 0;
-    }
-    .panel-body {
-      flex: 1; overflow-y: auto; padding: 14px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
+    .panel-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 600; flex-shrink: 0; }
+    .panel-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
     .panel-body::-webkit-scrollbar { width: 4px; }
     .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .panel-footer {
-      padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0;
-    }
+    .panel-footer { padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
     .btn-primary { background: var(--accent); color: #0d1117; border: none; font-weight: 500; }
     .btn-secondary { background: none; border: 1px solid var(--border); color: var(--text-muted); }
-    .btn-primary, .btn-secondary {
-      flex: 1; padding: 10px; border-radius: var(--radius-sm);
-      font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s;
-    }
-    .btn-primary:hover, .btn-secondary:hover { opacity: 0.8; }
-
-    /* API screen */
-    #api-screen {
+    .btn-danger { background: none; border: 1px solid var(--danger); color: var(--danger); }
+    .btn-primary, .btn-secondary, .btn-danger { flex: 1; padding: 10px; border-radius: var(--radius-sm); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s; }
+    .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { opacity: 0.8; }
+    /* Auth screen */
+    #auth-screen {
       display: none; flex-direction: column; align-items: center; justify-content: center;
       flex: 1; padding: 32px 24px; gap: 20px; text-align: center;
     }
+    #auth-screen.visible { display: flex; }
+    #auth-screen h2 { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; }
+    #auth-screen p { color: var(--text-muted); font-size: 14px; max-width: 300px; line-height: 1.7; }
+    .auth-form { width: 100%; max-width: 360px; display: flex; flex-direction: column; gap: 10px; }
+    .auth-form input {
+      width: 100%; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 13px 16px; color: var(--text);
+      font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .auth-form input:focus { border-color: var(--accent); }
+    .auth-form input::placeholder { color: var(--text-muted); }
+    .auth-submit { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .auth-submit:hover { opacity: 0.85; }
+    .auth-toggle { font-size: 13px; color: var(--text-muted); cursor: pointer; }
+    .auth-toggle span { color: var(--accent); text-decoration: underline; }
+    .auth-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 360px; text-align: left; }
+    /* API screen */
+    #api-screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 32px 24px; gap: 20px; text-align: center; }
     #api-screen.visible { display: flex; }
     #api-screen h2 { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; }
     #api-screen p { color: var(--text-muted); font-size: 14px; max-width: 320px; line-height: 1.7; }
     #api-screen a { color: var(--accent); text-decoration: none; }
     .api-input-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
-    .api-input-wrap input {
-      width: 100%; background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px 16px; color: var(--text);
-      font-family: monospace; font-size: 13px; outline: none; transition: border-color 0.2s;
-    }
+    .api-input-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; color: var(--text); font-family: monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
     .api-input-wrap input:focus { border-color: var(--accent); }
-    .api-input-wrap button {
-      background: var(--accent); color: #0d1117; border: none;
-      border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px;
-      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
-    }
+    .api-input-wrap button { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
     .api-input-wrap button:hover { opacity: 0.85; }
-    .privacy-note {
-      font-size: 11px; color: var(--text-muted); background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius-sm);
-      padding: 10px 14px; max-width: 400px; text-align: left;
-    }
-
-    /* History */
+    .privacy-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 400px; text-align: left; }
+    /* Sync indicator */
+    #sync-indicator { font-size: 10px; color: var(--text-muted); padding: 0 4px; }
+    #sync-indicator.syncing { color: var(--warning); }
+    #sync-indicator.synced { color: var(--success); }
+    /* Shared */
     .list-empty { color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 0; }
-    .history-item {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer;
-      transition: border-color 0.18s; display: flex; justify-content: space-between;
-      align-items: flex-start; gap: 10px;
-    }
+    .section-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
+    .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 0 2px; flex-shrink: 0; transition: color 0.18s; }
+    .icon-btn:hover { color: var(--danger); }
+    .full-btn { background: var(--accent); color: #0d1117; border: none; border-radius: 8px; padding: 10px; font-weight: 500; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .full-btn:hover { opacity: 0.85; }
+    /* History */
+    .history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer; transition: border-color 0.18s; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .history-item:hover { border-color: var(--accent); }
     .history-item-text { flex: 1; min-width: 0; }
     .history-item-preview { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .history-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    .icon-btn {
-      background: none; border: none; color: var(--text-muted); cursor: pointer;
-      font-size: 16px; padding: 0 2px; flex-shrink: 0; transition: color 0.18s;
-    }
-    .icon-btn:hover { color: var(--danger); }
-
     /* Lab */
-    .lab-form {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;
-    }
-    .section-title {
-      font-size: 11px; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.6px;
-    }
+    .lab-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .lab-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     .lab-field { display: flex; flex-direction: column; gap: 4px; }
     .lab-field label { font-size: 11px; color: var(--text-muted); }
-    .lab-field input {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 10px; color: var(--text); font-size: 14px;
-      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
-    }
+    .lab-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
     .lab-field input:focus { border-color: var(--accent); }
     .lab-field input::placeholder { color: var(--text-muted); font-size: 12px; }
-    .full-btn {
-      background: var(--accent); color: #0d1117; border: none; border-radius: 8px;
-      padding: 10px; font-weight: 500; font-size: 14px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
-    }
-    .full-btn:hover { opacity: 0.85; }
-    .lab-entry {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 14px;
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
-    }
+    .lab-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .lab-entry-values { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
-    .lab-badge {
-      font-size: 12px; padding: 3px 8px; border-radius: 20px;
-      background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
-      white-space: nowrap;
-    }
+    .lab-badge { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
     .lab-badge span { color: var(--text); font-weight: 500; }
     .lab-badge.alert { border-color: var(--danger); color: var(--danger); }
     .lab-badge.alert span { color: var(--danger); }
     .lab-entry-meta { display: flex; align-items: flex-start; gap: 6px; flex-shrink: 0; }
     .lab-entry-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
-
     /* Charts */
-    .chart-tabs {
-      display: flex; gap: 5px; flex-wrap: wrap;
-      padding: 10px 14px 0; border-bottom: 1px solid var(--border); flex-shrink: 0;
-    }
-    .chart-tab {
-      background: none; border: 1px solid var(--border); color: var(--text-muted);
-      border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 8px;
-    }
+    .chart-tabs { display: flex; gap: 5px; flex-wrap: wrap; padding: 10px 14px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .chart-tab { background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 8px; }
     .chart-tab:hover { border-color: var(--accent); color: var(--accent); }
     .chart-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
     .chart-wrap { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
     .chart-wrap::-webkit-scrollbar { width: 4px; }
     .chart-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .chart-card {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 16px;
-    }
+    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
     .chart-card-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
     .chart-card-latest { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; }
     .chart-card-latest .unit { font-size: 13px; font-weight: 300; color: var(--text-muted); margin-left: 4px; }
@@ -193,105 +138,51 @@
     .chart-canvas-wrap { width: 100%; height: 160px; }
     canvas { display: block; }
     .chart-note { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
-
     /* Settings */
-    .settings-section {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;
-    }
+    .settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .settings-field { display: flex; flex-direction: column; gap: 5px; }
     .settings-field label { font-size: 12px; color: var(--text-muted); }
-    .settings-field input, .settings-field select, .settings-field textarea {
-      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 10px 12px; color: var(--text); font-size: 14px;
-      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
-    }
+    .settings-field input, .settings-field select, .settings-field textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
     .settings-field input:focus, .settings-field select:focus, .settings-field textarea:focus { border-color: var(--accent); }
     .settings-field select { appearance: none; cursor: pointer; }
     .settings-field textarea { resize: none; min-height: 76px; }
     .med-list { display: flex; flex-direction: column; gap: 6px; }
-    .med-item {
-      display: flex; align-items: center; gap: 8px; background: var(--bg);
-      border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
-    }
+    .med-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
     .med-item-name { flex: 1; font-size: 13px; }
     .med-item-dose { font-size: 12px; color: var(--text-muted); }
     .med-add-row { display: flex; gap: 6px; }
-    .med-add-row input {
-      flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
-      padding: 8px 10px; color: var(--text); font-size: 13px;
-      font-family: 'DM Sans', sans-serif; outline: none;
-    }
+    .med-add-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
     .med-add-row input:focus { border-color: var(--accent); }
-    .med-add-row button {
-      background: var(--accent); color: #0d1117; border: none; border-radius: 8px;
-      padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; white-space: nowrap;
-    }
-
+    .med-add-row button { background: var(--accent); color: #0d1117; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
     /* Agenda */
     .agenda-add-row { display: flex; gap: 8px; align-items: flex-end; }
-    .agenda-textarea {
-      flex: 1; background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text);
-      font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none;
-      resize: none; min-height: 44px; max-height: 100px; line-height: 1.5;
-      transition: border-color 0.2s;
-    }
+    .agenda-textarea { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 44px; max-height: 100px; line-height: 1.5; transition: border-color 0.2s; }
     .agenda-textarea:focus { border-color: var(--accent); }
     .agenda-textarea::placeholder { color: var(--text-muted); }
-    .add-btn {
-      background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm);
-      padding: 10px 13px; font-size: 13px; font-weight: 500; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0;
-      transition: opacity 0.2s;
-    }
+    .add-btn { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 10px 13px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0; transition: opacity 0.2s; }
     .add-btn:hover { opacity: 0.85; }
     .agenda-divider { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
     .urgency-row { display: flex; gap: 6px; }
-    .urgency-btn {
-      padding: 4px 11px; border-radius: 20px; font-size: 12px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; border: 1px solid var(--border);
-      background: none; color: var(--text-muted); transition: all 0.18s;
-    }
+    .urgency-btn { padding: 4px 11px; border-radius: 20px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); background: none; color: var(--text-muted); transition: all 0.18s; }
     .urgency-btn.sel-mild { background: #1a3a2a; border-color: var(--success); color: var(--success); }
     .urgency-btn.sel-matig { background: #2a2010; border-color: var(--warning); color: var(--warning); }
     .urgency-btn.sel-ernstig { background: #2a1010; border-color: var(--danger); color: var(--danger); }
     .agenda-list { display: flex; flex-direction: column; gap: 7px; }
-    .agenda-item {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 11px 13px;
-      display: flex; gap: 9px; align-items: flex-start; transition: opacity 0.2s;
-    }
+    .agenda-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 13px; display: flex; gap: 9px; align-items: flex-start; }
     .agenda-item.done { opacity: 0.4; }
     .agenda-item.done .agenda-item-text { text-decoration: line-through; }
-    .check-circle {
-      width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--border);
-      background: none; cursor: pointer; flex-shrink: 0; margin-top: 2px;
-      transition: all 0.18s; display: flex; align-items: center; justify-content: center;
-    }
+    .check-circle { width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--border); background: none; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.18s; display: flex; align-items: center; justify-content: center; }
     .check-circle.checked { background: var(--success); border-color: var(--success); }
-    .check-circle.checked::after {
-      content: ''; width: 5px; height: 8px; border: 2px solid #0d1117;
-      border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block;
-    }
+    .check-circle.checked::after { content: ''; width: 5px; height: 8px; border: 2px solid #0d1117; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
     .agenda-item-body { flex: 1; min-width: 0; }
     .agenda-item-text { font-size: 14px; line-height: 1.5; word-break: break-word; }
     .agenda-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    .urgency-badge {
-      font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500;
-      margin-left: 5px; display: inline-block; vertical-align: middle;
-    }
+    .urgency-badge { font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500; margin-left: 5px; display: inline-block; vertical-align: middle; }
     .urgency-badge.mild { background: #1a3a2a; color: var(--success); }
     .urgency-badge.matig { background: #2a2010; color: var(--warning); }
     .urgency-badge.ernstig { background: #2a1010; color: var(--danger); }
-
     /* Chat */
-    #chat-area {
-      flex: 1; overflow-y: auto; padding: 18px 14px;
-      display: flex; flex-direction: column; gap: 15px;
-      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-    }
+    #chat-area { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
     #chat-area::-webkit-scrollbar { width: 4px; }
     #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     #welcome { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 8px 20px; }
@@ -318,41 +209,18 @@
     .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 1.2s infinite; }
     .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes pulse { 0%,80%,100% { opacity:0.4; transform:scale(1); } 40% { opacity:1; transform:scale(1.3); } }
-    #input-bar {
-      padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
-      background: var(--bg); border-top: 1px solid var(--border);
-      display: flex; gap: 9px; align-items: flex-end; flex-shrink: 0;
-    }
-    #user-input {
-      flex: 1; background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius); padding: 11px 15px; color: var(--text);
-      font-size: 15px; font-family: 'DM Sans', sans-serif; resize: none; outline: none;
-      min-height: 46px; max-height: 140px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto;
-    }
+    #input-bar { padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom)); background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 9px; align-items: flex-end; flex-shrink: 0; }
+    #user-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 15px; color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; resize: none; outline: none; min-height: 46px; max-height: 140px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto; }
     #user-input:focus { border-color: var(--accent); }
     #user-input::placeholder { color: var(--text-muted); }
-    #send-btn {
-      width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none;
-      cursor: pointer; display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 12px rgba(79,195,247,0.25);
-    }
+    #send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 12px rgba(79,195,247,0.25); }
     #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
     #send-btn:active { transform: scale(0.95); }
     #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
     #send-btn svg { width: 20px; height: 20px; fill: #0d1117; }
-    #error-toast {
-      position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
-      background: var(--danger); color: white; padding: 9px 18px;
-      border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none;
-      transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center;
-    }
+    #error-toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--danger); color: white; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center; }
     #error-toast.show { opacity: 1; }
-    #success-toast {
-      position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
-      background: var(--success); color: #0d1117; padding: 9px 18px;
-      border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none;
-      transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center;
-    }
+    #success-toast { position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%); background: var(--success); color: #0d1117; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center; }
     #success-toast.show { opacity: 1; }
   </style>
 </head>
@@ -372,15 +240,28 @@
     </div>
   </div>
 
-  <!-- API setup -->
+  <!-- Auth screen -->
+  <div id="auth-screen">
+    <h2 id="auth-title">Inloggen</h2>
+    <p id="auth-subtitle">Log in om je data op al je apparaten te synchroniseren.</p>
+    <div class="auth-form">
+      <input type="email" id="auth-email" placeholder="E-mailadres" autocomplete="email" />
+      <input type="password" id="auth-password" placeholder="Wachtwoord" autocomplete="current-password" />
+      <button class="auth-submit" id="auth-submit-btn" onclick="handleAuth()">Inloggen</button>
+    </div>
+    <div class="auth-toggle" onclick="toggleAuthMode()">Geen account? <span>Registreren</span></div>
+    <div class="auth-note">Je data wordt beveiligd opgeslagen op Europese servers. Alleen jij hebt toegang.</div>
+  </div>
+
+  <!-- API screen -->
   <div id="api-screen">
     <h2>API sleutel instellen</h2>
-    <p>De NierRobot werkt via de Claude API van Anthropic. Maak een gratis sleutel aan op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Je betaalt alleen per gebruik.</p>
+    <p>De NierRobot werkt via de Claude API van Anthropic. Maak een gratis sleutel aan op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>.</p>
     <div class="api-input-wrap">
       <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
       <button onclick="saveApiKey()">Opslaan en starten</button>
     </div>
-    <div class="privacy-note">Je sleutel wordt alleen lokaal op jouw telefoon opgeslagen — nooit naar een tussenliggende server.</div>
+    <div class="privacy-note">Je sleutel wordt alleen lokaal op dit apparaat opgeslagen — nooit naar een server verzonden.</div>
   </div>
 
   <!-- History panel -->
@@ -413,6 +294,7 @@
     </div>
     <div class="panel-footer">
       <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
+      <button class="btn-primary" onclick="exportLabCSV()">Exporteer CSV</button>
     </div>
   </div>
 
@@ -443,9 +325,7 @@
         <button class="add-btn" onclick="addVraag()">+ Voeg toe</button>
       </div>
       <div class="agenda-list" id="vraag-list"></div>
-
       <hr class="agenda-divider">
-
       <div class="section-title">Klachten bijhouden</div>
       <div class="urgency-row" id="urgency-row">
         <button class="urgency-btn sel-mild" onclick="selectUrgency('mild',this)">Mild</button>
@@ -470,17 +350,8 @@
     <div class="panel-body">
       <div class="settings-section">
         <div class="section-title">Chirurgische status</div>
-        <div class="settings-field">
-          <label>JJ-stent</label>
-          <select id="s-stent">
-            <option value="aanwezig">Nog aanwezig</option>
-            <option value="verwijderd">Verwijderd</option>
-          </select>
-        </div>
-        <div class="settings-field">
-          <label>Bijzonderheden</label>
-          <textarea id="s-notes" placeholder="Bijv. complicaties, allergieën, aanvullende diagnoses..."></textarea>
-        </div>
+        <div class="settings-field"><label>JJ-stent</label><select id="s-stent"><option value="aanwezig">Nog aanwezig</option><option value="verwijderd">Verwijderd</option></select></div>
+        <div class="settings-field"><label>Bijzonderheden</label><textarea id="s-notes" placeholder="Bijv. complicaties, allergieën..."></textarea></div>
       </div>
       <div class="settings-section">
         <div class="section-title">Medicatie</div>
@@ -492,13 +363,11 @@
         </div>
       </div>
       <div class="settings-section">
-        <div class="section-title">API sleutel</div>
-        <div class="settings-field">
-          <label>Anthropic API sleutel</label>
-          <input type="password" id="s-apikey" placeholder="sk-ant-api03-..." autocomplete="off" />
-        </div>
+        <div class="section-title">API sleutel (Claude)</div>
+        <div class="settings-field"><label>Anthropic API sleutel</label><input type="password" id="s-apikey" placeholder="sk-ant-api03-..." autocomplete="off" /></div>
       </div>
       <button class="full-btn" onclick="saveSettings()">Opslaan</button>
+      <button class="btn-danger" style="margin-top:4px;" onclick="signOut()">Uitloggen</button>
     </div>
   </div>
 
@@ -520,95 +389,218 @@
 <script>
 'use strict';
 
-// ── State ──
-let apiKey = localStorage.getItem('nk_api_key') || '';
-let currentHistory = [];
-let isLoading = false;
-let currentConvId = null;
-let selectedUrgency = 'mild';
+// ── Supabase ──
+var SUPA_URL = 'https://owtqluywrokierqykwyn.supabase.co';
+var SUPA_KEY = 'sb_publishable_GDV6_sx4BWqf2DvN3-O3TQ_s5eRNCeY';
+var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+var currentUser = null;
 
-// ── Storage helpers ──
+// ── State ──
+var apiKey = localStorage.getItem('nk_api_key') || '';
+var currentHistory = [];
+var isLoading = false;
+var currentConvId = null;
+var selectedUrgency = 'mild';
+var authMode = 'login';
+
+// ── Local storage helpers ──
 function getProfile() { try { return JSON.parse(localStorage.getItem('nk_profile') || '{}'); } catch(e) { return {}; } }
-function saveProfile(p) { localStorage.setItem('nk_profile', JSON.stringify(p)); }
+function saveProfileLocal(p) { localStorage.setItem('nk_profile', JSON.stringify(p)); }
 function getLabEntries() { try { return JSON.parse(localStorage.getItem('nk_lab') || '[]'); } catch(e) { return []; } }
-function saveLabEntries(e) { localStorage.setItem('nk_lab', JSON.stringify(e)); }
+function saveLabLocal(e) { localStorage.setItem('nk_lab', JSON.stringify(e)); }
 function getConversations() { try { return JSON.parse(localStorage.getItem('nk_convs') || '[]'); } catch(e) { return []; } }
 function saveConversations(c) { localStorage.setItem('nk_convs', JSON.stringify(c)); }
 function getAgenda() { try { return JSON.parse(localStorage.getItem('nk_agenda') || '{"vragen":[],"klachten":[]}'); } catch(e) { return {vragen:[],klachten:[]}; } }
-function saveAgendaData(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
+function saveAgendaLocal(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
 function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── System prompt ──
-function getSystemPrompt() {
-  const today = new Date();
-  const transplantDate = new Date('2026-03-26');
-  const daysSince = Math.floor((today - transplantDate) / (1000 * 60 * 60 * 24));
-  const todayStr = today.toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
+// ── Supabase sync ──
+async function syncFromSupabase() {
+  if (!currentUser) return;
+  try {
+    // Lab entries
+    var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
+    if (labRes.data && labRes.data.length > 0) {
+      var labEntries = labRes.data.map(function(r) {
+        return { date: r.entry_date, creatinine: r.creatinine||'', egfr: r.egfr||'', tacrolimus: r.tacrolimus||'', bp: r.bp||'', weight: r.weight||'', temp: r.temp||'', sbId: r.id };
+      });
+      saveLabLocal(labEntries);
+    }
+    // Vragen
+    var vraagRes = await supa.from('agenda_vragen').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
+    // Klachten
+    var klachtRes = await supa.from('agenda_klachten').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
+    // Profile
+    var profRes = await supa.from('profile').select('*').eq('user_id', currentUser.id).maybeSingle();
 
-  var fase;
-  if (daysSince <= 30) fase = 'vroege fase (dag ' + daysSince + ', eerste maand) \u2014 hoogste immunosuppressie, tacrolimus streefspiegels 10\u201315 ng/mL, laagste infectiedrempel';
-  else if (daysSince <= 90) fase = 'intermediaire fase (dag ' + daysSince + ', maand 1\u20133) \u2014 immunosuppressie wordt afgebouwd, streefspiegels dalen richting 8\u201312 ng/mL';
-  else if (daysSince <= 365) fase = 'late vroege fase (dag ' + daysSince + ', maand 3\u201312) \u2014 onderhoudsimmunosuppressie, streefspiegels 5\u201310 ng/mL';
-  else fase = 'chronische fase (dag ' + daysSince + ')';
+    var agenda = {vragen:[], klachten:[]};
+    if (vraagRes.data) {
+      agenda.vragen = vraagRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
+    }
+    if (klachtRes.data) {
+      agenda.klachten = klachtRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
+    }
+    saveAgendaLocal(agenda);
 
-  const profile = getProfile();
-  const stentStatus = profile.stent === 'verwijderd' ? 'Verwijderd' : 'Nog aanwezig';
-  const notes = profile.notes ? '\n- Aanvullende notities: ' + profile.notes : '';
-  const meds = profile.meds || [];
-  const medStr = meds.length > 0 ? meds.map(function(m) { return m.name + (m.dose ? ' ' + m.dose : ''); }).join(', ') : 'tacrolimus + mycophenolaat mofetil + prednison (standaard schema)';
-
-  const labs = getLabEntries().slice(0, 5);
-  var labContext = '';
-  if (labs.length > 0) {
-    labContext = '\n\nRECENTE LABWAARDEN (gebruik voor trendanalyse)\n';
-    labs.forEach(function(e) {
-      const d = new Date(e.date).toLocaleDateString('nl-NL', {day:'numeric',month:'short'});
-      const parts = [];
-      if (e.creatinine) parts.push('creatinine ' + e.creatinine + ' \u00b5mol/L');
-      if (e.egfr) parts.push('eGFR ' + e.egfr + ' ml/min');
-      if (e.tacrolimus) parts.push('tacrolimus ' + e.tacrolimus + ' ng/mL');
-      if (e.bp) parts.push('RR ' + e.bp);
-      if (e.weight) parts.push('gewicht ' + e.weight + ' kg');
-      if (e.temp) parts.push('temp ' + e.temp + '\u00b0C');
-      labContext += '- ' + d + ': ' + parts.join(', ') + '\n';
-    });
-    labContext += 'Signaleer creatinine stijging >20% t.o.v. laagste waarde. Signaleer tacrolimus buiten streefspiegel.';
-  }
-
-  return 'Je bent een gespecialiseerde medische kennisassistent op het gebied van niertransplantatie en nefrologie. Je hebt diepgaande kennis van de klinische praktijk, internationale richtlijnen (KDIGO, ERBP) en actueel wetenschappelijk onderzoek.\n\nHUIDIGE DATUM EN FASE\n\nVandaag is het ' + todayStr + '. Sunny bevindt zich in de ' + fase + '. Gebruik dit actief bij het beantwoorden van vragen.\n\nPATI\u00cbNTPROFIEL\n\n- Transplantatiedatum: 26 maart 2026 (levende donor, familielid \u2014 moeder)\n- Transplantatiecentrum: Amsterdam UMC\n- Medicatie: ' + medStr + '\n- JJ-stent: ' + stentStatus + '\n- Huidaandoening: warmte urticaria (cholinergische/hitte-ge\u00efnduceerde netelroos) \u2014 benoem proactief bij vragen over koorts, inspanning, warm weer, zonbescherming en huidkankerrisico\n- Geen dialyse voorafgaand aan transplantatie' + notes + labContext + '\n\nKERNPRINCIPES\n\nWetenschappelijke grondslag en bewijsniveau: Geef bij elke feitelijke claim het bewijsniveau aan:\n- "Sterke richtlijnconsensus (KDIGO/ERBP):" \u2014 meerdere RCTs of brede internationale consensus\n- "Richtlijnaanbeveling op basis van expert opinion:" \u2014 in richtlijnen opgenomen maar beperkt bewijs\n- "Beperkt bewijs / centrumafhankelijk:" \u2014 praktijken die per ziekenhuis verschillen\n- "Onzeker / actief debat:" \u2014 literatuur is verdeeld\n\nKennisgrens: Jouw trainingsdata heeft een grens (augustus 2025). Geef dit aan bij onderwerpen die snel evolueren.\n\nEerlijkheid over onzekerheid: Speculeer nooit. Zeg liever "dat hangt af van..." of "hierover bestaat geen eenduidig bewijs".\n\nGeen diagnostiek: De conclusie voor Sunny specifiek ligt altijd bij het behandelend team van Amsterdam UMC.\n\nPROACTIEVE SIGNALERING\n\nBij vragen over voeding, dranken, medicatie of supplementen: controleer altijd actief op interacties met de huidige medicatie. Kritische interacties: grapefruit/pompelmoes (CYP3A4-remming), sint-janskruid (CYP3A4-inductie), NSAID\'s (nefrotoxiciteit), rauwe of ongepasteuriseerde producten (infectierisico).\n\nFASE-AFHANKELIJKE URGENTIEDREMPELS\n\n- Koorts >=37,8\u00b0C in eerste 3 maanden \u2192 contact transplantatiecentrum\n- Urineproductie daalt >30% op \u00e9\u00e9n dag \u2192 direct contact\n- Pijn in transplantaatregio \u2192 direct contact\n- Creatinine stijgt >20\u201325% t.o.v. laagste waarde \u2192 contact dezelfde dag\n- Zwelling, roodheid of pus bij wond \u2192 contact dezelfde dag\n\nVerwijs bij deze signalen direct naar Amsterdam UMC of spoedeisende hulp.\n\nCOMMUNICATIESTIJL\n\nHelder Nederlands, medische termen altijd uitleggen. Direct en accuraat. Lopende tekst, opsommingstekens alleen indien nodig. Verwijs naar behandelend team alleen als dat inhoudelijk relevant is.';
+    if (profRes.data) {
+      var p = {stent: profRes.data.stent, notes: profRes.data.notes, meds: profRes.data.meds || []};
+      saveProfileLocal(p);
+    }
+  } catch(e) { console.error('Sync error:', e); }
 }
 
-// ── Markdown parser ──
-function parseMarkdown(text) {
-  var h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-  h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
-  h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
-  h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
-  h = h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
-  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
-  h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
-  h = h.replace(/_([^_\n]+)_/g,'<em>$1</em>');
-  h = h.replace(/`([^`]+)`/g,'<code>$1</code>');
-  h = h.replace(/^---$/gm,'<hr>');
-  h = h.replace(/((?:^[-*+] .+$\n?)+)/gm, function(m) {
-    var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^[-*+] /,'') + '</li>'; }).join('');
-    return '<ul>' + items + '</ul>\n';
+async function pushLabToSupabase(entry) {
+  if (!currentUser) return;
+  try {
+    await supa.from('lab_entries').insert({
+      user_id: currentUser.id, entry_date: entry.date,
+      creatinine: entry.creatinine||null, egfr: entry.egfr||null,
+      tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
+      weight: entry.weight||null, temp: entry.temp||null
+    });
+  } catch(e) { console.error('Lab push error:', e); }
+}
+
+async function deleteLabFromSupabase(entry) {
+  if (!currentUser || !entry.sbId) return;
+  try { await supa.from('lab_entries').delete().eq('id', entry.sbId); } catch(e) {}
+}
+
+async function pushVraagToSupabase(item) {
+  if (!currentUser) return;
+  try {
+    await supa.from('agenda_vragen').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: item.date, done: item.done});
+  } catch(e) { console.error('Vraag push error:', e); }
+}
+
+async function updateVraagDoneSupabase(item) {
+  if (!currentUser || !item.sbId) return;
+  try { await supa.from('agenda_vragen').update({done: item.done}).eq('id', item.sbId); } catch(e) {}
+}
+
+async function deleteVraagFromSupabase(item) {
+  if (!currentUser || !item.sbId) return;
+  try { await supa.from('agenda_vragen').delete().eq('id', item.sbId); } catch(e) {}
+}
+
+async function pushKlachtToSupabase(item) {
+  if (!currentUser) return;
+  try {
+    await supa.from('agenda_klachten').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: item.date, urgency: item.urgency});
+  } catch(e) { console.error('Klacht push error:', e); }
+}
+
+async function deleteKlachtFromSupabase(item) {
+  if (!currentUser || !item.sbId) return;
+  try { await supa.from('agenda_klachten').delete().eq('id', item.sbId); } catch(e) {}
+}
+
+async function pushProfileToSupabase(p) {
+  if (!currentUser) return;
+  try {
+    await supa.from('profile').upsert({user_id: currentUser.id, stent: p.stent, notes: p.notes, meds: p.meds, updated_at: new Date().toISOString()}, {onConflict: 'user_id'});
+  } catch(e) { console.error('Profile push error:', e); }
+}
+
+// ── Auth ──
+function toggleAuthMode() {
+  authMode = authMode === 'login' ? 'register' : 'login';
+  document.getElementById('auth-title').textContent = authMode === 'login' ? 'Inloggen' : 'Account aanmaken';
+  document.getElementById('auth-subtitle').textContent = authMode === 'login' ? 'Log in om je data op al je apparaten te synchroniseren.' : 'Maak een account aan om te beginnen.';
+  document.getElementById('auth-submit-btn').textContent = authMode === 'login' ? 'Inloggen' : 'Registreren';
+  document.querySelector('.auth-toggle').innerHTML = authMode === 'login' ? 'Geen account? <span>Registreren</span>' : 'Al een account? <span>Inloggen</span>';
+}
+
+async function handleAuth() {
+  var email = document.getElementById('auth-email').value.trim();
+  var password = document.getElementById('auth-password').value;
+  if (!email || !password) return showError('Vul e-mail en wachtwoord in');
+  var btn = document.getElementById('auth-submit-btn');
+  btn.textContent = '...'; btn.disabled = true;
+  try {
+    var res;
+    if (authMode === 'login') {
+      res = await supa.auth.signInWithPassword({email: email, password: password});
+    } else {
+      res = await supa.auth.signUp({email: email, password: password});
+    }
+    if (res.error) throw res.error;
+    if (authMode === 'register' && res.data && !res.data.session) {
+      showSuccess('Bevestig je e-mail en log daarna in');
+      toggleAuthMode();
+    }
+  } catch(e) {
+    showError(e.message || 'Inloggen mislukt');
+  } finally {
+    btn.textContent = authMode === 'login' ? 'Inloggen' : 'Registreren';
+    btn.disabled = false;
+  }
+}
+
+async function signOut() {
+  await supa.auth.signOut();
+  currentUser = null;
+  showAuthScreen();
+}
+
+// ── UI state ──
+function showAuthScreen() {
+  document.getElementById('auth-screen').classList.add('visible');
+  document.getElementById('api-screen').classList.remove('visible');
+  document.getElementById('chat-area').style.display = 'none';
+  document.getElementById('input-bar').style.display = 'none';
+  ALL_PANELS.forEach(function(p) { document.getElementById(p + '-panel').classList.remove('visible'); });
+}
+
+function showApiScreen() {
+  document.getElementById('auth-screen').classList.remove('visible');
+  document.getElementById('api-screen').classList.add('visible');
+  document.getElementById('chat-area').style.display = 'none';
+  document.getElementById('input-bar').style.display = 'none';
+}
+
+function showApp() {
+  document.getElementById('auth-screen').classList.remove('visible');
+  document.getElementById('api-screen').classList.remove('visible');
+  document.getElementById('chat-area').style.display = 'flex';
+  document.getElementById('input-bar').style.display = 'flex';
+  setActiveBtn('chat');
+}
+
+function saveApiKey() {
+  var val = document.getElementById('api-key-input').value.trim();
+  if (!val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
+  apiKey = val; localStorage.setItem('nk_api_key', apiKey); showApp();
+}
+
+// ── Init ──
+var ALL_PANELS = ['history','lab','chart','agenda','settings'];
+
+async function init() {
+  currentConvId = 'conv_' + Date.now();
+  // Listen for auth state changes
+  supa.auth.onAuthStateChange(async function(event, session) {
+    if (session && session.user) {
+      currentUser = session.user;
+      await syncFromSupabase();
+      if (!apiKey) { showApiScreen(); } else { showApp(); }
+    } else {
+      currentUser = null;
+      showAuthScreen();
+    }
   });
-  h = h.replace(/((?:^\d+\. .+$\n?)+)/gm, function(m) {
-    var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^\d+\. /,'') + '</li>'; }).join('');
-    return '<ol>' + items + '</ol>\n';
-  });
-  h = h.split(/\n{2,}/).map(function(b) {
-    b = b.trim(); if (!b) return '';
-    if (/^<(h[1-3]|ul|ol|blockquote|hr|pre)/.test(b)) return b;
-    return '<p>' + b.replace(/\n/g,'<br>') + '</p>';
-  }).join('');
-  return h;
+  // Check existing session
+  var sessionRes = await supa.auth.getSession();
+  if (sessionRes.data && sessionRes.data.session) {
+    currentUser = sessionRes.data.session.user;
+    await syncFromSupabase();
+    if (!apiKey) { showApiScreen(); } else { showApp(); }
+  } else {
+    showAuthScreen();
+  }
 }
 
 // ── Navigation ──
-var ALL_PANELS = ['history','lab','chart','agenda','settings'];
-
 function setActiveBtn(name) {
   ['chat','lab','chart','agenda','history','settings'].forEach(function(b) {
     var el = document.getElementById('btn-' + b);
@@ -637,35 +629,61 @@ function showPanel(name) {
 }
 
 // ── Toasts ──
-function showError(msg) {
-  var t = document.getElementById('error-toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 3200);
-}
-function showSuccess(msg) {
-  var t = document.getElementById('success-toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(function() { t.classList.remove('show'); }, 2000);
-}
+function showError(msg) { var t = document.getElementById('error-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 3200); }
+function showSuccess(msg) { var t = document.getElementById('success-toast'); t.textContent = msg; t.classList.add('show'); setTimeout(function() { t.classList.remove('show'); }, 2200); }
 
-// ── Init ──
-function init() {
-  currentConvId = 'conv_' + Date.now();
-  if (!apiKey) {
-    document.getElementById('api-screen').classList.add('visible');
-    document.getElementById('chat-area').style.display = 'none';
-    document.getElementById('input-bar').style.display = 'none';
-  } else {
-    document.getElementById('api-screen').classList.remove('visible');
-    document.getElementById('chat-area').style.display = 'flex';
-    document.getElementById('input-bar').style.display = 'flex';
+// ── System prompt ──
+function getSystemPrompt() {
+  var today = new Date();
+  var transplantDate = new Date('2026-03-26');
+  var daysSince = Math.floor((today - transplantDate) / (1000 * 60 * 60 * 24));
+  var todayStr = today.toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
+  var fase;
+  if (daysSince <= 30) fase = 'vroege fase (dag ' + daysSince + ', eerste maand) \u2014 hoogste immunosuppressie, tacrolimus streefspiegels 10\u201315 ng/mL, laagste infectiedrempel';
+  else if (daysSince <= 90) fase = 'intermediaire fase (dag ' + daysSince + ', maand 1\u20133) \u2014 immunosuppressie wordt afgebouwd, streefspiegels dalen richting 8\u201312 ng/mL';
+  else if (daysSince <= 365) fase = 'late vroege fase (dag ' + daysSince + ', maand 3\u201312) \u2014 onderhoudsimmunosuppressie, streefspiegels 5\u201310 ng/mL';
+  else fase = 'chronische fase (dag ' + daysSince + ')';
+  var profile = getProfile();
+  var stentStatus = profile.stent === 'verwijderd' ? 'Verwijderd' : 'Nog aanwezig';
+  var notes = profile.notes ? '\n- Aanvullende notities: ' + profile.notes : '';
+  var meds = profile.meds || [];
+  var medStr = meds.length > 0 ? meds.map(function(m) { return m.name + (m.dose ? ' ' + m.dose : ''); }).join(', ') : 'tacrolimus + mycophenolaat mofetil + prednison (standaard schema)';
+  var labs = getLabEntries().slice(0, 5);
+  var labContext = '';
+  if (labs.length > 0) {
+    labContext = '\n\nRECENTE LABWAARDEN (gebruik voor trendanalyse)\n';
+    labs.forEach(function(e) {
+      var d = new Date(e.date).toLocaleDateString('nl-NL', {day:'numeric',month:'short'});
+      var parts = [];
+      if (e.creatinine) parts.push('creatinine ' + e.creatinine + ' \u00b5mol/L');
+      if (e.egfr) parts.push('eGFR ' + e.egfr + ' ml/min');
+      if (e.tacrolimus) parts.push('tacrolimus ' + e.tacrolimus + ' ng/mL');
+      if (e.bp) parts.push('RR ' + e.bp);
+      if (e.weight) parts.push('gewicht ' + e.weight + ' kg');
+      if (e.temp) parts.push('temp ' + e.temp + '\u00b0C');
+      labContext += '- ' + d + ': ' + parts.join(', ') + '\n';
+    });
+    labContext += 'Signaleer creatinine stijging >20% t.o.v. laagste waarde. Signaleer tacrolimus buiten streefspiegel.';
   }
+  return 'Je bent een gespecialiseerde medische kennisassistent op het gebied van niertransplantatie en nefrologie. Je hebt diepgaande kennis van de klinische praktijk, internationale richtlijnen (KDIGO, ERBP) en actueel wetenschappelijk onderzoek.\n\nHUIDIGE DATUM EN FASE\n\nVandaag is het ' + todayStr + '. Sunny bevindt zich in de ' + fase + '. Gebruik dit actief bij het beantwoorden van vragen.\n\nPATI\u00cbNTPROFIEL\n\n- Transplantatiedatum: 26 maart 2026 (levende donor, familielid \u2014 moeder)\n- Transplantatiecentrum: Amsterdam UMC\n- Medicatie: ' + medStr + '\n- JJ-stent: ' + stentStatus + '\n- Huidaandoening: warmte urticaria (cholinergische/hitte-ge\u00efnduceerde netelroos) \u2014 benoem proactief bij vragen over koorts, inspanning, warm weer, zonbescherming en huidkankerrisico\n- Geen dialyse voorafgaand aan transplantatie' + notes + labContext + '\n\nKERNPRINCIPES\n\nWetenschappelijke grondslag en bewijsniveau: Geef bij elke feitelijke claim het bewijsniveau aan:\n- "Sterke richtlijnconsensus (KDIGO/ERBP):" \u2014 meerdere RCTs of brede internationale consensus\n- "Richtlijnaanbeveling op basis van expert opinion:" \u2014 in richtlijnen opgenomen maar beperkt bewijs\n- "Beperkt bewijs / centrumafhankelijk:" \u2014 praktijken die per ziekenhuis verschillen\n- "Onzeker / actief debat:" \u2014 literatuur is verdeeld\n\nKennisgrens: Jouw trainingsdata heeft een grens (augustus 2025). Geef dit aan bij onderwerpen die snel evolueren.\n\nEerlijkheid over onzekerheid: Speculeer nooit.\n\nGeen diagnostiek: De conclusie voor Sunny specifiek ligt altijd bij het behandelend team van Amsterdam UMC.\n\nPROACTIEVE SIGNALERING\n\nBij vragen over voeding, dranken, medicatie of supplementen: controleer altijd actief op interacties. Kritische interacties: grapefruit/pompelmoes (CYP3A4-remming), sint-janskruid (CYP3A4-inductie), NSAID\'s (nefrotoxiciteit), rauwe of ongepasteuriseerde producten (infectierisico).\n\nFASE-AFHANKELIJKE URGENTIEDREMPELS\n\n- Koorts >=37,8\u00b0C in eerste 3 maanden \u2192 contact transplantatiecentrum\n- Urineproductie daalt >30% op \u00e9\u00e9n dag \u2192 direct contact\n- Pijn in transplantaatregio \u2192 direct contact\n- Creatinine stijgt >20\u201325% t.o.v. laagste waarde \u2192 contact dezelfde dag\n\nVerwijs bij deze signalen direct naar Amsterdam UMC of spoedeisende hulp.\n\nCOMMUNICATIESTIJL\n\nHelder Nederlands, medische termen altijd uitleggen. Direct en accuraat. Lopende tekst, opsommingstekens alleen indien nodig. Verwijs naar behandelend team alleen als dat inhoudelijk relevant is.';
 }
 
-function saveApiKey() {
-  var val = document.getElementById('api-key-input').value.trim();
-  if (!val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
-  apiKey = val; localStorage.setItem('nk_api_key', apiKey); init();
+// ── Markdown ──
+function parseMarkdown(text) {
+  var h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
+  h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
+  h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
+  h = h.replace(/\*\*\*(.+?)\*\*\*/g,'<strong><em>$1</em></strong>');
+  h = h.replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>');
+  h = h.replace(/\*(.+?)\*/g,'<em>$1</em>');
+  h = h.replace(/_([^_\n]+)_/g,'<em>$1</em>');
+  h = h.replace(/`([^`]+)`/g,'<code>$1</code>');
+  h = h.replace(/^---$/gm,'<hr>');
+  h = h.replace(/((?:^[-*+] .+$\n?)+)/gm, function(m) { var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^[-*+] /,'') + '</li>'; }).join(''); return '<ul>' + items + '</ul>\n'; });
+  h = h.replace(/((?:^\d+\. .+$\n?)+)/gm, function(m) { var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^\d+\. /,'') + '</li>'; }).join(''); return '<ol>' + items + '</ol>\n'; });
+  h = h.split(/\n{2,}/).map(function(b) { b = b.trim(); if (!b) return ''; if (/^<(h[1-3]|ul|ol|blockquote|hr|pre)/.test(b)) return b; return '<p>' + b.replace(/\n/g,'<br>') + '</p>'; }).join('');
+  return h;
 }
 
 // ── History ──
@@ -709,7 +727,7 @@ function renderHistoryList() {
   convs.forEach(function(c) {
     var d = new Date(c.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     var div = document.createElement('div'); div.className = 'history-item';
-    div.innerHTML = '<div class="history-item-text"><div class="history-item-preview">' + escapeHtml(c.preview) + '</div><div class="history-item-date">' + d + '</div></div><button class="icon-btn" title="Verwijderen">&times;</button>';
+    div.innerHTML = '<div class="history-item-text"><div class="history-item-preview">' + escapeHtml(c.preview) + '</div><div class="history-item-date">' + d + '</div></div><button class="icon-btn">&times;</button>';
     div.querySelector('.icon-btn').addEventListener('click', function(e) { deleteConversation(c.id, e); });
     div.addEventListener('click', function() { loadConversation(c.id); });
     list.appendChild(div);
@@ -717,30 +735,32 @@ function renderHistoryList() {
 }
 
 // ── Lab ──
-function saveLabEntry() {
+async function saveLabEntry() {
   var creatinine = document.getElementById('lab-creatinine').value.trim();
   var egfr = document.getElementById('lab-egfr').value.trim();
   var tacrolimus = document.getElementById('lab-tacrolimus').value.trim();
   var bp = document.getElementById('lab-bp').value.trim();
   var weight = document.getElementById('lab-weight').value.trim();
   var temp = document.getElementById('lab-temp').value.trim();
-  // Treat '0' as empty to avoid accidental zero readings
   if (creatinine === '0') creatinine = '';
   if (egfr === '0') egfr = '';
   if (tacrolimus === '0') tacrolimus = '';
   if (weight === '0') weight = '';
   if (temp === '0') temp = '';
   if (!creatinine && !egfr && !tacrolimus && !bp && !weight && !temp) return showError('Vul minstens één waarde in');
-  var entries = getLabEntries();
-  entries.unshift({date: Date.now(), creatinine: creatinine, egfr: egfr, tacrolimus: tacrolimus, bp: bp, weight: weight, temp: temp});
-  saveLabEntries(entries.slice(0,200));
+  var entry = {date: Date.now(), creatinine: creatinine, egfr: egfr, tacrolimus: tacrolimus, bp: bp, weight: weight, temp: temp};
+  var entries = getLabEntries(); entries.unshift(entry); saveLabLocal(entries.slice(0,200));
   ['lab-creatinine','lab-egfr','lab-tacrolimus','lab-bp','lab-weight','lab-temp'].forEach(function(id) { document.getElementById(id).value = ''; });
   renderLabEntries();
   showSuccess('Meting opgeslagen');
+  await pushLabToSupabase(entry);
 }
 
-function deleteLabEntry(idx) {
-  var entries = getLabEntries(); entries.splice(idx,1); saveLabEntries(entries); renderLabEntries();
+async function deleteLabEntry(idx) {
+  var entries = getLabEntries();
+  var entry = entries[idx];
+  entries.splice(idx,1); saveLabLocal(entries); renderLabEntries();
+  await deleteLabFromSupabase(entry);
 }
 
 function renderLabEntries() {
@@ -752,17 +772,36 @@ function renderLabEntries() {
   entries.forEach(function(e, i) {
     var d = new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
     var badges = '';
-    if (e.creatinine) { var isAlert = lowestCreat && parseFloat(e.creatinine) > lowestCreat * 1.2; badges += '<div class="lab-badge' + (isAlert?' alert':'') + '">Creat <span>' + e.creatinine + ' µmol/L</span></div>'; }
+    if (e.creatinine) { var isAlert = lowestCreat && parseFloat(e.creatinine) > lowestCreat * 1.2; badges += '<div class="lab-badge' + (isAlert?' alert':'') + '">Creat <span>' + e.creatinine + ' \u00b5mol/L</span></div>'; }
     if (e.egfr) badges += '<div class="lab-badge">eGFR <span>' + e.egfr + ' ml/min</span></div>';
     if (e.tacrolimus) { var tv = parseFloat(e.tacrolimus); var ta = tv < 8 || tv > 15; badges += '<div class="lab-badge' + (ta?' alert':'') + '">Tac <span>' + e.tacrolimus + ' ng/mL</span></div>'; }
     if (e.bp) badges += '<div class="lab-badge">RR <span>' + e.bp + '</span></div>';
     if (e.weight) badges += '<div class="lab-badge">Gew <span>' + e.weight + ' kg</span></div>';
     if (e.temp) { var tv2 = parseFloat(e.temp); var ta2 = tv2 >= 37.8; badges += '<div class="lab-badge' + (ta2?' alert':'') + '">Temp <span>' + e.temp + '\u00b0C</span></div>'; }
+    if (!badges) return;
     var div = document.createElement('div'); div.className = 'lab-entry';
     div.innerHTML = '<div class="lab-entry-values">' + badges + '</div><div class="lab-entry-meta"><div class="lab-entry-date">' + d + '</div><button class="icon-btn">&times;</button></div>';
     div.querySelector('.icon-btn').addEventListener('click', function() { deleteLabEntry(i); });
     container.appendChild(div);
   });
+}
+
+// ── Export ──
+function exportLabCSV() {
+  var entries = getLabEntries();
+  if (entries.length === 0) return showError('Geen metingen om te exporteren');
+  var header = 'Datum,Creatinine (\u00b5mol/L),eGFR (ml/min),Tacrolimus (ng/mL),Bloeddruk,Gewicht (kg),Temperatuur (\u00b0C)';
+  var rows = entries.slice().reverse().map(function(e) {
+    var d = new Date(e.date).toLocaleDateString('nl-NL', {day:'2-digit',month:'2-digit',year:'numeric',hour:'2-digit',minute:'2-digit'});
+    return [d, e.creatinine||'', e.egfr||'', e.tacrolimus||'', e.bp||'', e.weight||'', e.temp||''].join(',');
+  });
+  var csv = [header].concat(rows).join('\n');
+  var blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  var url = URL.createObjectURL(blob);
+  var a = document.createElement('a'); a.href = url;
+  a.download = 'nierrobot-lab-' + new Date().toISOString().slice(0,10) + '.csv';
+  a.click(); URL.revokeObjectURL(url);
+  showSuccess('CSV gedownload');
 }
 
 // ── Charts ──
@@ -782,21 +821,14 @@ function getChartValue(entry, key) {
 
 function switchChartTab(key, btn) {
   document.querySelectorAll('.chart-tab').forEach(function(t) { t.classList.remove('active'); });
-  btn.classList.add('active');
-  renderChart(key);
+  btn.classList.add('active'); renderChart(key);
 }
 
 function renderChart(key) {
   var wrap = document.getElementById('chart-wrap');
-  var entries = getLabEntries();
   var cfg = CHART_CFG[key];
-  var filtered = entries.filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; }).slice(-15);
-
-  if (filtered.length === 0) {
-    wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="list-empty" style="padding:30px 0">Nog geen metingen voor ' + cfg.label + '.<br>Voeg ze toe via het Lab-tabblad.</div></div>';
-    return;
-  }
-
+  var filtered = getLabEntries().filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; }).slice(-15);
+  if (filtered.length === 0) { wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="list-empty" style="padding:30px 0">Nog geen metingen voor ' + cfg.label + '.</div></div>'; return; }
   var values = filtered.map(function(e) { return getChartValue(e,key); });
   var labels = filtered.map(function(e) { return new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); });
   var latest = values[values.length-1];
@@ -805,82 +837,38 @@ function renderChart(key) {
   var deltaStr = delta !== null ? (delta >= 0 ? '+' + delta.toFixed(1) : delta.toFixed(1)) : '';
   var goodDown = (key === 'creatinine' || key === 'bp' || key === 'temp');
   var deltaColor = delta === null || delta === 0 ? '' : (goodDown ? (delta > 0 ? 'color:#f85149' : 'color:#3fb950') : (delta < 0 ? 'color:#f85149' : 'color:#3fb950'));
-
   wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="chart-card-latest">' + latest + '<span class="unit">' + cfg.unit + '</span>' + (delta !== null ? '<span class="delta" style="' + deltaColor + '">' + deltaStr + '</span>' : '') + '</div><div class="chart-canvas-wrap"><canvas id="trend-canvas"></canvas></div>' + (cfg.note ? '<div class="chart-note">' + cfg.note + '</div>' : '') + '</div>';
-
-  requestAnimationFrame(function() { drawChart(key, values, labels, cfg); });
+  requestAnimationFrame(function() { drawChart(values, labels, cfg); });
 }
 
-function drawChart(key, values, labels, cfg) {
-  var canvas = document.getElementById('trend-canvas');
-  if (!canvas) return;
+function drawChart(values, labels, cfg) {
+  var canvas = document.getElementById('trend-canvas'); if (!canvas) return;
   var dpr = window.devicePixelRatio || 1;
   var rect = canvas.parentElement.getBoundingClientRect();
   var W = rect.width; var H = 160;
-  canvas.width = W * dpr; canvas.height = H * dpr;
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-  var ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
-
-  var pad = {top:16, right:14, bottom:28, left:42};
-  var gW = W - pad.left - pad.right;
-  var gH = H - pad.top - pad.bottom;
-
+  canvas.width = W*dpr; canvas.height = H*dpr; canvas.style.width = W+'px'; canvas.style.height = H+'px';
+  var ctx = canvas.getContext('2d'); ctx.scale(dpr,dpr);
+  var pad = {top:16,right:14,bottom:28,left:42};
+  var gW = W-pad.left-pad.right; var gH = H-pad.top-pad.bottom;
   var allVals = values.slice();
   cfg.refs.forEach(function(r) { allVals.push(r.value); });
   if (cfg.alertHigh) allVals.push(cfg.alertHigh);
   if (cfg.alertLow) allVals.push(cfg.alertLow);
-  var minVal = Math.min.apply(null, allVals) * 0.92;
-  var maxVal = Math.max.apply(null, allVals) * 1.08;
-  var range = maxVal - minVal || 1;
-
-  function toX(i) { return pad.left + (values.length === 1 ? gW/2 : (i / (values.length-1)) * gW); }
-  function toY(v) { return pad.top + gH - ((v - minVal) / range) * gH; }
-
-  // Grid
-  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
-  for (var i = 0; i <= 4; i++) {
-    var y = pad.top + (i/4)*gH;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+gW, y); ctx.stroke();
-    var v = maxVal - (i/4)*range;
-    ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
-    ctx.fillText(v.toFixed(v < 10 ? 1 : 0), pad.left-4, y+3);
+  var minVal = Math.min.apply(null,allVals)*0.92; var maxVal = Math.max.apply(null,allVals)*1.08; var range = maxVal-minVal||1;
+  function toX(i) { return pad.left + (values.length===1 ? gW/2 : (i/(values.length-1))*gW); }
+  function toY(v) { return pad.top+gH-((v-minVal)/range)*gH; }
+  ctx.strokeStyle='#30363d'; ctx.lineWidth=1;
+  for (var i=0;i<=4;i++) { var y=pad.top+(i/4)*gH; ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+gW,y); ctx.stroke(); var v=maxVal-(i/4)*range; ctx.fillStyle='#7d8590'; ctx.font='10px sans-serif'; ctx.textAlign='right'; ctx.fillText(v.toFixed(v<10?1:0),pad.left-4,y+3); }
+  cfg.refs.forEach(function(ref) { var ry=toY(ref.value); ctx.save(); ctx.strokeStyle=ref.color; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.left,ry); ctx.lineTo(pad.left+gW,ry); ctx.stroke(); ctx.restore(); });
+  if (values.length>1) {
+    ctx.beginPath(); ctx.moveTo(toX(0),toY(values[0])); values.forEach(function(v,i) { if(i>0) ctx.lineTo(toX(i),toY(v)); }); ctx.lineTo(toX(values.length-1),pad.top+gH); ctx.lineTo(toX(0),pad.top+gH); ctx.closePath();
+    var grad=ctx.createLinearGradient(0,pad.top,0,pad.top+gH); grad.addColorStop(0,cfg.color+'44'); grad.addColorStop(1,cfg.color+'00'); ctx.fillStyle=grad; ctx.fill();
+    ctx.strokeStyle=cfg.color; ctx.lineWidth=2.5; ctx.lineJoin='round'; ctx.lineCap='round'; ctx.beginPath(); values.forEach(function(v,i) { i===0?ctx.moveTo(toX(i),toY(v)):ctx.lineTo(toX(i),toY(v)); }); ctx.stroke();
   }
-
-  // Ref lines
-  cfg.refs.forEach(function(ref) {
-    var ry = toY(ref.value);
-    ctx.save(); ctx.strokeStyle = ref.color; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
-    ctx.beginPath(); ctx.moveTo(pad.left, ry); ctx.lineTo(pad.left+gW, ry); ctx.stroke(); ctx.restore();
-  });
-
-  if (values.length > 1) {
-    // Area fill
-    ctx.beginPath();
-    ctx.moveTo(toX(0), toY(values[0]));
-    values.forEach(function(v,i) { if (i>0) ctx.lineTo(toX(i), toY(v)); });
-    ctx.lineTo(toX(values.length-1), pad.top+gH); ctx.lineTo(toX(0), pad.top+gH); ctx.closePath();
-    var grad = ctx.createLinearGradient(0, pad.top, 0, pad.top+gH);
-    grad.addColorStop(0, cfg.color+'44'); grad.addColorStop(1, cfg.color+'00');
-    ctx.fillStyle = grad; ctx.fill();
-    // Line
-    ctx.strokeStyle = cfg.color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.beginPath();
-    values.forEach(function(v,i) { i===0 ? ctx.moveTo(toX(i),toY(v)) : ctx.lineTo(toX(i),toY(v)); });
-    ctx.stroke();
-  }
-
-  // Dots
-  values.forEach(function(v,i) {
-    var isAlert = (cfg.alertHigh && v >= cfg.alertHigh) || (cfg.alertLow && v <= cfg.alertLow);
-    ctx.beginPath(); ctx.arc(toX(i), toY(v), values.length===1?6:4, 0, Math.PI*2);
-    ctx.fillStyle = isAlert ? '#f85149' : cfg.color; ctx.fill();
-    if (isAlert) { ctx.strokeStyle = '#f8514955'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(toX(i),toY(v),9,0,Math.PI*2); ctx.stroke(); }
-  });
-
-  // X labels
-  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-  var step = Math.max(1, Math.ceil(labels.length/6));
-  labels.forEach(function(l,i) { if (i%step===0 || i===labels.length-1) ctx.fillText(l, toX(i), H-5); });
+  values.forEach(function(v,i) { var isAlert=(cfg.alertHigh&&v>=cfg.alertHigh)||(cfg.alertLow&&v<=cfg.alertLow); ctx.beginPath(); ctx.arc(toX(i),toY(v),values.length===1?6:4,0,Math.PI*2); ctx.fillStyle=isAlert?'#f85149':cfg.color; ctx.fill(); if(isAlert){ctx.strokeStyle='#f8514955';ctx.lineWidth=6;ctx.beginPath();ctx.arc(toX(i),toY(v),9,0,Math.PI*2);ctx.stroke();} });
+  ctx.fillStyle='#7d8590'; ctx.font='10px sans-serif'; ctx.textAlign='center';
+  var step=Math.max(1,Math.ceil(labels.length/6));
+  labels.forEach(function(l,i) { if(i%step===0||i===labels.length-1) ctx.fillText(l,toX(i),H-5); });
 }
 
 // ── Settings ──
@@ -895,7 +883,7 @@ function renderSettings() {
 function renderMedList(meds) {
   var list = document.getElementById('med-list'); list.innerHTML = '';
   if (meds.length === 0) { list.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:4px 0">Nog geen medicatie toegevoegd.</div>'; return; }
-  meds.forEach(function(m, i) {
+  meds.forEach(function(m,i) {
     var div = document.createElement('div'); div.className = 'med-item';
     div.innerHTML = '<div class="med-item-name">' + escapeHtml(m.name) + '</div><div class="med-item-dose">' + escapeHtml(m.dose||'') + '</div><button class="icon-btn">&times;</button>';
     div.querySelector('.icon-btn').addEventListener('click', function() { removeMed(i); });
@@ -904,211 +892,171 @@ function renderMedList(meds) {
 }
 
 function addMed() {
-  var name = document.getElementById('med-name').value.trim();
-  if (!name) return;
+  var name = document.getElementById('med-name').value.trim(); if (!name) return;
   var dose = document.getElementById('med-dose').value.trim();
-  var p = getProfile(); var meds = p.meds || []; meds.push({name:name,dose:dose});
-  p.meds = meds; saveProfile(p);
-  document.getElementById('med-name').value = ''; document.getElementById('med-dose').value = '';
+  var p = getProfile(); var meds = p.meds||[]; meds.push({name:name,dose:dose}); p.meds=meds; saveProfileLocal(p);
+  document.getElementById('med-name').value=''; document.getElementById('med-dose').value='';
   renderMedList(meds);
 }
 
 function removeMed(i) {
-  var p = getProfile(); var meds = p.meds || []; meds.splice(i,1); p.meds = meds; saveProfile(p); renderMedList(meds);
+  var p = getProfile(); var meds = p.meds||[]; meds.splice(i,1); p.meds=meds; saveProfileLocal(p); renderMedList(meds);
 }
 
-function saveSettings() {
+async function saveSettings() {
   var p = getProfile();
   p.stent = document.getElementById('s-stent').value;
   p.notes = document.getElementById('s-notes').value.trim();
-  saveProfile(p);
+  saveProfileLocal(p);
+  await pushProfileToSupabase(p);
   var keyVal = document.getElementById('s-apikey').value.trim();
   if (keyVal && !keyVal.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
-  if (keyVal) { apiKey = keyVal; localStorage.setItem('nk_api_key', apiKey); }
+  if (keyVal) { apiKey=keyVal; localStorage.setItem('nk_api_key',apiKey); }
   showSuccess('Opgeslagen');
   showChat();
 }
 
 // ── Agenda ──
-function selectUrgency(level, btn) {
-  selectedUrgency = level;
-  document.querySelectorAll('.urgency-btn').forEach(function(b) { b.className = 'urgency-btn'; });
-  btn.className = 'urgency-btn sel-' + level;
+function selectUrgency(level,btn) {
+  selectedUrgency=level;
+  document.querySelectorAll('.urgency-btn').forEach(function(b){b.className='urgency-btn';});
+  btn.className='urgency-btn sel-'+level;
 }
 
-function autoResizeTA(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+function autoResizeTA(el) { el.style.height='auto'; el.style.height=Math.min(el.scrollHeight,100)+'px'; }
+
+function handleAgendaKey(e,type) { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();if(type==='vraag')addVraag();else addKlacht();} }
+
+async function addVraag() {
+  var el=document.getElementById('vraag-input'); var text=el.value.trim(); if(!text) return;
+  var agenda=getAgenda();
+  var item={id:Date.now(),text:text,date:Date.now(),done:false};
+  agenda.vragen.unshift(item); saveAgendaLocal(agenda); el.value=''; el.style.height='auto'; renderAgenda();
+  await pushVraagToSupabase(item);
 }
 
-function handleAgendaKey(e, type) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (type === 'vraag') addVraag(); else addKlacht(); }
+async function addKlacht() {
+  var el=document.getElementById('klacht-input'); var text=el.value.trim(); if(!text) return;
+  var agenda=getAgenda();
+  var item={id:Date.now(),text:text,date:Date.now(),urgency:selectedUrgency};
+  agenda.klachten.unshift(item); saveAgendaLocal(agenda); el.value=''; el.style.height='auto'; renderAgenda();
+  await pushKlachtToSupabase(item);
 }
 
-function addVraag() {
-  var el = document.getElementById('vraag-input');
-  var text = el.value.trim(); if (!text) return;
-  var agenda = getAgenda();
-  agenda.vragen.unshift({id: Date.now(), text: text, date: Date.now(), done: false});
-  saveAgendaData(agenda); el.value = ''; el.style.height = 'auto'; renderAgenda();
+async function toggleVraag(id) {
+  var agenda=getAgenda();
+  var item=agenda.vragen.find(function(v){return v.id===id;});
+  if(item){item.done=!item.done; saveAgendaLocal(agenda); renderAgenda(); await updateVraagDoneSupabase(item);}
 }
 
-function addKlacht() {
-  var el = document.getElementById('klacht-input');
-  var text = el.value.trim(); if (!text) return;
-  var agenda = getAgenda();
-  agenda.klachten.unshift({id: Date.now(), text: text, date: Date.now(), urgency: selectedUrgency});
-  saveAgendaData(agenda); el.value = ''; el.style.height = 'auto'; renderAgenda();
+async function deleteVraag(id) {
+  var agenda=getAgenda();
+  var item=agenda.vragen.find(function(v){return v.id===id;});
+  agenda.vragen=agenda.vragen.filter(function(v){return v.id!==id;}); saveAgendaLocal(agenda); renderAgenda();
+  if(item) await deleteVraagFromSupabase(item);
 }
 
-function toggleVraag(id) {
-  var agenda = getAgenda();
-  var item = agenda.vragen.find(function(v) { return v.id === id; });
-  if (item) item.done = !item.done;
-  saveAgendaData(agenda); renderAgenda();
+async function deleteKlacht(id) {
+  var agenda=getAgenda();
+  var item=agenda.klachten.find(function(k){return k.id===id;});
+  agenda.klachten=agenda.klachten.filter(function(k){return k.id!==id;}); saveAgendaLocal(agenda); renderAgenda();
+  if(item) await deleteKlachtFromSupabase(item);
 }
 
-function deleteVraag(id) {
-  var agenda = getAgenda(); agenda.vragen = agenda.vragen.filter(function(v) { return v.id !== id; });
-  saveAgendaData(agenda); renderAgenda();
-}
-
-function deleteKlacht(id) {
-  var agenda = getAgenda(); agenda.klachten = agenda.klachten.filter(function(k) { return k.id !== id; });
-  saveAgendaData(agenda); renderAgenda();
-}
-
-function clearDoneVragen() {
-  var agenda = getAgenda(); agenda.vragen = agenda.vragen.filter(function(v) { return !v.done; });
-  saveAgendaData(agenda); renderAgenda();
+async function clearDoneVragen() {
+  var agenda=getAgenda();
+  var toDelete=agenda.vragen.filter(function(v){return v.done;});
+  agenda.vragen=agenda.vragen.filter(function(v){return !v.done;}); saveAgendaLocal(agenda); renderAgenda();
+  for(var i=0;i<toDelete.length;i++) { await deleteVraagFromSupabase(toDelete[i]); }
 }
 
 function renderAgenda() {
-  // Vragen
-  var agenda = getAgenda();
-  var vraagList = document.getElementById('vraag-list');
-  if (!vraagList) return;
-  var open = agenda.vragen.filter(function(v) { return !v.done; });
-  var done = agenda.vragen.filter(function(v) { return v.done; });
-  var sorted = open.concat(done);
-  vraagList.innerHTML = '';
-  if (sorted.length === 0) { vraagList.innerHTML = '<div class="list-empty">Nog geen vragen toegevoegd.</div>'; }
-  else {
-    sorted.forEach(function(v) {
-      var d = new Date(v.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
-      var div = document.createElement('div'); div.className = 'agenda-item' + (v.done ? ' done' : '');
-      div.innerHTML = '<div class="check-circle' + (v.done ? ' checked' : '') + '"></div><div class="agenda-item-body"><div class="agenda-item-text">' + escapeHtml(v.text) + '</div><div class="agenda-item-date">' + d + '</div></div><button class="icon-btn">&times;</button>';
-      div.querySelector('.check-circle').addEventListener('click', function() { toggleVraag(v.id); });
-      div.querySelector('.icon-btn').addEventListener('click', function() { deleteVraag(v.id); });
+  var agenda=getAgenda();
+  var vraagList=document.getElementById('vraag-list'); if(!vraagList) return;
+  var open=agenda.vragen.filter(function(v){return !v.done;}); var done=agenda.vragen.filter(function(v){return v.done;});
+  vraagList.innerHTML='';
+  if(open.length+done.length===0){vraagList.innerHTML='<div class="list-empty">Nog geen vragen toegevoegd.</div>';}
+  else{
+    open.concat(done).forEach(function(v){
+      var d=new Date(v.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+      var div=document.createElement('div'); div.className='agenda-item'+(v.done?' done':'');
+      div.innerHTML='<div class="check-circle'+(v.done?' checked':'')+'"></div><div class="agenda-item-body"><div class="agenda-item-text">'+escapeHtml(v.text)+'</div><div class="agenda-item-date">'+d+'</div></div><button class="icon-btn">&times;</button>';
+      div.querySelector('.check-circle').addEventListener('click',function(){toggleVraag(v.id);});
+      div.querySelector('.icon-btn').addEventListener('click',function(){deleteVraag(v.id);});
       vraagList.appendChild(div);
     });
   }
-
-  // Klachten
-  var klachtList = document.getElementById('klacht-list');
-  if (!klachtList) return;
-  klachtList.innerHTML = '';
-  if (agenda.klachten.length === 0) { klachtList.innerHTML = '<div class="list-empty">Nog geen klachten genoteerd.</div>'; }
-  else {
-    agenda.klachten.forEach(function(k) {
-      var d = new Date(k.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-      var urg = k.urgency || 'mild';
-      var urgLabel = urg === 'ernstig' ? 'Ernstig' : urg === 'matig' ? 'Matig' : 'Mild';
-      var div = document.createElement('div'); div.className = 'agenda-item';
-      div.innerHTML = '<div class="agenda-item-body"><div class="agenda-item-text">' + escapeHtml(k.text) + '<span class="urgency-badge ' + urg + '">' + urgLabel + '</span></div><div class="agenda-item-date">' + d + '</div></div><button class="icon-btn">&times;</button>';
-      div.querySelector('.icon-btn').addEventListener('click', function() { deleteKlacht(k.id); });
+  var klachtList=document.getElementById('klacht-list'); if(!klachtList) return;
+  klachtList.innerHTML='';
+  if(agenda.klachten.length===0){klachtList.innerHTML='<div class="list-empty">Nog geen klachten genoteerd.</div>';}
+  else{
+    agenda.klachten.forEach(function(k){
+      var d=new Date(k.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      var urg=k.urgency||'mild'; var urgLabel=urg==='ernstig'?'Ernstig':urg==='matig'?'Matig':'Mild';
+      var div=document.createElement('div'); div.className='agenda-item';
+      div.innerHTML='<div class="agenda-item-body"><div class="agenda-item-text">'+escapeHtml(k.text)+'<span class="urgency-badge '+urg+'">'+urgLabel+'</span></div><div class="agenda-item-date">'+d+'</div></div><button class="icon-btn">&times;</button>';
+      div.querySelector('.icon-btn').addEventListener('click',function(){deleteKlacht(k.id);});
       klachtList.appendChild(div);
     });
   }
 }
 
 // ── Chat ──
-function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
+function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
+function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';}
 
-function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,140)+'px'; }
-
-function renderMessage(role, text) {
-  var chat = document.getElementById('chat-area');
-  var div = document.createElement('div'); div.className = 'msg ' + role;
-  var label = document.createElement('div'); label.className = 'msg-label'; label.textContent = role==='user' ? 'Jij' : 'NierRobot';
-  var bubble = document.createElement('div'); bubble.className = 'bubble';
-  if (role === 'ai') bubble.innerHTML = parseMarkdown(text); else bubble.textContent = text;
-  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+function renderMessage(role,text){
+  var chat=document.getElementById('chat-area');
+  var div=document.createElement('div'); div.className='msg '+role;
+  var label=document.createElement('div'); label.className='msg-label'; label.textContent=role==='user'?'Jij':'NierRobot';
+  var bubble=document.createElement('div'); bubble.className='bubble';
+  if(role==='ai') bubble.innerHTML=parseMarkdown(text); else bubble.textContent=text;
+  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
 }
 
-function createStreamBubble() {
-  var welcome = document.getElementById('welcome'); if (welcome) welcome.remove();
-  var chat = document.getElementById('chat-area');
-  var div = document.createElement('div'); div.className = 'msg ai';
-  var label = document.createElement('div'); label.className = 'msg-label'; label.textContent = 'NierRobot';
-  var bubble = document.createElement('div'); bubble.className = 'bubble';
-  bubble.innerHTML = '<div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
+function createStreamBubble(){
+  var welcome=document.getElementById('welcome'); if(welcome) welcome.remove();
+  var chat=document.getElementById('chat-area');
+  var div=document.createElement('div'); div.className='msg ai';
+  var label=document.createElement('div'); label.className='msg-label'; label.textContent='NierRobot';
+  var bubble=document.createElement('div'); bubble.className='bubble';
+  bubble.innerHTML='<div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
+  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div); chat.scrollTop=chat.scrollHeight;
   return bubble;
 }
 
-async function sendMessage() {
-  if (isLoading) return;
-  if (!apiKey) return showError('Stel eerst een API sleutel in');
-  var input = document.getElementById('user-input');
-  var text = input.value.trim(); if (!text) return;
-  var welcome = document.getElementById('welcome'); if (welcome) welcome.remove();
-  input.value = ''; input.style.height = 'auto';
-  isLoading = true; document.getElementById('send-btn').disabled = true;
-  renderMessage('user', text);
-  currentHistory.push({role:'user', content:text});
-  var maxMessages = 20;
-  var messagesToSend = currentHistory.length > maxMessages ? currentHistory.slice(-maxMessages) : currentHistory;
-  var bubble = createStreamBubble();
-  var fullReply = '';
-  try {
-    var res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2500,
-        stream: true,
-        system: getSystemPrompt(),
-        messages: messagesToSend
-      })
+async function sendMessage(){
+  if(isLoading) return;
+  if(!apiKey) return showError('Stel eerst een API sleutel in');
+  var input=document.getElementById('user-input'); var text=input.value.trim(); if(!text) return;
+  var welcome=document.getElementById('welcome'); if(welcome) welcome.remove();
+  input.value=''; input.style.height='auto';
+  isLoading=true; document.getElementById('send-btn').disabled=true;
+  renderMessage('user',text);
+  currentHistory.push({role:'user',content:text});
+  var messagesToSend=currentHistory.length>20?currentHistory.slice(-20):currentHistory;
+  var bubble=createStreamBubble(); var fullReply='';
+  try{
+    var res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':apiKey,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2500,stream:true,system:getSystemPrompt(),messages:messagesToSend})
     });
-    if (!res.ok) { var err = await res.json().catch(function(){return {};}); throw new Error((err.error||{}).message || 'API fout: ' + res.status); }
-    var reader = res.body.getReader();
-    var decoder = new TextDecoder();
-    var buffer = '';
-    while (true) {
-      var result = await reader.read(); if (result.done) break;
-      buffer += decoder.decode(result.value, {stream:true});
-      var lines = buffer.split('\n'); buffer = lines.pop();
-      for (var li = 0; li < lines.length; li++) {
-        var line = lines[li]; if (!line.startsWith('data: ')) continue;
-        var data = line.slice(6).trim(); if (data === '[DONE]') break;
-        try {
-          var json = JSON.parse(data);
-          if (json.type === 'content_block_delta' && json.delta && json.delta.type === 'text_delta') {
-            fullReply += json.delta.text;
-            bubble.innerHTML = parseMarkdown(fullReply);
-            document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
-          }
-        } catch(pe) {}
+    if(!res.ok){var err=await res.json().catch(function(){return{};}); throw new Error((err.error||{}).message||'API fout: '+res.status);}
+    var reader=res.body.getReader(); var decoder=new TextDecoder(); var buffer='';
+    while(true){
+      var result=await reader.read(); if(result.done) break;
+      buffer+=decoder.decode(result.value,{stream:true});
+      var lines=buffer.split('\n'); buffer=lines.pop();
+      for(var li=0;li<lines.length;li++){
+        var line=lines[li]; if(!line.startsWith('data: ')) continue;
+        var data=line.slice(6).trim(); if(data==='[DONE]') break;
+        try{var json=JSON.parse(data); if(json.type==='content_block_delta'&&json.delta&&json.delta.type==='text_delta'){fullReply+=json.delta.text; bubble.innerHTML=parseMarkdown(fullReply); document.getElementById('chat-area').scrollTop=document.getElementById('chat-area').scrollHeight;}}catch(pe){}
       }
     }
-    currentHistory.push({role:'assistant', content:fullReply});
-    saveCurrentConversation();
-  } catch(err) {
-    bubble.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer opnieuw.');
-    currentHistory.pop();
-  } finally {
-    isLoading = false; document.getElementById('send-btn').disabled = false;
-    document.getElementById('user-input').focus();
-  }
+    currentHistory.push({role:'assistant',content:fullReply}); saveCurrentConversation();
+  }catch(err){bubble.textContent='Er ging iets mis: '+(err.message||'Probeer opnieuw.'); currentHistory.pop();}
+  finally{isLoading=false; document.getElementById('send-btn').disabled=false; document.getElementById('user-input').focus();}
 }
 
 init();

@@ -724,10 +724,16 @@ function saveLabEntry() {
   var bp = document.getElementById('lab-bp').value.trim();
   var weight = document.getElementById('lab-weight').value.trim();
   var temp = document.getElementById('lab-temp').value.trim();
+  // Treat '0' as empty to avoid accidental zero readings
+  if (creatinine === '0') creatinine = '';
+  if (egfr === '0') egfr = '';
+  if (tacrolimus === '0') tacrolimus = '';
+  if (weight === '0') weight = '';
+  if (temp === '0') temp = '';
   if (!creatinine && !egfr && !tacrolimus && !bp && !weight && !temp) return showError('Vul minstens één waarde in');
   var entries = getLabEntries();
   entries.unshift({date: Date.now(), creatinine: creatinine, egfr: egfr, tacrolimus: tacrolimus, bp: bp, weight: weight, temp: temp});
-  saveLabEntries(entries.slice(0,100));
+  saveLabEntries(entries.slice(0,200));
   ['lab-creatinine','lab-egfr','lab-tacrolimus','lab-bp','lab-weight','lab-temp'].forEach(function(id) { document.getElementById(id).value = ''; });
   renderLabEntries();
   showSuccess('Meting opgeslagen');
@@ -784,7 +790,7 @@ function renderChart(key) {
   var wrap = document.getElementById('chart-wrap');
   var entries = getLabEntries();
   var cfg = CHART_CFG[key];
-  var filtered = entries.filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; });
+  var filtered = entries.filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; }).slice(-15);
 
   if (filtered.length === 0) {
     wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="list-empty" style="padding:30px 0">Nog geen metingen voor ' + cfg.label + '.<br>Voeg ze toe via het Lab-tabblad.</div></div>';

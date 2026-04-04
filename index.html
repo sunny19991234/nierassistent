@@ -415,6 +415,136 @@
       cursor: pointer; transition: opacity 0.2s;
     }
     .btn-primary:hover, .btn-secondary:hover { opacity: 0.8; }
+
+    /* ── Chart panel ── */
+    .chart-tabs {
+      display: flex; gap: 6px; flex-wrap: wrap;
+      padding: 12px 16px 0; border-bottom: 1px solid var(--border); flex-shrink: 0;
+    }
+    .chart-tab {
+      background: none; border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 20px;
+      padding: 4px 12px; font-size: 12px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 10px;
+    }
+    .chart-tab:hover { border-color: var(--accent); color: var(--accent); }
+    .chart-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
+    .chart-wrap {
+      flex: 1; overflow-y: auto; padding: 16px;
+      display: flex; flex-direction: column; gap: 16px;
+    }
+    .chart-wrap::-webkit-scrollbar { width: 4px; }
+    .chart-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    .chart-card {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 16px;
+    }
+    .chart-card-title {
+      font-size: 12px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
+    }
+    .chart-card-latest {
+      font-family: 'Crimson Pro', serif; font-size: 22px; font-weight: 600;
+      color: var(--text); margin-bottom: 12px;
+    }
+    .chart-card-latest span { font-size: 13px; font-weight: 300; color: var(--text-muted); margin-left: 4px; }
+    .chart-canvas-wrap { position: relative; width: 100%; height: 160px; }
+    canvas { display: block; }
+    .chart-empty { color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 0; }
+    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+    .chart-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
+    .chart-legend-dot { width: 10px; height: 3px; border-radius: 2px; flex-shrink: 0; }
+    .chart-alert-band { font-size: 11px; color: var(--danger); margin-top: 6px; }
+
+    /* ── Agenda panel ── */
+    .agenda-section-title {
+      font-size: 12px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.5px;
+      margin-bottom: 8px; margin-top: 4px;
+    }
+    .agenda-add-row {
+      display: flex; gap: 8px; align-items: flex-start;
+    }
+    .agenda-add-row textarea {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 12px;
+      color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif;
+      outline: none; resize: none; min-height: 44px; max-height: 100px;
+      line-height: 1.5; transition: border-color 0.2s;
+    }
+    .agenda-add-row textarea:focus { border-color: var(--accent); }
+    .agenda-add-row textarea::placeholder { color: var(--text-muted); }
+    .agenda-add-btn {
+      background: var(--accent); color: #0d1117; border: none;
+      border-radius: var(--radius-sm); padding: 10px 14px;
+      font-size: 13px; font-weight: 500; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; white-space: nowrap;
+      flex-shrink: 0; align-self: flex-end; transition: opacity 0.2s;
+    }
+    .agenda-add-btn:hover { opacity: 0.85; }
+
+    .agenda-list { display: flex; flex-direction: column; gap: 8px; }
+    .agenda-empty { color: var(--text-muted); font-size: 13px; padding: 12px 0; }
+
+    .agenda-item {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 12px 14px;
+      display: flex; gap: 10px; align-items: flex-start;
+      transition: border-color 0.18s;
+    }
+    .agenda-item.done { opacity: 0.45; }
+    .agenda-item.done .agenda-item-text { text-decoration: line-through; color: var(--text-muted); }
+
+    .agenda-check {
+      width: 18px; height: 18px; border-radius: 50%;
+      border: 2px solid var(--border); background: none;
+      cursor: pointer; flex-shrink: 0; margin-top: 2px;
+      transition: all 0.18s; display: flex; align-items: center; justify-content: center;
+    }
+    .agenda-check.checked {
+      background: var(--success); border-color: var(--success);
+    }
+    .agenda-check.checked::after {
+      content: ''; width: 5px; height: 9px;
+      border: 2px solid #0d1117; border-top: none; border-left: none;
+      transform: rotate(45deg) translate(-1px, -1px);
+      display: block;
+    }
+
+    .agenda-item-body { flex: 1; min-width: 0; }
+    .agenda-item-text { font-size: 14px; line-height: 1.5; word-break: break-word; }
+    .agenda-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
+    .agenda-item-del {
+      background: none; border: none; color: var(--text-muted);
+      cursor: pointer; font-size: 16px; flex-shrink: 0;
+      transition: color 0.18s; padding: 0 2px;
+    }
+    .agenda-item-del:hover { color: var(--danger); }
+
+    .agenda-divider {
+      border: none; border-top: 1px solid var(--border); margin: 4px 0 8px;
+    }
+
+    .klacht-urgency {
+      display: flex; gap: 6px; margin-bottom: 8px;
+    }
+    .urgency-btn {
+      padding: 4px 10px; border-radius: 20px; font-size: 12px;
+      cursor: pointer; font-family: 'DM Sans', sans-serif;
+      border: 1px solid var(--border); background: none;
+      color: var(--text-muted); transition: all 0.18s;
+    }
+    .urgency-btn.selected-mild { background: #1a3a2a; border-color: var(--success); color: var(--success); }
+    .urgency-btn.selected-matig { background: #2a2010; border-color: var(--warning); color: var(--warning); }
+    .urgency-btn.selected-ernstig { background: #2a1010; border-color: var(--danger); color: var(--danger); }
+
+    .klacht-badge {
+      font-size: 10px; padding: 2px 7px; border-radius: 10px;
+      font-weight: 500; margin-left: 4px; flex-shrink: 0;
+    }
+    .klacht-badge.mild { background: #1a3a2a; color: var(--success); }
+    .klacht-badge.matig { background: #2a2010; color: var(--warning); }
+    .klacht-badge.ernstig { background: #2a1010; color: var(--danger); }
   </style>
 </head>
 <body>
@@ -428,6 +558,8 @@
       <button class="hdr-btn" id="btn-chat" onclick="showChat()">Chat</button>
       <button class="hdr-btn" id="btn-lab" onclick="showPanel('lab')">Lab</button>
       <button class="hdr-btn" id="btn-history" onclick="showPanel('history')">Gesprekken</button>
+      <button class="hdr-btn" id="btn-chart" onclick="showPanel('chart')">Grafiek</button>
+      <button class="hdr-btn" id="btn-agenda" onclick="showPanel('agenda')">Agenda</button>
       <button class="hdr-btn" id="btn-settings" onclick="showPanel('settings')">Profiel</button>
     </div>
   </div>
@@ -495,6 +627,62 @@
       <!-- Entries list -->
       <div id="lab-entries"></div>
     </div>
+    <div class="panel-footer">
+      <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
+    </div>
+  </div>
+
+
+
+  <!-- Agenda panel -->
+  <div id="agenda-panel" class="panel">
+    <div class="panel-header">Doktersagenda</div>
+    <div class="panel-body">
+
+      <!-- Vragen sectie -->
+      <div class="agenda-section-title">Vragen voor de dokter</div>
+      <div class="agenda-add-row">
+        <textarea id="vraag-input" placeholder="Schrijf hier een vraag..." rows="1"
+          oninput="autoResizeTA(this)" onkeydown="agendaKey(event,'vraag')"></textarea>
+        <button class="agenda-add-btn" onclick="addAgendaItem('vraag')">+ Voeg toe</button>
+      </div>
+      <div class="agenda-list" id="vraag-list"></div>
+
+      <hr class="agenda-divider" style="margin-top:12px;">
+
+      <!-- Klachten sectie -->
+      <div class="agenda-section-title">Klachten bijhouden</div>
+      <div class="klacht-urgency" id="urgency-btns">
+        <button class="urgency-btn selected-mild" onclick="selectUrgency('mild',this)">Mild</button>
+        <button class="urgency-btn" onclick="selectUrgency('matig',this)">Matig</button>
+        <button class="urgency-btn" onclick="selectUrgency('ernstig',this)">Ernstig</button>
+      </div>
+      <div class="agenda-add-row">
+        <textarea id="klacht-input" placeholder="Beschrijf de klacht..." rows="1"
+          oninput="autoResizeTA(this)" onkeydown="agendaKey(event,'klacht')"></textarea>
+        <button class="agenda-add-btn" onclick="addAgendaItem('klacht')">+ Voeg toe</button>
+      </div>
+      <div class="agenda-list" id="klacht-list"></div>
+
+    </div>
+    <div class="panel-footer">
+      <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
+      <button class="btn-primary" onclick="clearDoneVragen()">Afgevinkte vragen wissen</button>
+    </div>
+  </div>
+
+  <!-- Chart panel -->
+  <div id="chart-panel" class="panel">
+    <div class="panel-header">Trends</div>
+    <div class="chart-tabs">
+      <button class="chart-tab active" onclick="switchChartTab('creatinine',this)">Creatinine</button>
+      <button class="chart-tab" onclick="switchChartTab('egfr',this)">eGFR</button>
+      <button class="chart-tab" onclick="switchChartTab('tacrolimus',this)">Tacrolimus</button>
+      <button class="chart-tab" onclick="switchChartTab('bp',this)">Bloeddruk</button>
+      <button class="chart-tab" onclick="switchChartTab('weight',this)">Gewicht</button>
+      <button class="chart-tab" onclick="switchChartTab('temp',this)">Temperatuur</button>
+    </div>
+    <div class="chart-wrap" id="chart-wrap"></div>
     <div class="panel-footer">
       <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
     </div>
@@ -702,13 +890,13 @@ function parseMarkdown(text) {
 
 // ── Navigation ──
 function setActiveBtn(id) {
-  ['btn-chat','btn-lab','btn-history','btn-settings'].forEach(b => {
+  ['btn-chat','btn-lab','btn-chart','btn-agenda','btn-history','btn-settings'].forEach(b => {
     document.getElementById(b).classList.toggle('active', b === id);
   });
 }
 
 function showChat() {
-  ['history-panel','lab-panel','settings-panel'].forEach(p =>
+  ['history-panel','lab-panel','chart-panel','agenda-panel','settings-panel'].forEach(p =>
     document.getElementById(p).classList.remove('visible'));
   document.getElementById('chat-area').style.display = 'flex';
   document.getElementById('input-bar').style.display = 'flex';
@@ -718,13 +906,15 @@ function showChat() {
 function showPanel(name) {
   document.getElementById('chat-area').style.display = 'none';
   document.getElementById('input-bar').style.display = 'none';
-  ['history-panel','lab-panel','settings-panel'].forEach(p =>
+  ['history-panel','lab-panel','chart-panel','agenda-panel','settings-panel'].forEach(p =>
     document.getElementById(p).classList.remove('visible'));
   document.getElementById(name + '-panel').classList.add('visible');
   setActiveBtn('btn-' + name);
   if (name === 'history') renderHistoryList();
   if (name === 'lab') renderLabEntries();
   if (name === 'settings') renderSettings();
+  if (name === 'chart') renderChart('creatinine');
+  if (name === 'agenda') renderAgenda();
 }
 
 // ── History ──
@@ -1092,6 +1282,317 @@ async function sendMessage() {
     document.getElementById('user-input').focus();
   }
 }
+
+// ── Charts ──
+let activeChartKey = 'creatinine';
+
+const CHART_CONFIG = {
+  creatinine: {
+    label: 'Creatinine', unit: 'µmol/L', color: '#4fc3f7',
+    refLines: [{ value: 110, label: 'Bovengrens normaal', color: '#3fb950' }],
+    alertHigh: null, alertLow: null,
+    note: 'Stijging >20% boven laagste waarde is een alarmsignaal.'
+  },
+  egfr: {
+    label: 'eGFR', unit: 'ml/min/1.73m²', color: '#7ee787',
+    refLines: [{ value: 60, label: 'Grens CKD stadium 3', color: '#d29922' }],
+    alertLow: 30,
+    note: 'eGFR <30 wijst op ernstige nierschade.'
+  },
+  tacrolimus: {
+    label: 'Tacrolimus talspiegel', unit: 'ng/mL', color: '#d2a8ff',
+    refLines: [
+      { value: 10, label: 'Streef hoog vroege fase', color: '#4fc3f7' },
+      { value: 8,  label: 'Streef laag vroege fase', color: '#d29922' }
+    ],
+    alertHigh: 15, alertLow: 6,
+    note: 'Streefwaarden zijn fase-afhankelijk en worden bepaald door Amsterdam UMC.'
+  },
+  bp: {
+    label: 'Bloeddruk systolisch', unit: 'mmHg', color: '#ffa657',
+    refLines: [{ value: 130, label: 'Streef <130 mmHg post-tx', color: '#d29922' }],
+    alertHigh: 160, alertLow: null,
+    note: 'Post-transplantatie streef <130/80 mmHg.'
+  },
+  weight: {
+    label: 'Gewicht', unit: 'kg', color: '#79c0ff',
+    refLines: [], alertHigh: null, alertLow: null,
+    note: 'Toename >1–2 kg/dag kan wijzen op vochtretentie.'
+  },
+  temp: {
+    label: 'Temperatuur', unit: '°C', color: '#ff7b72',
+    refLines: [{ value: 37.8, label: 'Alarmgrens post-tx', color: '#f85149' }],
+    alertHigh: 37.8, alertLow: null,
+    note: 'Bij ≥37,8°C in eerste 3 maanden: direct contact Amsterdam UMC.'
+  }
+};
+
+function switchChartTab(key, btn) {
+  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderChart(key);
+}
+
+function parseChartValue(entry, key) {
+  if (key === 'bp') {
+    const m = (entry.bp || '').match(/^(\d+)/);
+    return m ? parseFloat(m[1]) : null;
+  }
+  const v = parseFloat(entry[key]);
+  return isNaN(v) ? null : v;
+}
+
+function renderChart(key) {
+  const wrap = document.getElementById('chart-wrap');
+  const entries = getLabEntries();
+  const cfg = CHART_CONFIG[key];
+
+  const filtered = entries
+    .filter(e => parseChartValue(e, key) !== null)
+    .sort((a, b) => a.date - b.date);
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = \`<div class="chart-card">
+      <div class="chart-card-title">\${cfg.label}</div>
+      <div class="chart-empty">Nog geen metingen voor \${cfg.label}.<br>Voeg ze toe via het Lab-tabblad.</div>
+    </div>\`;
+    return;
+  }
+
+  const values = filtered.map(e => parseChartValue(e, key));
+  const labels = filtered.map(e =>
+    new Date(e.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
+  );
+
+  const latest = values[values.length - 1];
+  const prev = values.length > 1 ? values[values.length - 2] : null;
+  const delta = prev !== null ? latest - prev : null;
+  const deltaStr = delta !== null ? (delta >= 0 ? '+' + delta.toFixed(1) : delta.toFixed(1)) : '';
+  const isNegativeGood = key === 'egfr';
+  const alertColor = delta === null ? '' : (
+    delta === 0 ? '' :
+    (isNegativeGood ? (delta < 0 ? 'color:var(--danger)' : 'color:var(--success)') :
+                      (delta > 0 ? 'color:var(--danger)' : 'color:var(--success)'))
+  );
+
+  wrap.innerHTML = \`<div class="chart-card">
+    <div class="chart-card-title">\${cfg.label}</div>
+    <div class="chart-card-latest">
+      \${latest} <span>\${cfg.unit}</span>
+      \${delta !== null ? \`<span style="font-size:13px;\${alertColor}">\${deltaStr}</span>\` : ''}
+    </div>
+    <div class="chart-canvas-wrap">
+      <canvas id="trend-canvas"></canvas>
+    </div>
+    \${cfg.note ? \`<div style="font-size:11px;color:var(--text-muted);margin-top:8px;">\${cfg.note}</div>\` : ''}
+  </div>\`;
+
+  requestAnimationFrame(() => drawCanvas(key, values, labels, cfg));
+}
+
+function drawCanvas(key, values, labels, cfg) {
+  const canvas = document.getElementById('trend-canvas');
+  if (!canvas) return;
+  const dpr = window.devicePixelRatio || 1;
+  const rect = canvas.parentElement.getBoundingClientRect();
+  const W = rect.width; const H = 160;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  const ctx = canvas.getContext('2d');
+  ctx.scale(dpr, dpr);
+
+  const pad = { top: 16, right: 16, bottom: 32, left: 44 };
+  const gW = W - pad.left - pad.right;
+  const gH = H - pad.top - pad.bottom;
+
+  const allVals = [...values];
+  cfg.refLines.forEach(r => allVals.push(r.value));
+  if (cfg.alertHigh) allVals.push(cfg.alertHigh);
+  if (cfg.alertLow) allVals.push(cfg.alertLow);
+  const minVal = Math.min(...allVals) * 0.92;
+  const maxVal = Math.max(...allVals) * 1.08;
+  const range = maxVal - minVal || 1;
+
+  const toX = i => pad.left + (values.length === 1 ? gW / 2 : (i / (values.length - 1)) * gW);
+  const toY = v => pad.top + gH - ((v - minVal) / range) * gH;
+
+  // Grid
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
+  for (let i = 0; i <= 4; i++) {
+    const y = pad.top + (i / 4) * gH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
+    const v = maxVal - (i / 4) * range;
+    ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(v < 10 ? 1 : 0), pad.left - 4, y + 3);
+  }
+
+  // Ref lines
+  cfg.refLines.forEach(ref => {
+    const y = toY(ref.value);
+    ctx.save(); ctx.strokeStyle = ref.color; ctx.lineWidth = 1;
+    ctx.setLineDash([4, 4]);
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
+    ctx.restore();
+  });
+
+  if (values.length > 1) {
+    // Area
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(values[0]));
+    values.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
+    ctx.lineTo(toX(values.length - 1), pad.top + gH);
+    ctx.lineTo(toX(0), pad.top + gH);
+    ctx.closePath();
+    const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
+    grad.addColorStop(0, cfg.color + '44'); grad.addColorStop(1, cfg.color + '00');
+    ctx.fillStyle = grad; ctx.fill();
+
+    // Line
+    ctx.strokeStyle = cfg.color; ctx.lineWidth = 2.5;
+    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    values.forEach((v, i) => { i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)); });
+    ctx.stroke();
+  }
+
+  // Dots
+  values.forEach((v, i) => {
+    const isAlert = (cfg.alertHigh && v >= cfg.alertHigh) || (cfg.alertLow && v <= cfg.alertLow);
+    ctx.beginPath(); ctx.arc(toX(i), toY(v), values.length === 1 ? 6 : 4, 0, Math.PI * 2);
+    ctx.fillStyle = isAlert ? '#f85149' : cfg.color; ctx.fill();
+    if (isAlert) {
+      ctx.strokeStyle = '#f8514966'; ctx.lineWidth = 6;
+      ctx.beginPath(); ctx.arc(toX(i), toY(v), 8, 0, Math.PI * 2); ctx.stroke();
+    }
+  });
+
+  // X labels
+  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  const step = Math.max(1, Math.ceil(labels.length / 6));
+  labels.forEach((l, i) => {
+    if (i % step === 0 || i === labels.length - 1)
+      ctx.fillText(l, toX(i), H - 6);
+  });
+}
+
+
+// ── Agenda ──
+let selectedUrgency = 'mild';
+
+function selectUrgency(level, btn) {
+  selectedUrgency = level;
+  document.querySelectorAll('.urgency-btn').forEach(b => {
+    b.className = 'urgency-btn';
+  });
+  btn.className = 'urgency-btn selected-' + level;
+}
+
+function autoResizeTA(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function agendaKey(e, type) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addAgendaItem(type); }
+}
+
+function getAgenda() {
+  try { return JSON.parse(localStorage.getItem('nk_agenda') || '{"vragen":[],"klachten":[]}'); }
+  catch { return { vragen: [], klachten: [] }; }
+}
+function saveAgenda(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
+
+function addAgendaItem(type) {
+  const inputId = type === 'vraag' ? 'vraag-input' : 'klacht-input';
+  const el = document.getElementById(inputId);
+  const text = el.value.trim();
+  if (!text) return;
+
+  const agenda = getAgenda();
+  const item = { id: Date.now(), text, date: Date.now(), done: false };
+  if (type === 'klacht') item.urgency = selectedUrgency;
+
+  if (type === 'vraag') agenda.vragen.unshift(item);
+  else agenda.klachten.unshift(item);
+
+  saveAgenda(agenda);
+  el.value = ''; el.style.height = 'auto';
+  renderAgenda();
+}
+
+function toggleVraagDone(id) {
+  const agenda = getAgenda();
+  const item = agenda.vragen.find(v => v.id === id);
+  if (item) item.done = !item.done;
+  saveAgenda(agenda);
+  renderAgenda();
+}
+
+function deleteAgendaItem(type, id) {
+  const agenda = getAgenda();
+  if (type === 'vraag') agenda.vragen = agenda.vragen.filter(v => v.id !== id);
+  else agenda.klachten = agenda.klachten.filter(k => k.id !== id);
+  saveAgenda(agenda);
+  renderAgenda();
+}
+
+function clearDoneVragen() {
+  const agenda = getAgenda();
+  agenda.vragen = agenda.vragen.filter(v => !v.done);
+  saveAgenda(agenda);
+  renderAgenda();
+}
+
+function renderAgenda() {
+  const agenda = getAgenda();
+
+  // Vragen
+  const vraagList = document.getElementById('vraag-list');
+  if (!vraagList) return;
+  const open = agenda.vragen.filter(v => !v.done);
+  const done = agenda.vragen.filter(v => v.done);
+  const sorted = [...open, ...done];
+
+  if (sorted.length === 0) {
+    vraagList.innerHTML = '<div class="agenda-empty">Nog geen vragen toegevoegd.</div>';
+  } else {
+    vraagList.innerHTML = sorted.map(v => {
+      const d = new Date(v.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+      return \`<div class="agenda-item \${v.done ? 'done' : ''}">
+        <div class="agenda-check \${v.done ? 'checked' : ''}" onclick="toggleVraagDone(\${v.id})"></div>
+        <div class="agenda-item-body">
+          <div class="agenda-item-text">\${escapeHtml(v.text)}</div>
+          <div class="agenda-item-date">\${d}</div>
+        </div>
+        <button class="agenda-item-del" onclick="deleteAgendaItem('vraag',\${v.id})">&times;</button>
+      </div>\`;
+    }).join('');
+  }
+
+  // Klachten
+  const klachtList = document.getElementById('klacht-list');
+  if (!klachtList) return;
+  if (agenda.klachten.length === 0) {
+    klachtList.innerHTML = '<div class="agenda-empty">Nog geen klachten genoteerd.</div>';
+  } else {
+    klachtList.innerHTML = agenda.klachten.map(k => {
+      const d = new Date(k.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
+      const urgLabel = k.urgency === 'ernstig' ? 'Ernstig' : k.urgency === 'matig' ? 'Matig' : 'Mild';
+      return \`<div class="agenda-item">
+        <div class="agenda-item-body">
+          <div class="agenda-item-text">
+            \${escapeHtml(k.text)}
+            <span class="klacht-badge \${k.urgency || 'mild'}">\${urgLabel}</span>
+          </div>
+          <div class="agenda-item-date">\${d}</div>
+        </div>
+        <button class="agenda-item-del" onclick="deleteAgendaItem('klacht',\${k.id})">&times;</button>
+      </div>\`;
+    }).join('');
+  }
+}
+
 
 init();
 </script>

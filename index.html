@@ -11,560 +11,368 @@
   <link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:wght@300;400;600&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
   <style>
     :root {
-      --bg: #0d1117;
-      --surface: #161b22;
-      --surface2: #1c2330;
-      --border: #30363d;
-      --accent: #4fc3f7;
-      --accent-dim: #1a3a4a;
-      --text: #e6edf3;
-      --text-muted: #7d8590;
-      --user-bg: #1a3a4a;
-      --user-border: #4fc3f7;
-      --ai-bg: #1c2330;
-      --ai-border: #30363d;
-      --danger: #f85149;
-      --success: #3fb950;
-      --warning: #d29922;
-      --radius: 16px;
-      --radius-sm: 10px;
+      --bg: #0d1117; --surface: #161b22; --surface2: #1c2330;
+      --border: #30363d; --accent: #4fc3f7; --accent-dim: #1a3a4a;
+      --text: #e6edf3; --text-muted: #7d8590;
+      --user-bg: #1a3a4a; --user-border: #4fc3f7;
+      --ai-bg: #1c2330; --ai-border: #30363d;
+      --danger: #f85149; --success: #3fb950; --warning: #d29922;
+      --radius: 16px; --radius-sm: 10px;
     }
-
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-
     html, body {
-      height: 100%; height: -webkit-fill-available;
-      overflow: hidden;
+      height: 100%; height: -webkit-fill-available; overflow: hidden;
       background: var(--bg); color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 15px; line-height: 1.6;
+      font-family: 'DM Sans', sans-serif; font-size: 15px; line-height: 1.6;
     }
-
     #app {
       display: flex; flex-direction: column;
       height: 100vh; height: -webkit-fill-available;
       max-width: 680px; margin: 0 auto;
     }
 
-    /* ── Header ── */
+    /* Header */
     #header {
-      padding: 14px 16px 12px;
-      background: var(--bg);
+      padding: 10px 12px 8px; background: var(--bg);
       border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 10px;
-      flex-shrink: 0; z-index: 10;
+      display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 10;
     }
-
     .header-dot {
-      width: 9px; height: 9px; border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 10px rgba(79,195,247,0.6);
-      flex-shrink: 0;
+      width: 9px; height: 9px; border-radius: 50%; background: var(--accent);
+      box-shadow: 0 0 10px rgba(79,195,247,0.6); flex-shrink: 0;
     }
-
     #header h1 {
-      font-family: 'Crimson Pro', serif;
-      font-size: 18px; font-weight: 600;
-      color: var(--text); letter-spacing: -0.2px;
+      font-family: 'Crimson Pro', serif; font-size: 17px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.2px; white-space: nowrap;
     }
-
-    #header-actions { margin-left: auto; display: flex; gap: 6px; }
-
+    #header-actions { margin-left: auto; display: flex; gap: 4px; flex-wrap: nowrap; }
     .hdr-btn {
-      background: none; border: 1px solid var(--border);
-      color: var(--text-muted); border-radius: var(--radius-sm);
-      padding: 5px 10px; font-size: 12px; cursor: pointer;
-      transition: all 0.2s; font-family: 'DM Sans', sans-serif;
-      white-space: nowrap;
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 8px; padding: 4px 8px; font-size: 11px; cursor: pointer;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif; white-space: nowrap;
     }
     .hdr-btn:hover { border-color: var(--accent); color: var(--accent); }
     .hdr-btn.active { border-color: var(--accent); color: var(--accent); background: var(--accent-dim); }
 
-    /* ── Panels (shared) ── */
-    .panel {
-      display: none; flex-direction: column;
-      flex: 1; overflow: hidden;
-    }
+    /* Panels */
+    .panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
     .panel.visible { display: flex; }
-
     .panel-header {
-      padding: 14px 16px 10px;
-      border-bottom: 1px solid var(--border);
-      font-family: 'Crimson Pro', serif;
-      font-size: 18px; font-weight: 600;
-      display: flex; align-items: center; justify-content: space-between;
+      padding: 14px 16px 12px; border-bottom: 1px solid var(--border);
+      font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 600; flex-shrink: 0;
     }
-
     .panel-body {
-      flex: 1; overflow-y: auto; padding: 16px;
+      flex: 1; overflow-y: auto; padding: 14px;
       display: flex; flex-direction: column; gap: 12px;
     }
-
     .panel-body::-webkit-scrollbar { width: 4px; }
     .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
     .panel-footer {
-      padding: 12px 16px;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      border-top: 1px solid var(--border);
-      display: flex; gap: 8px;
+      padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0;
     }
+    .btn-primary { background: var(--accent); color: #0d1117; border: none; font-weight: 500; }
+    .btn-secondary { background: none; border: 1px solid var(--border); color: var(--text-muted); }
+    .btn-primary, .btn-secondary {
+      flex: 1; padding: 10px; border-radius: var(--radius-sm);
+      font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-primary:hover, .btn-secondary:hover { opacity: 0.8; }
 
-    /* ── API screen ── */
+    /* API screen */
     #api-screen {
-      display: none; flex-direction: column;
-      align-items: center; justify-content: center;
+      display: none; flex-direction: column; align-items: center; justify-content: center;
       flex: 1; padding: 32px 24px; gap: 20px; text-align: center;
     }
     #api-screen.visible { display: flex; }
     #api-screen h2 { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; }
     #api-screen p { color: var(--text-muted); font-size: 14px; max-width: 320px; line-height: 1.7; }
     #api-screen a { color: var(--accent); text-decoration: none; }
-
     .api-input-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
     .api-input-wrap input {
       width: 100%; background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px 16px;
-      color: var(--text); font-family: monospace; font-size: 13px;
-      outline: none; transition: border-color 0.2s;
+      border-radius: var(--radius-sm); padding: 14px 16px; color: var(--text);
+      font-family: monospace; font-size: 13px; outline: none; transition: border-color 0.2s;
     }
     .api-input-wrap input:focus { border-color: var(--accent); }
     .api-input-wrap button {
       background: var(--accent); color: #0d1117; border: none;
-      border-radius: var(--radius-sm); padding: 14px;
-      font-weight: 500; font-size: 15px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+      border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px;
+      cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
     }
     .api-input-wrap button:hover { opacity: 0.85; }
     .privacy-note {
-      font-size: 11px; color: var(--text-muted);
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      max-width: 400px; text-align: left;
+      font-size: 11px; color: var(--text-muted); background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius-sm);
+      padding: 10px 14px; max-width: 400px; text-align: left;
     }
 
-    /* ── History panel ── */
-    .history-empty { color: var(--text-muted); font-size: 14px; text-align: center; padding: 40px 0; }
-
+    /* History */
+    .list-empty { color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 0; }
     .history-item {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 14px;
-      cursor: pointer; transition: border-color 0.18s;
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+      border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer;
+      transition: border-color 0.18s; display: flex; justify-content: space-between;
+      align-items: flex-start; gap: 10px;
     }
     .history-item:hover { border-color: var(--accent); }
     .history-item-text { flex: 1; min-width: 0; }
     .history-item-preview { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .history-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    .history-item-del {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 16px; padding: 0 2px;
-      flex-shrink: 0; transition: color 0.18s;
+    .icon-btn {
+      background: none; border: none; color: var(--text-muted); cursor: pointer;
+      font-size: 16px; padding: 0 2px; flex-shrink: 0; transition: color 0.18s;
     }
-    .history-item-del:hover { color: var(--danger); }
+    .icon-btn:hover { color: var(--danger); }
 
-    /* ── Lab diary panel ── */
+    /* Lab */
+    .lab-form {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .section-title {
+      font-size: 11px; font-weight: 500; color: var(--text-muted);
+      text-transform: uppercase; letter-spacing: 0.6px;
+    }
+    .lab-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .lab-field { display: flex; flex-direction: column; gap: 4px; }
+    .lab-field label { font-size: 11px; color: var(--text-muted); }
+    .lab-field input {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; color: var(--text); font-size: 14px;
+      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
+    }
+    .lab-field input:focus { border-color: var(--accent); }
+    .lab-field input::placeholder { color: var(--text-muted); font-size: 12px; }
+    .full-btn {
+      background: var(--accent); color: #0d1117; border: none; border-radius: 8px;
+      padding: 10px; font-weight: 500; font-size: 14px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
+    }
+    .full-btn:hover { opacity: 0.85; }
     .lab-entry {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-sm); padding: 12px 14px;
-      display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;
+      display: flex; justify-content: space-between; align-items: flex-start; gap: 8px;
     }
-
-    .lab-entry-values { flex: 1; display: flex; flex-wrap: wrap; gap: 8px; }
-
+    .lab-entry-values { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
     .lab-badge {
-      font-size: 12px; padding: 3px 8px;
-      border-radius: 20px; background: var(--surface2);
-      border: 1px solid var(--border); color: var(--text-muted);
+      font-size: 12px; padding: 3px 8px; border-radius: 20px;
+      background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted);
       white-space: nowrap;
     }
     .lab-badge span { color: var(--text); font-weight: 500; }
     .lab-badge.alert { border-color: var(--danger); color: var(--danger); }
     .lab-badge.alert span { color: var(--danger); }
+    .lab-entry-meta { display: flex; align-items: flex-start; gap: 6px; flex-shrink: 0; }
+    .lab-entry-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
 
-    .lab-entry-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; }
-
-    .lab-entry-del {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 16px; padding: 0;
-      transition: color 0.18s; flex-shrink: 0;
-    }
-    .lab-entry-del:hover { color: var(--danger); }
-
-    .lab-form {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px;
-      display: flex; flex-direction: column; gap: 10px;
-    }
-
-    .lab-form-title {
-      font-size: 13px; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-
-    .lab-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-
-    .lab-field { display: flex; flex-direction: column; gap: 4px; }
-    .lab-field label { font-size: 11px; color: var(--text-muted); }
-    .lab-field input {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 10px;
-      color: var(--text); font-size: 14px;
-      font-family: 'DM Sans', sans-serif; outline: none;
-      transition: border-color 0.2s;
-    }
-    .lab-field input:focus { border-color: var(--accent); }
-    .lab-field input::placeholder { color: var(--text-muted); font-size: 13px; }
-
-    .lab-save-btn {
-      background: var(--accent); color: #0d1117; border: none;
-      border-radius: 8px; padding: 10px;
-      font-weight: 500; font-size: 14px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s;
-    }
-    .lab-save-btn:hover { opacity: 0.85; }
-
-    /* ── Settings panel ── */
-    .settings-section {
-      background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 14px;
-      display: flex; flex-direction: column; gap: 12px;
-    }
-
-    .settings-section-title {
-      font-size: 12px; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px;
-    }
-
-    .settings-field { display: flex; flex-direction: column; gap: 5px; }
-    .settings-field label { font-size: 12px; color: var(--text-muted); }
-    .settings-field input, .settings-field select, .settings-field textarea {
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 10px 12px;
-      color: var(--text); font-size: 14px;
-      font-family: 'DM Sans', sans-serif; outline: none;
-      transition: border-color 0.2s;
-    }
-    .settings-field input:focus,
-    .settings-field select:focus,
-    .settings-field textarea:focus { border-color: var(--accent); }
-    .settings-field select { appearance: none; cursor: pointer; }
-    .settings-field textarea { resize: none; min-height: 80px; }
-
-    .med-list { display: flex; flex-direction: column; gap: 6px; }
-
-    .med-item {
-      display: flex; align-items: center; gap: 8px;
-      background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 12px;
-    }
-    .med-item-name { flex: 1; font-size: 13px; }
-    .med-item-dose { font-size: 12px; color: var(--text-muted); }
-    .med-item-del {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 15px; padding: 0 2px;
-      transition: color 0.18s;
-    }
-    .med-item-del:hover { color: var(--danger); }
-
-    .med-add-row { display: flex; gap: 6px; }
-    .med-add-row input {
-      flex: 1; background: var(--bg); border: 1px solid var(--border);
-      border-radius: 8px; padding: 8px 10px;
-      color: var(--text); font-size: 13px;
-      font-family: 'DM Sans', sans-serif; outline: none;
-    }
-    .med-add-row input:focus { border-color: var(--accent); }
-    .med-add-row button {
-      background: var(--accent); color: #0d1117; border: none;
-      border-radius: 8px; padding: 8px 14px;
-      font-size: 13px; font-weight: 500; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; white-space: nowrap;
-    }
-
-    .settings-save-btn {
-      background: var(--accent); color: #0d1117; border: none;
-      border-radius: var(--radius-sm); padding: 12px;
-      font-weight: 500; font-size: 14px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; width: 100%;
-    }
-    .settings-save-btn:hover { opacity: 0.85; }
-
-    /* ── Chat area ── */
-    #chat-area {
-      flex: 1; overflow-y: auto;
-      padding: 20px 16px;
-      display: flex; flex-direction: column; gap: 16px;
-      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
-    }
-    #chat-area::-webkit-scrollbar { width: 4px; }
-    #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-
-    #welcome {
-      display: flex; flex-direction: column;
-      align-items: center; text-align: center;
-      padding: 40px 8px 24px;
-    }
-    #welcome h2 {
-      font-family: 'Crimson Pro', serif; font-size: 22px;
-      font-weight: 400; color: var(--text-muted);
-    }
-
-    /* ── Messages ── */
-    .msg {
-      display: flex; flex-direction: column; gap: 4px;
-      animation: fadeUp 0.22s ease;
-    }
-    @keyframes fadeUp {
-      from { opacity: 0; transform: translateY(6px); }
-      to   { opacity: 1; transform: translateY(0); }
-    }
-    .msg.user { align-items: flex-end; }
-    .msg.ai   { align-items: flex-start; }
-
-    .bubble {
-      max-width: 88%; padding: 12px 16px;
-      border-radius: var(--radius); font-size: 14px;
-      line-height: 1.7; word-break: break-word;
-    }
-    .msg.user .bubble {
-      background: var(--user-bg); border: 1px solid var(--user-border);
-      border-bottom-right-radius: 4px; color: #c9e7f7; white-space: pre-wrap;
-    }
-    .msg.ai .bubble {
-      background: var(--ai-bg); border: 1px solid var(--ai-border);
-      border-bottom-left-radius: 4px; color: var(--text);
-    }
-
-    /* Markdown inside AI bubble */
-    .bubble h1, .bubble h2, .bubble h3 {
-      font-family: 'Crimson Pro', serif; font-weight: 600;
-      margin: 14px 0 6px; line-height: 1.3;
-    }
-    .bubble h1 { font-size: 18px; }
-    .bubble h2 { font-size: 16px; }
-    .bubble h3 { font-size: 15px; color: var(--accent); }
-    .bubble p { margin-bottom: 10px; }
-    .bubble p:last-child { margin-bottom: 0; }
-    .bubble strong { font-weight: 600; color: #d0e8f5; }
-    .bubble em { font-style: italic; color: #b0c8d8; }
-    .bubble ul, .bubble ol { padding-left: 18px; margin: 6px 0 10px; display: flex; flex-direction: column; gap: 3px; }
-    .bubble li { font-size: 14px; line-height: 1.6; }
-    .bubble code { font-family: monospace; font-size: 12px; background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.2); border-radius: 4px; padding: 1px 5px; }
-    .bubble blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-muted); margin: 8px 0; font-style: italic; }
-    .bubble hr { border: none; border-top: 1px solid var(--border); margin: 12px 0; }
-
-    .msg-label { font-size: 10px; color: var(--text-muted); padding: 0 4px; font-weight: 300; }
-
-    /* Typing dots */
-    .typing-bubble { display: flex; gap: 5px; align-items: center; padding: 14px 18px; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 1.2s infinite; }
-    .dot:nth-child(2) { animation-delay: 0.2s; }
-    .dot:nth-child(3) { animation-delay: 0.4s; }
-    @keyframes pulse {
-      0%, 80%, 100% { opacity: 0.4; transform: scale(1); }
-      40% { opacity: 1; transform: scale(1.3); }
-    }
-
-    /* ── Input bar ── */
-    #input-bar {
-      padding: 12px 16px;
-      padding-bottom: calc(12px + env(safe-area-inset-bottom));
-      background: var(--bg); border-top: 1px solid var(--border);
-      display: flex; gap: 10px; align-items: flex-end; flex-shrink: 0;
-    }
-    #user-input {
-      flex: 1; background: var(--surface);
-      border: 1px solid var(--border); border-radius: var(--radius);
-      padding: 12px 16px; color: var(--text); font-size: 15px;
-      font-family: 'DM Sans', sans-serif; resize: none; outline: none;
-      min-height: 48px; max-height: 140px; line-height: 1.5;
-      transition: border-color 0.2s; overflow-y: auto;
-    }
-    #user-input:focus { border-color: var(--accent); }
-    #user-input::placeholder { color: var(--text-muted); }
-    #send-btn {
-      width: 48px; height: 48px; border-radius: 50%;
-      background: var(--accent); border: none; cursor: pointer;
-      display: flex; align-items: center; justify-content: center;
-      flex-shrink: 0; transition: all 0.2s;
-      box-shadow: 0 0 12px rgba(79,195,247,0.25);
-    }
-    #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
-    #send-btn:active { transform: scale(0.95); }
-    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    #send-btn svg { width: 20px; height: 20px; fill: #0d1117; }
-
-    /* ── Error toast ── */
-    #error-toast {
-      position: fixed; bottom: 90px; left: 50%; transform: translateX(-50%);
-      background: var(--danger); color: white;
-      padding: 10px 20px; border-radius: var(--radius-sm);
-      font-size: 13px; opacity: 0; pointer-events: none;
-      transition: opacity 0.3s; z-index: 100;
-      white-space: nowrap; max-width: 90vw; text-align: center;
-    }
-    #error-toast.show { opacity: 1; }
-
-    /* Shared btn styles */
-    .btn-primary { background: var(--accent); color: #0d1117; border: none; font-weight: 500; }
-    .btn-secondary { background: none; border: 1px solid var(--border); color: var(--text-muted); }
-    .btn-primary, .btn-secondary {
-      flex: 1; padding: 10px; border-radius: var(--radius-sm);
-      font-size: 13px; font-family: 'DM Sans', sans-serif;
-      cursor: pointer; transition: opacity 0.2s;
-    }
-    .btn-primary:hover, .btn-secondary:hover { opacity: 0.8; }
-
-    /* ── Chart panel ── */
+    /* Charts */
     .chart-tabs {
-      display: flex; gap: 6px; flex-wrap: wrap;
-      padding: 12px 16px 0; border-bottom: 1px solid var(--border); flex-shrink: 0;
+      display: flex; gap: 5px; flex-wrap: wrap;
+      padding: 10px 14px 0; border-bottom: 1px solid var(--border); flex-shrink: 0;
     }
     .chart-tab {
-      background: none; border: 1px solid var(--border);
-      color: var(--text-muted); border-radius: 20px;
-      padding: 4px 12px; font-size: 12px; cursor: pointer;
-      font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 10px;
+      background: none; border: 1px solid var(--border); color: var(--text-muted);
+      border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 8px;
     }
     .chart-tab:hover { border-color: var(--accent); color: var(--accent); }
     .chart-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
-    .chart-wrap {
-      flex: 1; overflow-y: auto; padding: 16px;
-      display: flex; flex-direction: column; gap: 16px;
-    }
+    .chart-wrap { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
     .chart-wrap::-webkit-scrollbar { width: 4px; }
     .chart-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
     .chart-card {
       background: var(--surface); border: 1px solid var(--border);
       border-radius: var(--radius-sm); padding: 16px;
     }
-    .chart-card-title {
-      font-size: 12px; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;
-    }
-    .chart-card-latest {
-      font-family: 'Crimson Pro', serif; font-size: 22px; font-weight: 600;
-      color: var(--text); margin-bottom: 12px;
-    }
-    .chart-card-latest span { font-size: 13px; font-weight: 300; color: var(--text-muted); margin-left: 4px; }
-    .chart-canvas-wrap { position: relative; width: 100%; height: 160px; }
+    .chart-card-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
+    .chart-card-latest { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; }
+    .chart-card-latest .unit { font-size: 13px; font-weight: 300; color: var(--text-muted); margin-left: 4px; }
+    .chart-card-latest .delta { font-size: 13px; margin-left: 6px; }
+    .chart-canvas-wrap { width: 100%; height: 160px; }
     canvas { display: block; }
-    .chart-empty { color: var(--text-muted); font-size: 13px; text-align: center; padding: 40px 0; }
-    .chart-legend { display: flex; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
-    .chart-legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--text-muted); }
-    .chart-legend-dot { width: 10px; height: 3px; border-radius: 2px; flex-shrink: 0; }
-    .chart-alert-band { font-size: 11px; color: var(--danger); margin-top: 6px; }
+    .chart-note { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
 
-    /* ── Agenda panel ── */
-    .agenda-section-title {
-      font-size: 12px; font-weight: 500; color: var(--text-muted);
-      text-transform: uppercase; letter-spacing: 0.5px;
-      margin-bottom: 8px; margin-top: 4px;
+    /* Settings */
+    .settings-section {
+      background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px;
     }
-    .agenda-add-row {
-      display: flex; gap: 8px; align-items: flex-start;
+    .settings-field { display: flex; flex-direction: column; gap: 5px; }
+    .settings-field label { font-size: 12px; color: var(--text-muted); }
+    .settings-field input, .settings-field select, .settings-field textarea {
+      background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; color: var(--text); font-size: 14px;
+      font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s;
     }
-    .agenda-add-row textarea {
-      flex: 1; background: var(--bg); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 10px 12px;
-      color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif;
-      outline: none; resize: none; min-height: 44px; max-height: 100px;
-      line-height: 1.5; transition: border-color 0.2s;
+    .settings-field input:focus, .settings-field select:focus, .settings-field textarea:focus { border-color: var(--accent); }
+    .settings-field select { appearance: none; cursor: pointer; }
+    .settings-field textarea { resize: none; min-height: 76px; }
+    .med-list { display: flex; flex-direction: column; gap: 6px; }
+    .med-item {
+      display: flex; align-items: center; gap: 8px; background: var(--bg);
+      border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px;
     }
-    .agenda-add-row textarea:focus { border-color: var(--accent); }
-    .agenda-add-row textarea::placeholder { color: var(--text-muted); }
-    .agenda-add-btn {
-      background: var(--accent); color: #0d1117; border: none;
-      border-radius: var(--radius-sm); padding: 10px 14px;
-      font-size: 13px; font-weight: 500; cursor: pointer;
+    .med-item-name { flex: 1; font-size: 13px; }
+    .med-item-dose { font-size: 12px; color: var(--text-muted); }
+    .med-add-row { display: flex; gap: 6px; }
+    .med-add-row input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px;
+      padding: 8px 10px; color: var(--text); font-size: 13px;
+      font-family: 'DM Sans', sans-serif; outline: none;
+    }
+    .med-add-row input:focus { border-color: var(--accent); }
+    .med-add-row button {
+      background: var(--accent); color: #0d1117; border: none; border-radius: 8px;
+      padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer;
       font-family: 'DM Sans', sans-serif; white-space: nowrap;
-      flex-shrink: 0; align-self: flex-end; transition: opacity 0.2s;
     }
-    .agenda-add-btn:hover { opacity: 0.85; }
 
-    .agenda-list { display: flex; flex-direction: column; gap: 8px; }
-    .agenda-empty { color: var(--text-muted); font-size: 13px; padding: 12px 0; }
-
+    /* Agenda */
+    .agenda-add-row { display: flex; gap: 8px; align-items: flex-end; }
+    .agenda-textarea {
+      flex: 1; background: var(--bg); border: 1px solid var(--border);
+      border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text);
+      font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none;
+      resize: none; min-height: 44px; max-height: 100px; line-height: 1.5;
+      transition: border-color 0.2s;
+    }
+    .agenda-textarea:focus { border-color: var(--accent); }
+    .agenda-textarea::placeholder { color: var(--text-muted); }
+    .add-btn {
+      background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm);
+      padding: 10px 13px; font-size: 13px; font-weight: 500; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0;
+      transition: opacity 0.2s;
+    }
+    .add-btn:hover { opacity: 0.85; }
+    .agenda-divider { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+    .urgency-row { display: flex; gap: 6px; }
+    .urgency-btn {
+      padding: 4px 11px; border-radius: 20px; font-size: 12px; cursor: pointer;
+      font-family: 'DM Sans', sans-serif; border: 1px solid var(--border);
+      background: none; color: var(--text-muted); transition: all 0.18s;
+    }
+    .urgency-btn.sel-mild { background: #1a3a2a; border-color: var(--success); color: var(--success); }
+    .urgency-btn.sel-matig { background: #2a2010; border-color: var(--warning); color: var(--warning); }
+    .urgency-btn.sel-ernstig { background: #2a1010; border-color: var(--danger); color: var(--danger); }
+    .agenda-list { display: flex; flex-direction: column; gap: 7px; }
     .agenda-item {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: var(--radius-sm); padding: 12px 14px;
-      display: flex; gap: 10px; align-items: flex-start;
-      transition: border-color 0.18s;
+      border-radius: var(--radius-sm); padding: 11px 13px;
+      display: flex; gap: 9px; align-items: flex-start; transition: opacity 0.2s;
     }
-    .agenda-item.done { opacity: 0.45; }
-    .agenda-item.done .agenda-item-text { text-decoration: line-through; color: var(--text-muted); }
-
-    .agenda-check {
-      width: 18px; height: 18px; border-radius: 50%;
-      border: 2px solid var(--border); background: none;
-      cursor: pointer; flex-shrink: 0; margin-top: 2px;
+    .agenda-item.done { opacity: 0.4; }
+    .agenda-item.done .agenda-item-text { text-decoration: line-through; }
+    .check-circle {
+      width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--border);
+      background: none; cursor: pointer; flex-shrink: 0; margin-top: 2px;
       transition: all 0.18s; display: flex; align-items: center; justify-content: center;
     }
-    .agenda-check.checked {
-      background: var(--success); border-color: var(--success);
+    .check-circle.checked { background: var(--success); border-color: var(--success); }
+    .check-circle.checked::after {
+      content: ''; width: 5px; height: 8px; border: 2px solid #0d1117;
+      border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block;
     }
-    .agenda-check.checked::after {
-      content: ''; width: 5px; height: 9px;
-      border: 2px solid #0d1117; border-top: none; border-left: none;
-      transform: rotate(45deg) translate(-1px, -1px);
-      display: block;
-    }
-
     .agenda-item-body { flex: 1; min-width: 0; }
     .agenda-item-text { font-size: 14px; line-height: 1.5; word-break: break-word; }
     .agenda-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    .agenda-item-del {
-      background: none; border: none; color: var(--text-muted);
-      cursor: pointer; font-size: 16px; flex-shrink: 0;
-      transition: color 0.18s; padding: 0 2px;
+    .urgency-badge {
+      font-size: 10px; padding: 2px 7px; border-radius: 10px; font-weight: 500;
+      margin-left: 5px; display: inline-block; vertical-align: middle;
     }
-    .agenda-item-del:hover { color: var(--danger); }
+    .urgency-badge.mild { background: #1a3a2a; color: var(--success); }
+    .urgency-badge.matig { background: #2a2010; color: var(--warning); }
+    .urgency-badge.ernstig { background: #2a1010; color: var(--danger); }
 
-    .agenda-divider {
-      border: none; border-top: 1px solid var(--border); margin: 4px 0 8px;
+    /* Chat */
+    #chat-area {
+      flex: 1; overflow-y: auto; padding: 18px 14px;
+      display: flex; flex-direction: column; gap: 15px;
+      scroll-behavior: smooth; -webkit-overflow-scrolling: touch;
     }
-
-    .klacht-urgency {
-      display: flex; gap: 6px; margin-bottom: 8px;
+    #chat-area::-webkit-scrollbar { width: 4px; }
+    #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+    #welcome { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 8px 20px; }
+    #welcome h2 { font-family: 'Crimson Pro', serif; font-size: 21px; font-weight: 400; color: var(--text-muted); }
+    .msg { display: flex; flex-direction: column; gap: 4px; animation: fadeUp 0.22s ease; }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
+    .msg.user { align-items: flex-end; }
+    .msg.ai { align-items: flex-start; }
+    .bubble { max-width: 88%; padding: 11px 15px; border-radius: var(--radius); font-size: 14px; line-height: 1.7; word-break: break-word; }
+    .msg.user .bubble { background: var(--user-bg); border: 1px solid var(--user-border); border-bottom-right-radius: 4px; color: #c9e7f7; white-space: pre-wrap; }
+    .msg.ai .bubble { background: var(--ai-bg); border: 1px solid var(--ai-border); border-bottom-left-radius: 4px; color: var(--text); }
+    .bubble h1, .bubble h2, .bubble h3 { font-family: 'Crimson Pro', serif; font-weight: 600; margin: 13px 0 5px; line-height: 1.3; }
+    .bubble h1 { font-size: 18px; } .bubble h2 { font-size: 16px; } .bubble h3 { font-size: 15px; color: var(--accent); }
+    .bubble p { margin-bottom: 9px; } .bubble p:last-child { margin-bottom: 0; }
+    .bubble strong { font-weight: 600; color: #d0e8f5; }
+    .bubble em { font-style: italic; color: #b0c8d8; }
+    .bubble ul, .bubble ol { padding-left: 18px; margin: 5px 0 9px; display: flex; flex-direction: column; gap: 3px; }
+    .bubble li { font-size: 14px; line-height: 1.6; }
+    .bubble code { font-family: monospace; font-size: 12px; background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.2); border-radius: 4px; padding: 1px 5px; }
+    .bubble blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-muted); margin: 7px 0; font-style: italic; }
+    .bubble hr { border: none; border-top: 1px solid var(--border); margin: 11px 0; }
+    .msg-label { font-size: 10px; color: var(--text-muted); padding: 0 4px; font-weight: 300; }
+    .typing-bubble { display: flex; gap: 5px; align-items: center; padding: 13px 17px; }
+    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 1.2s infinite; }
+    .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
+    @keyframes pulse { 0%,80%,100% { opacity:0.4; transform:scale(1); } 40% { opacity:1; transform:scale(1.3); } }
+    #input-bar {
+      padding: 10px 14px; padding-bottom: calc(10px + env(safe-area-inset-bottom));
+      background: var(--bg); border-top: 1px solid var(--border);
+      display: flex; gap: 9px; align-items: flex-end; flex-shrink: 0;
     }
-    .urgency-btn {
-      padding: 4px 10px; border-radius: 20px; font-size: 12px;
-      cursor: pointer; font-family: 'DM Sans', sans-serif;
-      border: 1px solid var(--border); background: none;
-      color: var(--text-muted); transition: all 0.18s;
+    #user-input {
+      flex: 1; background: var(--surface); border: 1px solid var(--border);
+      border-radius: var(--radius); padding: 11px 15px; color: var(--text);
+      font-size: 15px; font-family: 'DM Sans', sans-serif; resize: none; outline: none;
+      min-height: 46px; max-height: 140px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto;
     }
-    .urgency-btn.selected-mild { background: #1a3a2a; border-color: var(--success); color: var(--success); }
-    .urgency-btn.selected-matig { background: #2a2010; border-color: var(--warning); color: var(--warning); }
-    .urgency-btn.selected-ernstig { background: #2a1010; border-color: var(--danger); color: var(--danger); }
-
-    .klacht-badge {
-      font-size: 10px; padding: 2px 7px; border-radius: 10px;
-      font-weight: 500; margin-left: 4px; flex-shrink: 0;
+    #user-input:focus { border-color: var(--accent); }
+    #user-input::placeholder { color: var(--text-muted); }
+    #send-btn {
+      width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none;
+      cursor: pointer; display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 12px rgba(79,195,247,0.25);
     }
-    .klacht-badge.mild { background: #1a3a2a; color: var(--success); }
-    .klacht-badge.matig { background: #2a2010; color: var(--warning); }
-    .klacht-badge.ernstig { background: #2a1010; color: var(--danger); }
+    #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
+    #send-btn:active { transform: scale(0.95); }
+    #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
+    #send-btn svg { width: 20px; height: 20px; fill: #0d1117; }
+    #error-toast {
+      position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+      background: var(--danger); color: white; padding: 9px 18px;
+      border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center;
+    }
+    #error-toast.show { opacity: 1; }
+    #success-toast {
+      position: fixed; bottom: 85px; left: 50%; transform: translateX(-50%);
+      background: var(--success); color: #0d1117; padding: 9px 18px;
+      border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center;
+    }
+    #success-toast.show { opacity: 1; }
   </style>
 </head>
 <body>
 <div id="app">
 
-  <!-- Header -->
   <div id="header">
     <div class="header-dot"></div>
     <h1>Sunny's NierRobot</h1>
     <div id="header-actions">
-      <button class="hdr-btn" id="btn-chat" onclick="showChat()">Chat</button>
+      <button class="hdr-btn active" id="btn-chat" onclick="showChat()">Chat</button>
       <button class="hdr-btn" id="btn-lab" onclick="showPanel('lab')">Lab</button>
-      <button class="hdr-btn" id="btn-history" onclick="showPanel('history')">Gesprekken</button>
       <button class="hdr-btn" id="btn-chart" onclick="showPanel('chart')">Grafiek</button>
       <button class="hdr-btn" id="btn-agenda" onclick="showPanel('agenda')">Agenda</button>
+      <button class="hdr-btn" id="btn-history" onclick="showPanel('history')">Log</button>
       <button class="hdr-btn" id="btn-settings" onclick="showPanel('settings')">Profiel</button>
     </div>
   </div>
 
-  <!-- API Key Setup -->
+  <!-- API setup -->
   <div id="api-screen">
     <h2>API sleutel instellen</h2>
     <p>De NierRobot werkt via de Claude API van Anthropic. Maak een gratis sleutel aan op <a href="https://console.anthropic.com" target="_blank">console.anthropic.com</a>. Je betaalt alleen per gebruik.</p>
@@ -572,14 +380,12 @@
       <input type="password" id="api-key-input" placeholder="sk-ant-api03-..." autocomplete="off" />
       <button onclick="saveApiKey()">Opslaan en starten</button>
     </div>
-    <div class="privacy-note">Je sleutel wordt alleen lokaal op jouw telefoon opgeslagen. Hij gaat nooit naar een tussenliggende server — alleen rechtstreeks naar Anthropic.</div>
+    <div class="privacy-note">Je sleutel wordt alleen lokaal op jouw telefoon opgeslagen — nooit naar een tussenliggende server.</div>
   </div>
 
   <!-- History panel -->
   <div id="history-panel" class="panel">
-    <div class="panel-header">
-      Gesprekken
-    </div>
+    <div class="panel-header">Gesprekslog</div>
     <div class="panel-body" id="history-list"></div>
     <div class="panel-footer">
       <button class="btn-secondary" onclick="showChat()">Terug</button>
@@ -587,87 +393,26 @@
     </div>
   </div>
 
-  <!-- Lab diary panel -->
+  <!-- Lab panel -->
   <div id="lab-panel" class="panel">
     <div class="panel-header">Labdagboek</div>
-    <div class="panel-body" id="lab-body">
-
-      <!-- Entry form -->
+    <div class="panel-body">
       <div class="lab-form">
-        <div class="lab-form-title">Nieuwe meting invoeren</div>
+        <div class="section-title">Nieuwe meting</div>
         <div class="lab-fields">
-          <div class="lab-field">
-            <label>Creatinine (µmol/L)</label>
-            <input type="number" id="lab-creatinine" placeholder="bijv. 142" step="0.1" />
-          </div>
-          <div class="lab-field">
-            <label>eGFR (ml/min/1.73m²)</label>
-            <input type="number" id="lab-egfr" placeholder="bijv. 52" step="0.1" />
-          </div>
-          <div class="lab-field">
-            <label>Tacrolimus (ng/mL)</label>
-            <input type="number" id="lab-tacrolimus" placeholder="bijv. 11.2" step="0.1" />
-          </div>
-          <div class="lab-field">
-            <label>Bloeddruk (sys/dia)</label>
-            <input type="text" id="lab-bp" placeholder="bijv. 128/82" />
-          </div>
-          <div class="lab-field">
-            <label>Gewicht (kg)</label>
-            <input type="number" id="lab-weight" placeholder="bijv. 74.5" step="0.1" />
-          </div>
-          <div class="lab-field">
-            <label>Temperatuur (°C)</label>
-            <input type="number" id="lab-temp" placeholder="bijv. 37.1" step="0.1" />
-          </div>
+          <div class="lab-field"><label>Creatinine (µmol/L)</label><input type="number" id="lab-creatinine" placeholder="bijv. 142" step="0.1" /></div>
+          <div class="lab-field"><label>eGFR (ml/min/1.73m²)</label><input type="number" id="lab-egfr" placeholder="bijv. 52" step="0.1" /></div>
+          <div class="lab-field"><label>Tacrolimus (ng/mL)</label><input type="number" id="lab-tacrolimus" placeholder="bijv. 11.2" step="0.1" /></div>
+          <div class="lab-field"><label>Bloeddruk (sys/dia)</label><input type="text" id="lab-bp" placeholder="bijv. 128/82" /></div>
+          <div class="lab-field"><label>Gewicht (kg)</label><input type="number" id="lab-weight" placeholder="bijv. 74.5" step="0.1" /></div>
+          <div class="lab-field"><label>Temperatuur (°C)</label><input type="number" id="lab-temp" placeholder="bijv. 37.1" step="0.1" /></div>
         </div>
-        <button class="lab-save-btn" onclick="saveLabEntry()">Meting opslaan</button>
+        <button class="full-btn" onclick="saveLabEntry()">Meting opslaan</button>
       </div>
-
-      <!-- Entries list -->
       <div id="lab-entries"></div>
     </div>
     <div class="panel-footer">
       <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
-    </div>
-  </div>
-
-
-
-  <!-- Agenda panel -->
-  <div id="agenda-panel" class="panel">
-    <div class="panel-header">Doktersagenda</div>
-    <div class="panel-body">
-
-      <!-- Vragen sectie -->
-      <div class="agenda-section-title">Vragen voor de dokter</div>
-      <div class="agenda-add-row">
-        <textarea id="vraag-input" placeholder="Schrijf hier een vraag..." rows="1"
-          oninput="autoResizeTA(this)" onkeydown="agendaKey(event,'vraag')"></textarea>
-        <button class="agenda-add-btn" onclick="addAgendaItem('vraag')">+ Voeg toe</button>
-      </div>
-      <div class="agenda-list" id="vraag-list"></div>
-
-      <hr class="agenda-divider" style="margin-top:12px;">
-
-      <!-- Klachten sectie -->
-      <div class="agenda-section-title">Klachten bijhouden</div>
-      <div class="klacht-urgency" id="urgency-btns">
-        <button class="urgency-btn selected-mild" onclick="selectUrgency('mild',this)">Mild</button>
-        <button class="urgency-btn" onclick="selectUrgency('matig',this)">Matig</button>
-        <button class="urgency-btn" onclick="selectUrgency('ernstig',this)">Ernstig</button>
-      </div>
-      <div class="agenda-add-row">
-        <textarea id="klacht-input" placeholder="Beschrijf de klacht..." rows="1"
-          oninput="autoResizeTA(this)" onkeydown="agendaKey(event,'klacht')"></textarea>
-        <button class="agenda-add-btn" onclick="addAgendaItem('klacht')">+ Voeg toe</button>
-      </div>
-      <div class="agenda-list" id="klacht-list"></div>
-
-    </div>
-    <div class="panel-footer">
-      <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
-      <button class="btn-primary" onclick="clearDoneVragen()">Afgevinkte vragen wissen</button>
     </div>
   </div>
 
@@ -680,7 +425,7 @@
       <button class="chart-tab" onclick="switchChartTab('tacrolimus',this)">Tacrolimus</button>
       <button class="chart-tab" onclick="switchChartTab('bp',this)">Bloeddruk</button>
       <button class="chart-tab" onclick="switchChartTab('weight',this)">Gewicht</button>
-      <button class="chart-tab" onclick="switchChartTab('temp',this)">Temperatuur</button>
+      <button class="chart-tab" onclick="switchChartTab('temp',this)">Temp</button>
     </div>
     <div class="chart-wrap" id="chart-wrap"></div>
     <div class="panel-footer">
@@ -688,13 +433,43 @@
     </div>
   </div>
 
-  <!-- Settings / Profile panel -->
+  <!-- Agenda panel -->
+  <div id="agenda-panel" class="panel">
+    <div class="panel-header">Doktersagenda</div>
+    <div class="panel-body">
+      <div class="section-title">Vragen voor de dokter</div>
+      <div class="agenda-add-row">
+        <textarea class="agenda-textarea" id="vraag-input" placeholder="Schrijf hier een vraag..." rows="1" oninput="autoResizeTA(this)" onkeydown="handleAgendaKey(event,'vraag')"></textarea>
+        <button class="add-btn" onclick="addVraag()">+ Voeg toe</button>
+      </div>
+      <div class="agenda-list" id="vraag-list"></div>
+
+      <hr class="agenda-divider">
+
+      <div class="section-title">Klachten bijhouden</div>
+      <div class="urgency-row" id="urgency-row">
+        <button class="urgency-btn sel-mild" onclick="selectUrgency('mild',this)">Mild</button>
+        <button class="urgency-btn" onclick="selectUrgency('matig',this)">Matig</button>
+        <button class="urgency-btn" onclick="selectUrgency('ernstig',this)">Ernstig</button>
+      </div>
+      <div class="agenda-add-row">
+        <textarea class="agenda-textarea" id="klacht-input" placeholder="Beschrijf de klacht..." rows="1" oninput="autoResizeTA(this)" onkeydown="handleAgendaKey(event,'klacht')"></textarea>
+        <button class="add-btn" onclick="addKlacht()">+ Voeg toe</button>
+      </div>
+      <div class="agenda-list" id="klacht-list"></div>
+    </div>
+    <div class="panel-footer">
+      <button class="btn-secondary" onclick="showChat()">Terug naar chat</button>
+      <button class="btn-primary" onclick="clearDoneVragen()">Afgevinkte wissen</button>
+    </div>
+  </div>
+
+  <!-- Settings panel -->
   <div id="settings-panel" class="panel">
     <div class="panel-header">Profiel</div>
     <div class="panel-body">
-
       <div class="settings-section">
-        <div class="settings-section-title">Chirurgische status</div>
+        <div class="section-title">Chirurgische status</div>
         <div class="settings-field">
           <label>JJ-stent</label>
           <select id="s-stent">
@@ -703,43 +478,36 @@
           </select>
         </div>
         <div class="settings-field">
-          <label>Bijzonderheden (optioneel)</label>
-          <textarea id="s-notes" placeholder="Bijv. complicaties, aanvullende diagnoses, relevante allergieën..."></textarea>
+          <label>Bijzonderheden</label>
+          <textarea id="s-notes" placeholder="Bijv. complicaties, allergieën, aanvullende diagnoses..."></textarea>
         </div>
       </div>
-
       <div class="settings-section">
-        <div class="settings-section-title">Medicatie</div>
+        <div class="section-title">Medicatie</div>
         <div class="med-list" id="med-list"></div>
         <div class="med-add-row">
           <input type="text" id="med-name" placeholder="Naam medicijn" />
-          <input type="text" id="med-dose" placeholder="Dosis" style="max-width:90px;" />
+          <input type="text" id="med-dose" placeholder="Dosis" style="max-width:85px;" />
           <button onclick="addMed()">+ Voeg toe</button>
         </div>
       </div>
-
       <div class="settings-section">
-        <div class="settings-section-title">API sleutel</div>
+        <div class="section-title">API sleutel</div>
         <div class="settings-field">
           <label>Anthropic API sleutel</label>
           <input type="password" id="s-apikey" placeholder="sk-ant-api03-..." autocomplete="off" />
         </div>
       </div>
-
-      <button class="settings-save-btn" onclick="saveSettings()">Opslaan</button>
-
+      <button class="full-btn" onclick="saveSettings()">Opslaan</button>
     </div>
   </div>
 
-  <!-- Chat area -->
+  <!-- Chat -->
   <div id="chat-area">
     <div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>
   </div>
-
-  <!-- Input bar -->
   <div id="input-bar">
-    <textarea id="user-input" placeholder="Stel een vraag..." rows="1"
-      onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+    <textarea id="user-input" placeholder="Stel een vraag..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
     <button id="send-btn" onclick="sendMessage()" aria-label="Verstuur">
       <svg viewBox="0 0 24 24"><path d="M2.01 21L23 12 2.01 3 2 10l15 2-15 2z"/></svg>
     </button>
@@ -747,122 +515,72 @@
 
 </div>
 <div id="error-toast"></div>
+<div id="success-toast"></div>
 
 <script>
+'use strict';
+
 // ── State ──
 let apiKey = localStorage.getItem('nk_api_key') || '';
 let currentHistory = [];
 let isLoading = false;
 let currentConvId = null;
+let selectedUrgency = 'mild';
 
-// ── Profile ──
-function getProfile() {
-  try { return JSON.parse(localStorage.getItem('nk_profile') || '{}'); } catch { return {}; }
-}
+// ── Storage helpers ──
+function getProfile() { try { return JSON.parse(localStorage.getItem('nk_profile') || '{}'); } catch(e) { return {}; } }
 function saveProfile(p) { localStorage.setItem('nk_profile', JSON.stringify(p)); }
-
-// ── Lab entries ──
-function getLabEntries() {
-  try { return JSON.parse(localStorage.getItem('nk_lab') || '[]'); } catch { return []; }
-}
+function getLabEntries() { try { return JSON.parse(localStorage.getItem('nk_lab') || '[]'); } catch(e) { return []; } }
 function saveLabEntries(e) { localStorage.setItem('nk_lab', JSON.stringify(e)); }
+function getConversations() { try { return JSON.parse(localStorage.getItem('nk_convs') || '[]'); } catch(e) { return []; } }
+function saveConversations(c) { localStorage.setItem('nk_convs', JSON.stringify(c)); }
+function getAgenda() { try { return JSON.parse(localStorage.getItem('nk_agenda') || '{"vragen":[],"klachten":[]}'); } catch(e) { return {vragen:[],klachten:[]}; } }
+function saveAgendaData(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
+function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
-// ── System prompt (dynamic) ──
+// ── System prompt ──
 function getSystemPrompt() {
   const today = new Date();
   const transplantDate = new Date('2026-03-26');
   const daysSince = Math.floor((today - transplantDate) / (1000 * 60 * 60 * 24));
-  const todayStr = today.toLocaleDateString('nl-NL', { day: 'numeric', month: 'long', year: 'numeric' });
+  const todayStr = today.toLocaleDateString('nl-NL', {day:'numeric',month:'long',year:'numeric'});
 
-  let fase;
-  if (daysSince <= 30) fase = `vroege fase (dag ${daysSince}, eerste maand) — hoogste immunosuppressie, tacrolimus streefspiegels 10–15 ng/mL in de meeste protocollen, laagste infectiedrempel, meeste beperkingen op activiteit`;
-  else if (daysSince <= 90) fase = `intermediaire fase (dag ${daysSince}, maand 1–3) — immunosuppressie wordt afgebouwd, streefspiegels tacrolimus dalen richting 8–12 ng/mL, activiteiten worden stapsgewijs uitgebreid`;
-  else if (daysSince <= 365) fase = `late vroege fase (dag ${daysSince}, maand 3–12) — onderhoudsimmunosuppressie, streefspiegels tacrolimus 5–10 ng/mL, meeste activiteiten toegestaan`;
-  else fase = `chronische fase (dag ${daysSince}) — stabiele onderhoudsimmunosuppressie`;
+  var fase;
+  if (daysSince <= 30) fase = 'vroege fase (dag ' + daysSince + ', eerste maand) \u2014 hoogste immunosuppressie, tacrolimus streefspiegels 10\u201315 ng/mL, laagste infectiedrempel';
+  else if (daysSince <= 90) fase = 'intermediaire fase (dag ' + daysSince + ', maand 1\u20133) \u2014 immunosuppressie wordt afgebouwd, streefspiegels dalen richting 8\u201312 ng/mL';
+  else if (daysSince <= 365) fase = 'late vroege fase (dag ' + daysSince + ', maand 3\u201312) \u2014 onderhoudsimmunosuppressie, streefspiegels 5\u201310 ng/mL';
+  else fase = 'chronische fase (dag ' + daysSince + ')';
 
   const profile = getProfile();
   const stentStatus = profile.stent === 'verwijderd' ? 'Verwijderd' : 'Nog aanwezig';
-  const notes = profile.notes ? `\n- Aanvullende notities: ${profile.notes}` : '';
-  const meds = (profile.meds || []);
-  const medStr = meds.length > 0
-    ? meds.map(m => `${m.name}${m.dose ? ' ' + m.dose : ''}`).join(', ')
-    : 'tacrolimus + mycophenolaat mofetil + prednison (standaard schema)';
+  const notes = profile.notes ? '\n- Aanvullende notities: ' + profile.notes : '';
+  const meds = profile.meds || [];
+  const medStr = meds.length > 0 ? meds.map(function(m) { return m.name + (m.dose ? ' ' + m.dose : ''); }).join(', ') : 'tacrolimus + mycophenolaat mofetil + prednison (standaard schema)';
 
-  // Lab context: last 5 entries
   const labs = getLabEntries().slice(0, 5);
-  let labContext = '';
+  var labContext = '';
   if (labs.length > 0) {
-    labContext = '\n\nRECENTE LABWAARDEN (gebruik dit actief voor trendanalyse)\n';
-    labs.forEach(e => {
-      const d = new Date(e.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
+    labContext = '\n\nRECENTE LABWAARDEN (gebruik voor trendanalyse)\n';
+    labs.forEach(function(e) {
+      const d = new Date(e.date).toLocaleDateString('nl-NL', {day:'numeric',month:'short'});
       const parts = [];
-      if (e.creatinine) parts.push(`creatinine ${e.creatinine} µmol/L`);
-      if (e.egfr) parts.push(`eGFR ${e.egfr} ml/min`);
-      if (e.tacrolimus) parts.push(`tacrolimus ${e.tacrolimus} ng/mL`);
-      if (e.bp) parts.push(`RR ${e.bp}`);
-      if (e.weight) parts.push(`gewicht ${e.weight} kg`);
-      if (e.temp) parts.push(`temp ${e.temp}°C`);
-      labContext += `- ${d}: ${parts.join(', ')}\n`;
+      if (e.creatinine) parts.push('creatinine ' + e.creatinine + ' \u00b5mol/L');
+      if (e.egfr) parts.push('eGFR ' + e.egfr + ' ml/min');
+      if (e.tacrolimus) parts.push('tacrolimus ' + e.tacrolimus + ' ng/mL');
+      if (e.bp) parts.push('RR ' + e.bp);
+      if (e.weight) parts.push('gewicht ' + e.weight + ' kg');
+      if (e.temp) parts.push('temp ' + e.temp + '\u00b0C');
+      labContext += '- ' + d + ': ' + parts.join(', ') + '\n';
     });
-    labContext += 'Analyseer trends actief. Signaleer stijging creatinine >20% ten opzichte van laagste waarde. Signaleer tacrolimus buiten streefspiegel voor huidige fase.';
+    labContext += 'Signaleer creatinine stijging >20% t.o.v. laagste waarde. Signaleer tacrolimus buiten streefspiegel.';
   }
 
-  return `Je bent een gespecialiseerde medische kennisassistent op het gebied van niertransplantatie en nefrologie. Je hebt diepgaande kennis van de klinische praktijk, internationale richtlijnen (KDIGO, ERBP) en actueel wetenschappelijk onderzoek.
-
-HUIDIGE DATUM EN FASE
-
-Vandaag is het ${todayStr}. Sunny bevindt zich in de ${fase}. Gebruik dit actief bij het beantwoorden van vragen — zonder dat Sunny dit hoeft te vermelden.
-
-PATIËNTPROFIEL
-
-- Transplantatiedatum: 26 maart 2026 (levende donor, familielid — moeder)
-- Transplantatiecentrum: Amsterdam UMC
-- Medicatie: ${medStr}
-- JJ-stent: ${stentStatus}
-- Huidaandoening: warmte urticaria (cholinergische/hitte-geïnduceerde netelroos) — benoem proactief bij vragen over koorts, inspanning, warm weer, zonbescherming en huidkankerrisico
-- Geen dialyse voorafgaand aan transplantatie${notes}${labContext}
-
-KERNPRINCIPES
-
-Wetenschappelijke grondslag en bewijsniveau: Geef bij elke feitelijke claim over medicatie, labwaarden, timing of risico's het bewijsniveau aan:
-- "Sterke richtlijnconsensus (KDIGO/ERBP):" — meerdere RCTs of brede internationale consensus
-- "Richtlijnaanbeveling op basis van expert opinion:" — in richtlijnen opgenomen maar beperkt bewijs
-- "Beperkt bewijs / centrumafhankelijk:" — praktijken die per ziekenhuis verschillen
-- "Onzeker / actief debat:" — literatuur is verdeeld
-
-Kennisgrens: Jouw trainingsdata heeft een grens (augustus 2025). Geef dit aan bij onderwerpen die snel evolueren (CMV-profylaxe, BK-virus management, CNI-minimalisatie).
-
-Eerlijkheid over onzekerheid: Speculeer nooit. Zeg "dat hangt af van..." of "hierover bestaat geen eenduidig bewijs" als dat van toepassing is.
-
-Geen diagnostiek: Leg uit wat waarden betekenen en wat klinische drempelwaarden zijn — de conclusie voor Sunny specifiek ligt bij het behandelend team van Amsterdam UMC.
-
-PROACTIEVE SIGNALERING
-
-Bij vragen over voeding, dranken, medicatie of supplementen: controleer altijd actief op interacties met de huidige medicatie, ook als daar niet expliciet naar gevraagd wordt. Kritische interacties: grapefruit/pompelmoes (CYP3A4-remming → tacrolimus toxiciteit), sint-janskruid (CYP3A4-inductie → spiegeldaling), NSAID's (nefrotoxiciteit), kaliumrijke voeding in overmaat, rauwe of ongepasteuriseerde producten (infectierisico).
-
-FASE-AFHANKELIJKE URGENTIEDREMPELS
-
-In de huidige fase gelden strengere drempels dan bij gezonde mensen:
-- Koorts ≥ 37,8°C in eerste 3 maanden → contact transplantatiecentrum (niet pas bij 38°C)
-- Urineproductie daalt >30% op één dag → direct contact
-- Pijn in transplantaatregio → direct contact
-- Creatinine stijgt >20–25% ten opzichte van laagste gemeten waarde → contact dezelfde dag
-- Zwelling, roodheid of pus bij wond → contact dezelfde dag
-
-Verwijs bij deze signalen direct naar transplantatiecentrum Amsterdam UMC of spoedeisende hulp.
-
-KENNISGEBIEDEN
-
-Immunosuppressie, afstoting, labwaarden, herstelverloop per fase, chirurgische aspecten, infectierisico's, voeding, leefstijl, levende donatie, lange termijn complicaties.
-
-COMMUNICATIESTIJL
-
-Helder Nederlands, medische termen altijd uitleggen. Direct en accuraat, niet geruststellend om gerust te stellen. Lopende tekst, opsommingstekens alleen indien nodig. Verwijs naar behandelend team alleen als dat inhoudelijk relevant is — niet als standaard-afsluiter.`;
+  return 'Je bent een gespecialiseerde medische kennisassistent op het gebied van niertransplantatie en nefrologie. Je hebt diepgaande kennis van de klinische praktijk, internationale richtlijnen (KDIGO, ERBP) en actueel wetenschappelijk onderzoek.\n\nHUIDIGE DATUM EN FASE\n\nVandaag is het ' + todayStr + '. Sunny bevindt zich in de ' + fase + '. Gebruik dit actief bij het beantwoorden van vragen.\n\nPATI\u00cbNTPROFIEL\n\n- Transplantatiedatum: 26 maart 2026 (levende donor, familielid \u2014 moeder)\n- Transplantatiecentrum: Amsterdam UMC\n- Medicatie: ' + medStr + '\n- JJ-stent: ' + stentStatus + '\n- Huidaandoening: warmte urticaria (cholinergische/hitte-ge\u00efnduceerde netelroos) \u2014 benoem proactief bij vragen over koorts, inspanning, warm weer, zonbescherming en huidkankerrisico\n- Geen dialyse voorafgaand aan transplantatie' + notes + labContext + '\n\nKERNPRINCIPES\n\nWetenschappelijke grondslag en bewijsniveau: Geef bij elke feitelijke claim het bewijsniveau aan:\n- "Sterke richtlijnconsensus (KDIGO/ERBP):" \u2014 meerdere RCTs of brede internationale consensus\n- "Richtlijnaanbeveling op basis van expert opinion:" \u2014 in richtlijnen opgenomen maar beperkt bewijs\n- "Beperkt bewijs / centrumafhankelijk:" \u2014 praktijken die per ziekenhuis verschillen\n- "Onzeker / actief debat:" \u2014 literatuur is verdeeld\n\nKennisgrens: Jouw trainingsdata heeft een grens (augustus 2025). Geef dit aan bij onderwerpen die snel evolueren.\n\nEerlijkheid over onzekerheid: Speculeer nooit. Zeg liever "dat hangt af van..." of "hierover bestaat geen eenduidig bewijs".\n\nGeen diagnostiek: De conclusie voor Sunny specifiek ligt altijd bij het behandelend team van Amsterdam UMC.\n\nPROACTIEVE SIGNALERING\n\nBij vragen over voeding, dranken, medicatie of supplementen: controleer altijd actief op interacties met de huidige medicatie. Kritische interacties: grapefruit/pompelmoes (CYP3A4-remming), sint-janskruid (CYP3A4-inductie), NSAID\'s (nefrotoxiciteit), rauwe of ongepasteuriseerde producten (infectierisico).\n\nFASE-AFHANKELIJKE URGENTIEDREMPELS\n\n- Koorts >=37,8\u00b0C in eerste 3 maanden \u2192 contact transplantatiecentrum\n- Urineproductie daalt >30% op \u00e9\u00e9n dag \u2192 direct contact\n- Pijn in transplantaatregio \u2192 direct contact\n- Creatinine stijgt >20\u201325% t.o.v. laagste waarde \u2192 contact dezelfde dag\n- Zwelling, roodheid of pus bij wond \u2192 contact dezelfde dag\n\nVerwijs bij deze signalen direct naar Amsterdam UMC of spoedeisende hulp.\n\nCOMMUNICATIESTIJL\n\nHelder Nederlands, medische termen altijd uitleggen. Direct en accuraat. Lopende tekst, opsommingstekens alleen indien nodig. Verwijs naar behandelend team alleen als dat inhoudelijk relevant is.';
 }
 
 // ── Markdown parser ──
 function parseMarkdown(text) {
-  let h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  var h = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
   h = h.replace(/^### (.+)$/gm,'<h3>$1</h3>');
   h = h.replace(/^## (.+)$/gm,'<h2>$1</h2>');
   h = h.replace(/^# (.+)$/gm,'<h1>$1</h1>');
@@ -872,256 +590,67 @@ function parseMarkdown(text) {
   h = h.replace(/_([^_\n]+)_/g,'<em>$1</em>');
   h = h.replace(/`([^`]+)`/g,'<code>$1</code>');
   h = h.replace(/^---$/gm,'<hr>');
-  h = h.replace(/((?:^[-*+] .+$\n?)+)/gm, m => {
-    const items = m.trim().split('\n').map(l=>`<li>${l.replace(/^[-*+] /,'')}</li>`).join('');
-    return `<ul>${items}</ul>\n`;
+  h = h.replace(/((?:^[-*+] .+$\n?)+)/gm, function(m) {
+    var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^[-*+] /,'') + '</li>'; }).join('');
+    return '<ul>' + items + '</ul>\n';
   });
-  h = h.replace(/((?:^\d+\. .+$\n?)+)/gm, m => {
-    const items = m.trim().split('\n').map(l=>`<li>${l.replace(/^\d+\. /,'')}</li>`).join('');
-    return `<ol>${items}</ol>\n`;
+  h = h.replace(/((?:^\d+\. .+$\n?)+)/gm, function(m) {
+    var items = m.trim().split('\n').map(function(l) { return '<li>' + l.replace(/^\d+\. /,'') + '</li>'; }).join('');
+    return '<ol>' + items + '</ol>\n';
   });
-  h = h.split(/\n{2,}/).map(b => {
+  h = h.split(/\n{2,}/).map(function(b) {
     b = b.trim(); if (!b) return '';
     if (/^<(h[1-3]|ul|ol|blockquote|hr|pre)/.test(b)) return b;
-    return `<p>${b.replace(/\n/g,'<br>')}</p>`;
+    return '<p>' + b.replace(/\n/g,'<br>') + '</p>';
   }).join('');
   return h;
 }
 
 // ── Navigation ──
-function setActiveBtn(id) {
-  ['btn-chat','btn-lab','btn-chart','btn-agenda','btn-history','btn-settings'].forEach(b => {
-    document.getElementById(b).classList.toggle('active', b === id);
+var ALL_PANELS = ['history','lab','chart','agenda','settings'];
+
+function setActiveBtn(name) {
+  ['chat','lab','chart','agenda','history','settings'].forEach(function(b) {
+    var el = document.getElementById('btn-' + b);
+    if (el) el.classList.toggle('active', b === name);
   });
 }
 
 function showChat() {
-  ['history-panel','lab-panel','chart-panel','agenda-panel','settings-panel'].forEach(p =>
-    document.getElementById(p).classList.remove('visible'));
+  ALL_PANELS.forEach(function(p) { document.getElementById(p + '-panel').classList.remove('visible'); });
   document.getElementById('chat-area').style.display = 'flex';
   document.getElementById('input-bar').style.display = 'flex';
-  setActiveBtn('btn-chat');
+  setActiveBtn('chat');
 }
 
 function showPanel(name) {
   document.getElementById('chat-area').style.display = 'none';
   document.getElementById('input-bar').style.display = 'none';
-  ['history-panel','lab-panel','chart-panel','agenda-panel','settings-panel'].forEach(p =>
-    document.getElementById(p).classList.remove('visible'));
+  ALL_PANELS.forEach(function(p) { document.getElementById(p + '-panel').classList.remove('visible'); });
   document.getElementById(name + '-panel').classList.add('visible');
-  setActiveBtn('btn-' + name);
+  setActiveBtn(name);
   if (name === 'history') renderHistoryList();
   if (name === 'lab') renderLabEntries();
-  if (name === 'settings') renderSettings();
   if (name === 'chart') renderChart('creatinine');
   if (name === 'agenda') renderAgenda();
+  if (name === 'settings') renderSettings();
 }
 
-// ── History ──
-function getConversations() {
-  try { return JSON.parse(localStorage.getItem('nk_convs') || '[]'); } catch { return []; }
+// ── Toasts ──
+function showError(msg) {
+  var t = document.getElementById('error-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 3200);
 }
-function saveConversations(c) { localStorage.setItem('nk_convs', JSON.stringify(c)); }
-
-function saveCurrentConversation() {
-  if (!currentConvId || currentHistory.length === 0) return;
-  const convs = getConversations();
-  const idx = convs.findIndex(c => c.id === currentConvId);
-  const firstMsg = currentHistory.find(m => m.role === 'user')?.content || 'Gesprek';
-  const preview = firstMsg.slice(0, 60) + (firstMsg.length > 60 ? '...' : '');
-  const conv = { id: currentConvId, preview, date: Date.now(), messages: currentHistory };
-  if (idx >= 0) convs[idx] = conv; else convs.unshift(conv);
-  saveConversations(convs.slice(0, 30));
-}
-
-function newConversation() {
-  currentHistory = [];
-  currentConvId = 'conv_' + Date.now();
-  document.getElementById('chat-area').innerHTML = '<div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>';
-  showChat();
-}
-
-function loadConversation(id) {
-  const conv = getConversations().find(c => c.id === id);
-  if (!conv) return;
-  currentConvId = conv.id; currentHistory = conv.messages;
-  const chat = document.getElementById('chat-area');
-  chat.innerHTML = '';
-  currentHistory.forEach(m => renderMessage(m.role === 'user' ? 'user' : 'ai', m.content));
-  showChat();
-  setTimeout(() => { chat.scrollTop = chat.scrollHeight; }, 50);
-}
-
-function deleteConversation(id, e) {
-  e.stopPropagation();
-  saveConversations(getConversations().filter(c => c.id !== id));
-  renderHistoryList();
-}
-
-function escapeHtml(t) {
-  return t.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function renderHistoryList() {
-  const convs = getConversations();
-  const list = document.getElementById('history-list');
-  if (convs.length === 0) {
-    list.innerHTML = '<div class="history-empty">Nog geen opgeslagen gesprekken.</div>';
-    return;
-  }
-  list.innerHTML = convs.map(c => {
-    const d = new Date(c.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    return `<div class="history-item" onclick="loadConversation('${c.id}')">
-      <div class="history-item-text">
-        <div class="history-item-preview">${escapeHtml(c.preview)}</div>
-        <div class="history-item-date">${d}</div>
-      </div>
-      <button class="history-item-del" onclick="deleteConversation('${c.id}',event)">&times;</button>
-    </div>`;
-  }).join('');
-}
-
-// ── Lab diary ──
-function saveLabEntry() {
-  const creatinine = document.getElementById('lab-creatinine').value.trim();
-  const egfr = document.getElementById('lab-egfr').value.trim();
-  const tacrolimus = document.getElementById('lab-tacrolimus').value.trim();
-  const bp = document.getElementById('lab-bp').value.trim();
-  const weight = document.getElementById('lab-weight').value.trim();
-  const temp = document.getElementById('lab-temp').value.trim();
-
-  if (!creatinine && !egfr && !tacrolimus && !bp && !weight && !temp) {
-    return showError('Vul minstens één waarde in');
-  }
-
-  const entries = getLabEntries();
-  entries.unshift({ date: Date.now(), creatinine, egfr, tacrolimus, bp, weight, temp });
-  saveLabEntries(entries.slice(0, 100));
-
-  // Clear fields
-  ['lab-creatinine','lab-egfr','lab-tacrolimus','lab-bp','lab-weight','lab-temp']
-    .forEach(id => { document.getElementById(id).value = ''; });
-
-  renderLabEntries();
-}
-
-function deleteLabEntry(idx) {
-  const entries = getLabEntries();
-  entries.splice(idx, 1);
-  saveLabEntries(entries);
-  renderLabEntries();
-}
-
-function renderLabEntries() {
-  const entries = getLabEntries();
-  const container = document.getElementById('lab-entries');
-  if (entries.length === 0) {
-    container.innerHTML = '<div class="history-empty" style="padding:20px 0">Nog geen metingen opgeslagen.</div>';
-    return;
-  }
-
-  // Alert thresholds
-  const creatinineValues = entries.map(e => parseFloat(e.creatinine)).filter(v => !isNaN(v));
-  const lowestCreatinine = creatinineValues.length > 0 ? Math.min(...creatinineValues) : null;
-
-  container.innerHTML = entries.map((e, i) => {
-    const d = new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
-    const badges = [];
-
-    if (e.creatinine) {
-      const val = parseFloat(e.creatinine);
-      const isAlert = lowestCreatinine && val > lowestCreatinine * 1.2;
-      badges.push(`<div class="lab-badge ${isAlert ? 'alert' : ''}">Creat <span>${e.creatinine} µmol/L</span></div>`);
-    }
-    if (e.egfr) badges.push(`<div class="lab-badge">eGFR <span>${e.egfr} ml/min</span></div>`);
-    if (e.tacrolimus) {
-      const val = parseFloat(e.tacrolimus);
-      const isAlert = val < 8 || val > 15;
-      badges.push(`<div class="lab-badge ${isAlert ? 'alert' : ''}">Tac <span>${e.tacrolimus} ng/mL</span></div>`);
-    }
-    if (e.bp) badges.push(`<div class="lab-badge">RR <span>${e.bp}</span></div>`);
-    if (e.weight) badges.push(`<div class="lab-badge">Gew <span>${e.weight} kg</span></div>`);
-    if (e.temp) {
-      const val = parseFloat(e.temp);
-      const isAlert = val >= 37.8;
-      badges.push(`<div class="lab-badge ${isAlert ? 'alert' : ''}">Temp <span>${e.temp}°C</span></div>`);
-    }
-
-    return `<div class="lab-entry">
-      <div class="lab-entry-values">${badges.join('')}</div>
-      <div style="display:flex;align-items:flex-start;gap:8px;flex-shrink:0;">
-        <div class="lab-entry-date">${d}</div>
-        <button class="lab-entry-del" onclick="deleteLabEntry(${i})">&times;</button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ── Settings / Profile ──
-function renderSettings() {
-  const p = getProfile();
-  document.getElementById('s-stent').value = p.stent || 'aanwezig';
-  document.getElementById('s-notes').value = p.notes || '';
-  document.getElementById('s-apikey').value = apiKey;
-  renderMedList(p.meds || []);
-}
-
-function renderMedList(meds) {
-  document.getElementById('med-list').innerHTML = meds.length === 0
-    ? '<div style="font-size:13px;color:var(--text-muted);padding:4px 0">Nog geen medicatie toegevoegd.</div>'
-    : meds.map((m, i) => `
-      <div class="med-item">
-        <div class="med-item-name">${escapeHtml(m.name)}</div>
-        <div class="med-item-dose">${escapeHtml(m.dose || '')}</div>
-        <button class="med-item-del" onclick="removeMed(${i})">&times;</button>
-      </div>`).join('');
-}
-
-function addMed() {
-  const name = document.getElementById('med-name').value.trim();
-  if (!name) return;
-  const dose = document.getElementById('med-dose').value.trim();
-  const p = getProfile();
-  const meds = p.meds || [];
-  meds.push({ name, dose });
-  p.meds = meds;
-  saveProfile(p);
-  document.getElementById('med-name').value = '';
-  document.getElementById('med-dose').value = '';
-  renderMedList(meds);
-}
-
-function removeMed(i) {
-  const p = getProfile();
-  const meds = p.meds || [];
-  meds.splice(i, 1);
-  p.meds = meds;
-  saveProfile(p);
-  renderMedList(meds);
-}
-
-function saveSettings() {
-  const p = getProfile();
-  p.stent = document.getElementById('s-stent').value;
-  p.notes = document.getElementById('s-notes').value.trim();
-  saveProfile(p);
-
-  const keyVal = document.getElementById('s-apikey').value.trim();
-  if (keyVal && keyVal.startsWith('sk-ant')) {
-    apiKey = keyVal;
-    localStorage.setItem('nk_api_key', apiKey);
-  } else if (keyVal && !keyVal.startsWith('sk-ant')) {
-    return showError('Geen geldige API sleutel');
-  }
-
-  showChat();
-  showError('Profiel opgeslagen');
+function showSuccess(msg) {
+  var t = document.getElementById('success-toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(function() { t.classList.remove('show'); }, 2000);
 }
 
 // ── Init ──
 function init() {
   currentConvId = 'conv_' + Date.now();
-  setActiveBtn('btn-chat');
   if (!apiKey) {
     document.getElementById('api-screen').classList.add('visible');
     document.getElementById('chat-area').style.display = 'none';
@@ -1134,94 +663,401 @@ function init() {
 }
 
 function saveApiKey() {
-  const val = document.getElementById('api-key-input').value.trim();
+  var val = document.getElementById('api-key-input').value.trim();
   if (!val.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
-  apiKey = val;
-  localStorage.setItem('nk_api_key', apiKey);
-  init();
+  apiKey = val; localStorage.setItem('nk_api_key', apiKey); init();
+}
+
+// ── History ──
+function saveCurrentConversation() {
+  if (!currentConvId || currentHistory.length === 0) return;
+  var convs = getConversations();
+  var idx = convs.findIndex(function(c) { return c.id === currentConvId; });
+  var firstMsg = (currentHistory.find(function(m) { return m.role === 'user'; }) || {}).content || 'Gesprek';
+  var preview = firstMsg.slice(0,60) + (firstMsg.length > 60 ? '...' : '');
+  var conv = {id: currentConvId, preview: preview, date: Date.now(), messages: currentHistory};
+  if (idx >= 0) convs[idx] = conv; else convs.unshift(conv);
+  saveConversations(convs.slice(0,30));
+}
+
+function newConversation() {
+  currentHistory = []; currentConvId = 'conv_' + Date.now();
+  document.getElementById('chat-area').innerHTML = '<div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>';
+  showChat();
+}
+
+function loadConversation(id) {
+  var conv = getConversations().find(function(c) { return c.id === id; });
+  if (!conv) return;
+  currentConvId = conv.id; currentHistory = conv.messages;
+  var chat = document.getElementById('chat-area'); chat.innerHTML = '';
+  currentHistory.forEach(function(m) { renderMessage(m.role === 'user' ? 'user' : 'ai', m.content); });
+  showChat();
+  setTimeout(function() { chat.scrollTop = chat.scrollHeight; }, 50);
+}
+
+function deleteConversation(id, e) {
+  e.stopPropagation();
+  saveConversations(getConversations().filter(function(c) { return c.id !== id; }));
+  renderHistoryList();
+}
+
+function renderHistoryList() {
+  var convs = getConversations();
+  var list = document.getElementById('history-list'); list.innerHTML = '';
+  if (convs.length === 0) { list.innerHTML = '<div class="list-empty">Nog geen opgeslagen gesprekken.</div>'; return; }
+  convs.forEach(function(c) {
+    var d = new Date(c.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    var div = document.createElement('div'); div.className = 'history-item';
+    div.innerHTML = '<div class="history-item-text"><div class="history-item-preview">' + escapeHtml(c.preview) + '</div><div class="history-item-date">' + d + '</div></div><button class="icon-btn" title="Verwijderen">&times;</button>';
+    div.querySelector('.icon-btn').addEventListener('click', function(e) { deleteConversation(c.id, e); });
+    div.addEventListener('click', function() { loadConversation(c.id); });
+    list.appendChild(div);
+  });
+}
+
+// ── Lab ──
+function saveLabEntry() {
+  var creatinine = document.getElementById('lab-creatinine').value.trim();
+  var egfr = document.getElementById('lab-egfr').value.trim();
+  var tacrolimus = document.getElementById('lab-tacrolimus').value.trim();
+  var bp = document.getElementById('lab-bp').value.trim();
+  var weight = document.getElementById('lab-weight').value.trim();
+  var temp = document.getElementById('lab-temp').value.trim();
+  if (!creatinine && !egfr && !tacrolimus && !bp && !weight && !temp) return showError('Vul minstens één waarde in');
+  var entries = getLabEntries();
+  entries.unshift({date: Date.now(), creatinine: creatinine, egfr: egfr, tacrolimus: tacrolimus, bp: bp, weight: weight, temp: temp});
+  saveLabEntries(entries.slice(0,100));
+  ['lab-creatinine','lab-egfr','lab-tacrolimus','lab-bp','lab-weight','lab-temp'].forEach(function(id) { document.getElementById(id).value = ''; });
+  renderLabEntries();
+  showSuccess('Meting opgeslagen');
+}
+
+function deleteLabEntry(idx) {
+  var entries = getLabEntries(); entries.splice(idx,1); saveLabEntries(entries); renderLabEntries();
+}
+
+function renderLabEntries() {
+  var entries = getLabEntries();
+  var container = document.getElementById('lab-entries'); container.innerHTML = '';
+  if (entries.length === 0) { container.innerHTML = '<div class="list-empty">Nog geen metingen opgeslagen.</div>'; return; }
+  var creatVals = entries.map(function(e) { return parseFloat(e.creatinine); }).filter(function(v) { return !isNaN(v); });
+  var lowestCreat = creatVals.length > 0 ? Math.min.apply(null, creatVals) : null;
+  entries.forEach(function(e, i) {
+    var d = new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+    var badges = '';
+    if (e.creatinine) { var isAlert = lowestCreat && parseFloat(e.creatinine) > lowestCreat * 1.2; badges += '<div class="lab-badge' + (isAlert?' alert':'') + '">Creat <span>' + e.creatinine + ' µmol/L</span></div>'; }
+    if (e.egfr) badges += '<div class="lab-badge">eGFR <span>' + e.egfr + ' ml/min</span></div>';
+    if (e.tacrolimus) { var tv = parseFloat(e.tacrolimus); var ta = tv < 8 || tv > 15; badges += '<div class="lab-badge' + (ta?' alert':'') + '">Tac <span>' + e.tacrolimus + ' ng/mL</span></div>'; }
+    if (e.bp) badges += '<div class="lab-badge">RR <span>' + e.bp + '</span></div>';
+    if (e.weight) badges += '<div class="lab-badge">Gew <span>' + e.weight + ' kg</span></div>';
+    if (e.temp) { var tv2 = parseFloat(e.temp); var ta2 = tv2 >= 37.8; badges += '<div class="lab-badge' + (ta2?' alert':'') + '">Temp <span>' + e.temp + '\u00b0C</span></div>'; }
+    var div = document.createElement('div'); div.className = 'lab-entry';
+    div.innerHTML = '<div class="lab-entry-values">' + badges + '</div><div class="lab-entry-meta"><div class="lab-entry-date">' + d + '</div><button class="icon-btn">&times;</button></div>';
+    div.querySelector('.icon-btn').addEventListener('click', function() { deleteLabEntry(i); });
+    container.appendChild(div);
+  });
+}
+
+// ── Charts ──
+var CHART_CFG = {
+  creatinine: { label:'Creatinine', unit:'\u00b5mol/L', color:'#4fc3f7', alertHigh:null, alertLow:null, refs:[{value:110,label:'Bovengrens normaal',color:'#3fb950'}], note:'Stijging >20% boven laagste waarde is een alarmsignaal.' },
+  egfr:       { label:'eGFR', unit:'ml/min/1.73m\u00b2', color:'#7ee787', alertLow:30, alertHigh:null, refs:[{value:60,label:'Grens CKD3',color:'#d29922'}], note:'eGFR <30 wijst op ernstige nierschade.' },
+  tacrolimus: { label:'Tacrolimus', unit:'ng/mL', color:'#d2a8ff', alertHigh:15, alertLow:6, refs:[{value:10,label:'Streef hoog',color:'#4fc3f7'},{value:8,label:'Streef laag',color:'#d29922'}], note:'Streefwaarden zijn fase-afhankelijk.' },
+  bp:         { label:'Bloeddruk systolisch', unit:'mmHg', color:'#ffa657', alertHigh:160, alertLow:null, refs:[{value:130,label:'Streef <130',color:'#d29922'}], note:'Post-tx streef <130/80 mmHg.' },
+  weight:     { label:'Gewicht', unit:'kg', color:'#79c0ff', alertHigh:null, alertLow:null, refs:[], note:'Toename >1\u20132 kg/dag kan wijzen op vochtretentie.' },
+  temp:       { label:'Temperatuur', unit:'\u00b0C', color:'#ff7b72', alertHigh:37.8, alertLow:null, refs:[{value:37.8,label:'Alarmgrens post-tx',color:'#f85149'}], note:'Bij \u226537,8\u00b0C in eerste 3 maanden: direct contact Amsterdam UMC.' }
+};
+
+function getChartValue(entry, key) {
+  if (key === 'bp') { var m = (entry.bp||'').match(/^(\d+)/); return m ? parseFloat(m[1]) : null; }
+  var v = parseFloat(entry[key]); return isNaN(v) ? null : v;
+}
+
+function switchChartTab(key, btn) {
+  document.querySelectorAll('.chart-tab').forEach(function(t) { t.classList.remove('active'); });
+  btn.classList.add('active');
+  renderChart(key);
+}
+
+function renderChart(key) {
+  var wrap = document.getElementById('chart-wrap');
+  var entries = getLabEntries();
+  var cfg = CHART_CFG[key];
+  var filtered = entries.filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; });
+
+  if (filtered.length === 0) {
+    wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="list-empty" style="padding:30px 0">Nog geen metingen voor ' + cfg.label + '.<br>Voeg ze toe via het Lab-tabblad.</div></div>';
+    return;
+  }
+
+  var values = filtered.map(function(e) { return getChartValue(e,key); });
+  var labels = filtered.map(function(e) { return new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); });
+  var latest = values[values.length-1];
+  var prev = values.length > 1 ? values[values.length-2] : null;
+  var delta = prev !== null ? latest - prev : null;
+  var deltaStr = delta !== null ? (delta >= 0 ? '+' + delta.toFixed(1) : delta.toFixed(1)) : '';
+  var goodDown = (key === 'creatinine' || key === 'bp' || key === 'temp');
+  var deltaColor = delta === null || delta === 0 ? '' : (goodDown ? (delta > 0 ? 'color:#f85149' : 'color:#3fb950') : (delta < 0 ? 'color:#f85149' : 'color:#3fb950'));
+
+  wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="chart-card-latest">' + latest + '<span class="unit">' + cfg.unit + '</span>' + (delta !== null ? '<span class="delta" style="' + deltaColor + '">' + deltaStr + '</span>' : '') + '</div><div class="chart-canvas-wrap"><canvas id="trend-canvas"></canvas></div>' + (cfg.note ? '<div class="chart-note">' + cfg.note + '</div>' : '') + '</div>';
+
+  requestAnimationFrame(function() { drawChart(key, values, labels, cfg); });
+}
+
+function drawChart(key, values, labels, cfg) {
+  var canvas = document.getElementById('trend-canvas');
+  if (!canvas) return;
+  var dpr = window.devicePixelRatio || 1;
+  var rect = canvas.parentElement.getBoundingClientRect();
+  var W = rect.width; var H = 160;
+  canvas.width = W * dpr; canvas.height = H * dpr;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
+  var ctx = canvas.getContext('2d'); ctx.scale(dpr, dpr);
+
+  var pad = {top:16, right:14, bottom:28, left:42};
+  var gW = W - pad.left - pad.right;
+  var gH = H - pad.top - pad.bottom;
+
+  var allVals = values.slice();
+  cfg.refs.forEach(function(r) { allVals.push(r.value); });
+  if (cfg.alertHigh) allVals.push(cfg.alertHigh);
+  if (cfg.alertLow) allVals.push(cfg.alertLow);
+  var minVal = Math.min.apply(null, allVals) * 0.92;
+  var maxVal = Math.max.apply(null, allVals) * 1.08;
+  var range = maxVal - minVal || 1;
+
+  function toX(i) { return pad.left + (values.length === 1 ? gW/2 : (i / (values.length-1)) * gW); }
+  function toY(v) { return pad.top + gH - ((v - minVal) / range) * gH; }
+
+  // Grid
+  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
+  for (var i = 0; i <= 4; i++) {
+    var y = pad.top + (i/4)*gH;
+    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left+gW, y); ctx.stroke();
+    var v = maxVal - (i/4)*range;
+    ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'right';
+    ctx.fillText(v.toFixed(v < 10 ? 1 : 0), pad.left-4, y+3);
+  }
+
+  // Ref lines
+  cfg.refs.forEach(function(ref) {
+    var ry = toY(ref.value);
+    ctx.save(); ctx.strokeStyle = ref.color; ctx.lineWidth = 1; ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left, ry); ctx.lineTo(pad.left+gW, ry); ctx.stroke(); ctx.restore();
+  });
+
+  if (values.length > 1) {
+    // Area fill
+    ctx.beginPath();
+    ctx.moveTo(toX(0), toY(values[0]));
+    values.forEach(function(v,i) { if (i>0) ctx.lineTo(toX(i), toY(v)); });
+    ctx.lineTo(toX(values.length-1), pad.top+gH); ctx.lineTo(toX(0), pad.top+gH); ctx.closePath();
+    var grad = ctx.createLinearGradient(0, pad.top, 0, pad.top+gH);
+    grad.addColorStop(0, cfg.color+'44'); grad.addColorStop(1, cfg.color+'00');
+    ctx.fillStyle = grad; ctx.fill();
+    // Line
+    ctx.strokeStyle = cfg.color; ctx.lineWidth = 2.5; ctx.lineJoin = 'round'; ctx.lineCap = 'round';
+    ctx.beginPath();
+    values.forEach(function(v,i) { i===0 ? ctx.moveTo(toX(i),toY(v)) : ctx.lineTo(toX(i),toY(v)); });
+    ctx.stroke();
+  }
+
+  // Dots
+  values.forEach(function(v,i) {
+    var isAlert = (cfg.alertHigh && v >= cfg.alertHigh) || (cfg.alertLow && v <= cfg.alertLow);
+    ctx.beginPath(); ctx.arc(toX(i), toY(v), values.length===1?6:4, 0, Math.PI*2);
+    ctx.fillStyle = isAlert ? '#f85149' : cfg.color; ctx.fill();
+    if (isAlert) { ctx.strokeStyle = '#f8514955'; ctx.lineWidth=6; ctx.beginPath(); ctx.arc(toX(i),toY(v),9,0,Math.PI*2); ctx.stroke(); }
+  });
+
+  // X labels
+  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
+  var step = Math.max(1, Math.ceil(labels.length/6));
+  labels.forEach(function(l,i) { if (i%step===0 || i===labels.length-1) ctx.fillText(l, toX(i), H-5); });
+}
+
+// ── Settings ──
+function renderSettings() {
+  var p = getProfile();
+  document.getElementById('s-stent').value = p.stent || 'aanwezig';
+  document.getElementById('s-notes').value = p.notes || '';
+  document.getElementById('s-apikey').value = apiKey;
+  renderMedList(p.meds || []);
+}
+
+function renderMedList(meds) {
+  var list = document.getElementById('med-list'); list.innerHTML = '';
+  if (meds.length === 0) { list.innerHTML = '<div style="font-size:13px;color:var(--text-muted);padding:4px 0">Nog geen medicatie toegevoegd.</div>'; return; }
+  meds.forEach(function(m, i) {
+    var div = document.createElement('div'); div.className = 'med-item';
+    div.innerHTML = '<div class="med-item-name">' + escapeHtml(m.name) + '</div><div class="med-item-dose">' + escapeHtml(m.dose||'') + '</div><button class="icon-btn">&times;</button>';
+    div.querySelector('.icon-btn').addEventListener('click', function() { removeMed(i); });
+    list.appendChild(div);
+  });
+}
+
+function addMed() {
+  var name = document.getElementById('med-name').value.trim();
+  if (!name) return;
+  var dose = document.getElementById('med-dose').value.trim();
+  var p = getProfile(); var meds = p.meds || []; meds.push({name:name,dose:dose});
+  p.meds = meds; saveProfile(p);
+  document.getElementById('med-name').value = ''; document.getElementById('med-dose').value = '';
+  renderMedList(meds);
+}
+
+function removeMed(i) {
+  var p = getProfile(); var meds = p.meds || []; meds.splice(i,1); p.meds = meds; saveProfile(p); renderMedList(meds);
+}
+
+function saveSettings() {
+  var p = getProfile();
+  p.stent = document.getElementById('s-stent').value;
+  p.notes = document.getElementById('s-notes').value.trim();
+  saveProfile(p);
+  var keyVal = document.getElementById('s-apikey').value.trim();
+  if (keyVal && !keyVal.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
+  if (keyVal) { apiKey = keyVal; localStorage.setItem('nk_api_key', apiKey); }
+  showSuccess('Opgeslagen');
+  showChat();
+}
+
+// ── Agenda ──
+function selectUrgency(level, btn) {
+  selectedUrgency = level;
+  document.querySelectorAll('.urgency-btn').forEach(function(b) { b.className = 'urgency-btn'; });
+  btn.className = 'urgency-btn sel-' + level;
+}
+
+function autoResizeTA(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
+}
+
+function handleAgendaKey(e, type) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); if (type === 'vraag') addVraag(); else addKlacht(); }
+}
+
+function addVraag() {
+  var el = document.getElementById('vraag-input');
+  var text = el.value.trim(); if (!text) return;
+  var agenda = getAgenda();
+  agenda.vragen.unshift({id: Date.now(), text: text, date: Date.now(), done: false});
+  saveAgendaData(agenda); el.value = ''; el.style.height = 'auto'; renderAgenda();
+}
+
+function addKlacht() {
+  var el = document.getElementById('klacht-input');
+  var text = el.value.trim(); if (!text) return;
+  var agenda = getAgenda();
+  agenda.klachten.unshift({id: Date.now(), text: text, date: Date.now(), urgency: selectedUrgency});
+  saveAgendaData(agenda); el.value = ''; el.style.height = 'auto'; renderAgenda();
+}
+
+function toggleVraag(id) {
+  var agenda = getAgenda();
+  var item = agenda.vragen.find(function(v) { return v.id === id; });
+  if (item) item.done = !item.done;
+  saveAgendaData(agenda); renderAgenda();
+}
+
+function deleteVraag(id) {
+  var agenda = getAgenda(); agenda.vragen = agenda.vragen.filter(function(v) { return v.id !== id; });
+  saveAgendaData(agenda); renderAgenda();
+}
+
+function deleteKlacht(id) {
+  var agenda = getAgenda(); agenda.klachten = agenda.klachten.filter(function(k) { return k.id !== id; });
+  saveAgendaData(agenda); renderAgenda();
+}
+
+function clearDoneVragen() {
+  var agenda = getAgenda(); agenda.vragen = agenda.vragen.filter(function(v) { return !v.done; });
+  saveAgendaData(agenda); renderAgenda();
+}
+
+function renderAgenda() {
+  // Vragen
+  var agenda = getAgenda();
+  var vraagList = document.getElementById('vraag-list');
+  if (!vraagList) return;
+  var open = agenda.vragen.filter(function(v) { return !v.done; });
+  var done = agenda.vragen.filter(function(v) { return v.done; });
+  var sorted = open.concat(done);
+  vraagList.innerHTML = '';
+  if (sorted.length === 0) { vraagList.innerHTML = '<div class="list-empty">Nog geen vragen toegevoegd.</div>'; }
+  else {
+    sorted.forEach(function(v) {
+      var d = new Date(v.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'});
+      var div = document.createElement('div'); div.className = 'agenda-item' + (v.done ? ' done' : '');
+      div.innerHTML = '<div class="check-circle' + (v.done ? ' checked' : '') + '"></div><div class="agenda-item-body"><div class="agenda-item-text">' + escapeHtml(v.text) + '</div><div class="agenda-item-date">' + d + '</div></div><button class="icon-btn">&times;</button>';
+      div.querySelector('.check-circle').addEventListener('click', function() { toggleVraag(v.id); });
+      div.querySelector('.icon-btn').addEventListener('click', function() { deleteVraag(v.id); });
+      vraagList.appendChild(div);
+    });
+  }
+
+  // Klachten
+  var klachtList = document.getElementById('klacht-list');
+  if (!klachtList) return;
+  klachtList.innerHTML = '';
+  if (agenda.klachten.length === 0) { klachtList.innerHTML = '<div class="list-empty">Nog geen klachten genoteerd.</div>'; }
+  else {
+    agenda.klachten.forEach(function(k) {
+      var d = new Date(k.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
+      var urg = k.urgency || 'mild';
+      var urgLabel = urg === 'ernstig' ? 'Ernstig' : urg === 'matig' ? 'Matig' : 'Mild';
+      var div = document.createElement('div'); div.className = 'agenda-item';
+      div.innerHTML = '<div class="agenda-item-body"><div class="agenda-item-text">' + escapeHtml(k.text) + '<span class="urgency-badge ' + urg + '">' + urgLabel + '</span></div><div class="agenda-item-date">' + d + '</div></div><button class="icon-btn">&times;</button>';
+      div.querySelector('.icon-btn').addEventListener('click', function() { deleteKlacht(k.id); });
+      klachtList.appendChild(div);
+    });
+  }
 }
 
 // ── Chat ──
-function handleKey(e) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); }
-}
+function handleKey(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); sendMessage(); } }
 
-function autoResize(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 140) + 'px';
-}
+function autoResize(el) { el.style.height = 'auto'; el.style.height = Math.min(el.scrollHeight,140)+'px'; }
 
 function renderMessage(role, text) {
-  const chat = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = `msg ${role}`;
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.textContent = role === 'user' ? 'Jij' : 'NierRobot';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
-  if (role === 'ai') bubble.innerHTML = parseMarkdown(text);
-  else bubble.textContent = text;
-  div.appendChild(label);
-  div.appendChild(bubble);
-  chat.appendChild(div);
+  var chat = document.getElementById('chat-area');
+  var div = document.createElement('div'); div.className = 'msg ' + role;
+  var label = document.createElement('div'); label.className = 'msg-label'; label.textContent = role==='user' ? 'Jij' : 'NierRobot';
+  var bubble = document.createElement('div'); bubble.className = 'bubble';
+  if (role === 'ai') bubble.innerHTML = parseMarkdown(text); else bubble.textContent = text;
+  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div);
   chat.scrollTop = chat.scrollHeight;
-  return bubble;
 }
 
 function createStreamBubble() {
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.remove();
-  const chat = document.getElementById('chat-area');
-  const div = document.createElement('div');
-  div.className = 'msg ai';
-  const label = document.createElement('div');
-  label.className = 'msg-label';
-  label.textContent = 'NierRobot';
-  const bubble = document.createElement('div');
-  bubble.className = 'bubble';
+  var welcome = document.getElementById('welcome'); if (welcome) welcome.remove();
+  var chat = document.getElementById('chat-area');
+  var div = document.createElement('div'); div.className = 'msg ai';
+  var label = document.createElement('div'); label.className = 'msg-label'; label.textContent = 'NierRobot';
+  var bubble = document.createElement('div'); bubble.className = 'bubble';
   bubble.innerHTML = '<div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>';
-  div.appendChild(label);
-  div.appendChild(bubble);
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
+  div.appendChild(label); div.appendChild(bubble); chat.appendChild(div); chat.scrollTop = chat.scrollHeight;
   return bubble;
-}
-
-function showError(msg) {
-  const toast = document.getElementById('error-toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  setTimeout(() => toast.classList.remove('show'), 3000);
 }
 
 async function sendMessage() {
   if (isLoading) return;
   if (!apiKey) return showError('Stel eerst een API sleutel in');
-  const input = document.getElementById('user-input');
-  const text = input.value.trim();
-  if (!text) return;
-
-  const welcome = document.getElementById('welcome');
-  if (welcome) welcome.remove();
-
-  input.value = '';
-  input.style.height = 'auto';
-  isLoading = true;
-  document.getElementById('send-btn').disabled = true;
-
+  var input = document.getElementById('user-input');
+  var text = input.value.trim(); if (!text) return;
+  var welcome = document.getElementById('welcome'); if (welcome) welcome.remove();
+  input.value = ''; input.style.height = 'auto';
+  isLoading = true; document.getElementById('send-btn').disabled = true;
   renderMessage('user', text);
-  currentHistory.push({ role: 'user', content: text });
-
-  const maxMessages = 20;
-  const messagesToSend = currentHistory.length > maxMessages
-    ? currentHistory.slice(-maxMessages) : currentHistory;
-
-  const bubble = createStreamBubble();
-  let fullReply = '';
-
+  currentHistory.push({role:'user', content:text});
+  var maxMessages = 20;
+  var messagesToSend = currentHistory.length > maxMessages ? currentHistory.slice(-maxMessages) : currentHistory;
+  var bubble = createStreamBubble();
+  var fullReply = '';
   try {
-    const res = await fetch('https://api.anthropic.com/v1/messages', {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -1237,362 +1073,37 @@ async function sendMessage() {
         messages: messagesToSend
       })
     });
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      throw new Error(err?.error?.message || `API fout: ${res.status}`);
-    }
-
-    const reader = res.body.getReader();
-    const decoder = new TextDecoder();
-    let buffer = '';
-
+    if (!res.ok) { var err = await res.json().catch(function(){return {};}); throw new Error((err.error||{}).message || 'API fout: ' + res.status); }
+    var reader = res.body.getReader();
+    var decoder = new TextDecoder();
+    var buffer = '';
     while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      buffer += decoder.decode(value, { stream: true });
-
-      const lines = buffer.split('\n');
-      buffer = lines.pop(); // keep incomplete line
-
-      for (const line of lines) {
-        if (!line.startsWith('data: ')) continue;
-        const data = line.slice(6).trim();
-        if (data === '[DONE]') break;
+      var result = await reader.read(); if (result.done) break;
+      buffer += decoder.decode(result.value, {stream:true});
+      var lines = buffer.split('\n'); buffer = lines.pop();
+      for (var li = 0; li < lines.length; li++) {
+        var line = lines[li]; if (!line.startsWith('data: ')) continue;
+        var data = line.slice(6).trim(); if (data === '[DONE]') break;
         try {
-          const json = JSON.parse(data);
-          if (json.type === 'content_block_delta' && json.delta?.type === 'text_delta') {
+          var json = JSON.parse(data);
+          if (json.type === 'content_block_delta' && json.delta && json.delta.type === 'text_delta') {
             fullReply += json.delta.text;
             bubble.innerHTML = parseMarkdown(fullReply);
             document.getElementById('chat-area').scrollTop = document.getElementById('chat-area').scrollHeight;
           }
-        } catch {}
+        } catch(pe) {}
       }
     }
-
-    currentHistory.push({ role: 'assistant', content: fullReply });
+    currentHistory.push({role:'assistant', content:fullReply});
     saveCurrentConversation();
-
-  } catch (err) {
+  } catch(err) {
     bubble.textContent = 'Er ging iets mis: ' + (err.message || 'Probeer opnieuw.');
     currentHistory.pop();
   } finally {
-    isLoading = false;
-    document.getElementById('send-btn').disabled = false;
+    isLoading = false; document.getElementById('send-btn').disabled = false;
     document.getElementById('user-input').focus();
   }
 }
-
-// ── Charts ──
-let activeChartKey = 'creatinine';
-
-const CHART_CONFIG = {
-  creatinine: {
-    label: 'Creatinine', unit: 'µmol/L', color: '#4fc3f7',
-    refLines: [{ value: 110, label: 'Bovengrens normaal', color: '#3fb950' }],
-    alertHigh: null, alertLow: null,
-    note: 'Stijging >20% boven laagste waarde is een alarmsignaal.'
-  },
-  egfr: {
-    label: 'eGFR', unit: 'ml/min/1.73m²', color: '#7ee787',
-    refLines: [{ value: 60, label: 'Grens CKD stadium 3', color: '#d29922' }],
-    alertLow: 30,
-    note: 'eGFR <30 wijst op ernstige nierschade.'
-  },
-  tacrolimus: {
-    label: 'Tacrolimus talspiegel', unit: 'ng/mL', color: '#d2a8ff',
-    refLines: [
-      { value: 10, label: 'Streef hoog vroege fase', color: '#4fc3f7' },
-      { value: 8,  label: 'Streef laag vroege fase', color: '#d29922' }
-    ],
-    alertHigh: 15, alertLow: 6,
-    note: 'Streefwaarden zijn fase-afhankelijk en worden bepaald door Amsterdam UMC.'
-  },
-  bp: {
-    label: 'Bloeddruk systolisch', unit: 'mmHg', color: '#ffa657',
-    refLines: [{ value: 130, label: 'Streef <130 mmHg post-tx', color: '#d29922' }],
-    alertHigh: 160, alertLow: null,
-    note: 'Post-transplantatie streef <130/80 mmHg.'
-  },
-  weight: {
-    label: 'Gewicht', unit: 'kg', color: '#79c0ff',
-    refLines: [], alertHigh: null, alertLow: null,
-    note: 'Toename >1–2 kg/dag kan wijzen op vochtretentie.'
-  },
-  temp: {
-    label: 'Temperatuur', unit: '°C', color: '#ff7b72',
-    refLines: [{ value: 37.8, label: 'Alarmgrens post-tx', color: '#f85149' }],
-    alertHigh: 37.8, alertLow: null,
-    note: 'Bij ≥37,8°C in eerste 3 maanden: direct contact Amsterdam UMC.'
-  }
-};
-
-function switchChartTab(key, btn) {
-  document.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderChart(key);
-}
-
-function parseChartValue(entry, key) {
-  if (key === 'bp') {
-    const m = (entry.bp || '').match(/^(\d+)/);
-    return m ? parseFloat(m[1]) : null;
-  }
-  const v = parseFloat(entry[key]);
-  return isNaN(v) ? null : v;
-}
-
-function renderChart(key) {
-  const wrap = document.getElementById('chart-wrap');
-  const entries = getLabEntries();
-  const cfg = CHART_CONFIG[key];
-
-  const filtered = entries
-    .filter(e => parseChartValue(e, key) !== null)
-    .sort((a, b) => a.date - b.date);
-
-  if (filtered.length === 0) {
-    wrap.innerHTML = \`<div class="chart-card">
-      <div class="chart-card-title">\${cfg.label}</div>
-      <div class="chart-empty">Nog geen metingen voor \${cfg.label}.<br>Voeg ze toe via het Lab-tabblad.</div>
-    </div>\`;
-    return;
-  }
-
-  const values = filtered.map(e => parseChartValue(e, key));
-  const labels = filtered.map(e =>
-    new Date(e.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' })
-  );
-
-  const latest = values[values.length - 1];
-  const prev = values.length > 1 ? values[values.length - 2] : null;
-  const delta = prev !== null ? latest - prev : null;
-  const deltaStr = delta !== null ? (delta >= 0 ? '+' + delta.toFixed(1) : delta.toFixed(1)) : '';
-  const isNegativeGood = key === 'egfr';
-  const alertColor = delta === null ? '' : (
-    delta === 0 ? '' :
-    (isNegativeGood ? (delta < 0 ? 'color:var(--danger)' : 'color:var(--success)') :
-                      (delta > 0 ? 'color:var(--danger)' : 'color:var(--success)'))
-  );
-
-  wrap.innerHTML = \`<div class="chart-card">
-    <div class="chart-card-title">\${cfg.label}</div>
-    <div class="chart-card-latest">
-      \${latest} <span>\${cfg.unit}</span>
-      \${delta !== null ? \`<span style="font-size:13px;\${alertColor}">\${deltaStr}</span>\` : ''}
-    </div>
-    <div class="chart-canvas-wrap">
-      <canvas id="trend-canvas"></canvas>
-    </div>
-    \${cfg.note ? \`<div style="font-size:11px;color:var(--text-muted);margin-top:8px;">\${cfg.note}</div>\` : ''}
-  </div>\`;
-
-  requestAnimationFrame(() => drawCanvas(key, values, labels, cfg));
-}
-
-function drawCanvas(key, values, labels, cfg) {
-  const canvas = document.getElementById('trend-canvas');
-  if (!canvas) return;
-  const dpr = window.devicePixelRatio || 1;
-  const rect = canvas.parentElement.getBoundingClientRect();
-  const W = rect.width; const H = 160;
-  canvas.width = W * dpr; canvas.height = H * dpr;
-  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
-  const ctx = canvas.getContext('2d');
-  ctx.scale(dpr, dpr);
-
-  const pad = { top: 16, right: 16, bottom: 32, left: 44 };
-  const gW = W - pad.left - pad.right;
-  const gH = H - pad.top - pad.bottom;
-
-  const allVals = [...values];
-  cfg.refLines.forEach(r => allVals.push(r.value));
-  if (cfg.alertHigh) allVals.push(cfg.alertHigh);
-  if (cfg.alertLow) allVals.push(cfg.alertLow);
-  const minVal = Math.min(...allVals) * 0.92;
-  const maxVal = Math.max(...allVals) * 1.08;
-  const range = maxVal - minVal || 1;
-
-  const toX = i => pad.left + (values.length === 1 ? gW / 2 : (i / (values.length - 1)) * gW);
-  const toY = v => pad.top + gH - ((v - minVal) / range) * gH;
-
-  // Grid
-  ctx.strokeStyle = '#30363d'; ctx.lineWidth = 1;
-  for (let i = 0; i <= 4; i++) {
-    const y = pad.top + (i / 4) * gH;
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
-    const v = maxVal - (i / 4) * range;
-    ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif';
-    ctx.textAlign = 'right';
-    ctx.fillText(v.toFixed(v < 10 ? 1 : 0), pad.left - 4, y + 3);
-  }
-
-  // Ref lines
-  cfg.refLines.forEach(ref => {
-    const y = toY(ref.value);
-    ctx.save(); ctx.strokeStyle = ref.color; ctx.lineWidth = 1;
-    ctx.setLineDash([4, 4]);
-    ctx.beginPath(); ctx.moveTo(pad.left, y); ctx.lineTo(pad.left + gW, y); ctx.stroke();
-    ctx.restore();
-  });
-
-  if (values.length > 1) {
-    // Area
-    ctx.beginPath();
-    ctx.moveTo(toX(0), toY(values[0]));
-    values.forEach((v, i) => { if (i > 0) ctx.lineTo(toX(i), toY(v)); });
-    ctx.lineTo(toX(values.length - 1), pad.top + gH);
-    ctx.lineTo(toX(0), pad.top + gH);
-    ctx.closePath();
-    const grad = ctx.createLinearGradient(0, pad.top, 0, pad.top + gH);
-    grad.addColorStop(0, cfg.color + '44'); grad.addColorStop(1, cfg.color + '00');
-    ctx.fillStyle = grad; ctx.fill();
-
-    // Line
-    ctx.strokeStyle = cfg.color; ctx.lineWidth = 2.5;
-    ctx.lineJoin = 'round'; ctx.lineCap = 'round';
-    ctx.beginPath();
-    values.forEach((v, i) => { i === 0 ? ctx.moveTo(toX(i), toY(v)) : ctx.lineTo(toX(i), toY(v)); });
-    ctx.stroke();
-  }
-
-  // Dots
-  values.forEach((v, i) => {
-    const isAlert = (cfg.alertHigh && v >= cfg.alertHigh) || (cfg.alertLow && v <= cfg.alertLow);
-    ctx.beginPath(); ctx.arc(toX(i), toY(v), values.length === 1 ? 6 : 4, 0, Math.PI * 2);
-    ctx.fillStyle = isAlert ? '#f85149' : cfg.color; ctx.fill();
-    if (isAlert) {
-      ctx.strokeStyle = '#f8514966'; ctx.lineWidth = 6;
-      ctx.beginPath(); ctx.arc(toX(i), toY(v), 8, 0, Math.PI * 2); ctx.stroke();
-    }
-  });
-
-  // X labels
-  ctx.fillStyle = '#7d8590'; ctx.font = '10px sans-serif'; ctx.textAlign = 'center';
-  const step = Math.max(1, Math.ceil(labels.length / 6));
-  labels.forEach((l, i) => {
-    if (i % step === 0 || i === labels.length - 1)
-      ctx.fillText(l, toX(i), H - 6);
-  });
-}
-
-
-// ── Agenda ──
-let selectedUrgency = 'mild';
-
-function selectUrgency(level, btn) {
-  selectedUrgency = level;
-  document.querySelectorAll('.urgency-btn').forEach(b => {
-    b.className = 'urgency-btn';
-  });
-  btn.className = 'urgency-btn selected-' + level;
-}
-
-function autoResizeTA(el) {
-  el.style.height = 'auto';
-  el.style.height = Math.min(el.scrollHeight, 100) + 'px';
-}
-
-function agendaKey(e, type) {
-  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); addAgendaItem(type); }
-}
-
-function getAgenda() {
-  try { return JSON.parse(localStorage.getItem('nk_agenda') || '{"vragen":[],"klachten":[]}'); }
-  catch { return { vragen: [], klachten: [] }; }
-}
-function saveAgenda(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
-
-function addAgendaItem(type) {
-  const inputId = type === 'vraag' ? 'vraag-input' : 'klacht-input';
-  const el = document.getElementById(inputId);
-  const text = el.value.trim();
-  if (!text) return;
-
-  const agenda = getAgenda();
-  const item = { id: Date.now(), text, date: Date.now(), done: false };
-  if (type === 'klacht') item.urgency = selectedUrgency;
-
-  if (type === 'vraag') agenda.vragen.unshift(item);
-  else agenda.klachten.unshift(item);
-
-  saveAgenda(agenda);
-  el.value = ''; el.style.height = 'auto';
-  renderAgenda();
-}
-
-function toggleVraagDone(id) {
-  const agenda = getAgenda();
-  const item = agenda.vragen.find(v => v.id === id);
-  if (item) item.done = !item.done;
-  saveAgenda(agenda);
-  renderAgenda();
-}
-
-function deleteAgendaItem(type, id) {
-  const agenda = getAgenda();
-  if (type === 'vraag') agenda.vragen = agenda.vragen.filter(v => v.id !== id);
-  else agenda.klachten = agenda.klachten.filter(k => k.id !== id);
-  saveAgenda(agenda);
-  renderAgenda();
-}
-
-function clearDoneVragen() {
-  const agenda = getAgenda();
-  agenda.vragen = agenda.vragen.filter(v => !v.done);
-  saveAgenda(agenda);
-  renderAgenda();
-}
-
-function renderAgenda() {
-  const agenda = getAgenda();
-
-  // Vragen
-  const vraagList = document.getElementById('vraag-list');
-  if (!vraagList) return;
-  const open = agenda.vragen.filter(v => !v.done);
-  const done = agenda.vragen.filter(v => v.done);
-  const sorted = [...open, ...done];
-
-  if (sorted.length === 0) {
-    vraagList.innerHTML = '<div class="agenda-empty">Nog geen vragen toegevoegd.</div>';
-  } else {
-    vraagList.innerHTML = sorted.map(v => {
-      const d = new Date(v.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short' });
-      return \`<div class="agenda-item \${v.done ? 'done' : ''}">
-        <div class="agenda-check \${v.done ? 'checked' : ''}" onclick="toggleVraagDone(\${v.id})"></div>
-        <div class="agenda-item-body">
-          <div class="agenda-item-text">\${escapeHtml(v.text)}</div>
-          <div class="agenda-item-date">\${d}</div>
-        </div>
-        <button class="agenda-item-del" onclick="deleteAgendaItem('vraag',\${v.id})">&times;</button>
-      </div>\`;
-    }).join('');
-  }
-
-  // Klachten
-  const klachtList = document.getElementById('klacht-list');
-  if (!klachtList) return;
-  if (agenda.klachten.length === 0) {
-    klachtList.innerHTML = '<div class="agenda-empty">Nog geen klachten genoteerd.</div>';
-  } else {
-    klachtList.innerHTML = agenda.klachten.map(k => {
-      const d = new Date(k.date).toLocaleDateString('nl-NL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' });
-      const urgLabel = k.urgency === 'ernstig' ? 'Ernstig' : k.urgency === 'matig' ? 'Matig' : 'Mild';
-      return \`<div class="agenda-item">
-        <div class="agenda-item-body">
-          <div class="agenda-item-text">
-            \${escapeHtml(k.text)}
-            <span class="klacht-badge \${k.urgency || 'mild'}">\${urgLabel}</span>
-          </div>
-          <div class="agenda-item-date">\${d}</div>
-        </div>
-        <button class="agenda-item-del" onclick="deleteAgendaItem('klacht',\${k.id})">&times;</button>
-      </div>\`;
-    }).join('');
-  }
-}
-
 
 init();
 </script>

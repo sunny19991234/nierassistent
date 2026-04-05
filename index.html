@@ -459,10 +459,17 @@ function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&l
 
 // ── Supabase sync ──
 async function syncFromSupabase() {
-  if (!currentUser) return;
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ sync...';
   try {
+    // Refresh session before syncing
+    var sessRes = await supa.auth.getSession();
+    if (!sessRes.data || !sessRes.data.session) {
+      currentUser = null;
+      if (statusEl) statusEl.textContent = '';
+      return;
+    }
+    currentUser = sessRes.data.session.user;
     // Lab entries — always overwrite local, even if array is empty
     var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
     if (labRes.data) {
@@ -513,13 +520,29 @@ function refreshVisiblePanel() {
   if (settingsPanel && settingsPanel.classList.contains('visible')) renderSettings();
 }
 
+// Always get a fresh/valid user before any write — refreshes token automatically
+async function getValidUser() {
+  try {
+    var res = await supa.auth.getSession();
+    if (res.data && res.data.session) {
+      currentUser = res.data.session.user;
+      return currentUser;
+    }
+  } catch(e) { console.error('getValidUser error:', e); }
+  currentUser = null;
+  showError('Sessie verlopen — log opnieuw in');
+  showAuthScreen();
+  return null;
+}
+
 async function pushLabToSupabase(entry) {
-  if (!currentUser) { showError('Niet ingelogd — meting niet gesynchroniseerd'); return; }
+  var user = await getValidUser();
+  if (!user) return;
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ opslaan...';
   try {
     var res = await supa.from('lab_entries').insert({
-      user_id: currentUser.id, entry_date: new Date(entry.date).toISOString(),
+      user_id: user.id, entry_date: new Date(entry.date).toISOString(),
       creatinine: entry.creatinine||null, egfr: entry.egfr||null,
       tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
       weight: entry.weight||null, temp: entry.temp||null
@@ -544,9 +567,9 @@ async function deleteLabFromSupabase(entry) {
 }
 
 async function pushVraagToSupabase(item) {
-  if (!currentUser) return;
+  var user = await getValidUser(); if (!user) return;
   try {
-    var res = await supa.from('agenda_vragen').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), done: item.done});
+    var res = await supa.from('agenda_vragen').insert({user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), done: item.done});
     if (res.error) { console.error('Vraag push error:', res.error); showError('Sync fout: ' + res.error.message); }
   } catch(e) { console.error('Vraag push error:', e); }
 }
@@ -562,9 +585,9 @@ async function deleteVraagFromSupabase(item) {
 }
 
 async function pushKlachtToSupabase(item) {
-  if (!currentUser) return;
+  var user = await getValidUser(); if (!user) return;
   try {
-    var res = await supa.from('agenda_klachten').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), urgency: item.urgency});
+    var res = await supa.from('agenda_klachten').insert({user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), urgency: item.urgency});
     if (res.error) { console.error('Klacht push error:', res.error); showError('Sync fout: ' + res.error.message); }
   } catch(e) { console.error('Klacht push error:', e); }
 }
@@ -689,19 +712,31 @@ function setupRealtimeSync() {
     .subscribe();
 }
 
-// Sync when app comes back to foreground (e.g. switching browser tabs or home screen app)
+// Sync when app comes back to foreground — also refresh session first
 document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && currentUser) {
-    syncFromSupabase().then(function() {
-      var labPanel = document.getElementById('lab-panel');
-      var agendaPanel = document.getElementById('agenda-panel');
-      var chartPanel = document.getElementById('chart-panel');
-      if (labPanel && labPanel.classList.contains('visible')) renderLabEntries();
-      if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
-      if (chartPanel && chartPanel.classList.contains('visible')) renderChart(currentChartKey || 'creatinine');
-    });
+  if (document.visibilityState === 'visible') {
+    refreshSessionAndSync();
   }
 });
+
+async function refreshSessionAndSync() {
+  try {
+    // Always ask Supabase for a fresh session (auto-refreshes token if needed)
+    var refreshed = await supa.auth.getSession();
+    if (refreshed.data && refreshed.data.session) {
+      currentUser = refreshed.data.session.user;
+      await syncFromSupabase();
+    } else {
+      // Session truly expired
+      currentUser = null;
+      if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
+      showAuthScreen();
+      showError('Sessie verlopen — log opnieuw in');
+    }
+  } catch(e) {
+    console.error('Session refresh error:', e);
+  }
+}
 
 async function init() {
   currentConvId = 'conv_' + Date.now();

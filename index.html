@@ -419,9 +419,9 @@ function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&l
 async function syncFromSupabase() {
   if (!currentUser) return;
   try {
-    // Lab entries
+    // Lab entries — always overwrite local, even if array is empty
     var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    if (labRes.data && labRes.data.length > 0) {
+    if (labRes.data) {
       var labEntries = labRes.data.map(function(r) {
         return { date: r.entry_date, creatinine: r.creatinine||'', egfr: r.egfr||'', tacrolimus: r.tacrolimus||'', bp: r.bp||'', weight: r.weight||'', temp: r.temp||'', sbId: r.id };
       });
@@ -447,7 +447,21 @@ async function syncFromSupabase() {
       var p = {stent: profRes.data.stent, notes: profRes.data.notes, meds: profRes.data.meds || []};
       saveProfileLocal(p);
     }
+
+    // Refresh whichever panel is currently visible
+    refreshVisiblePanel();
   } catch(e) { console.error('Sync error:', e); }
+}
+
+function refreshVisiblePanel() {
+  var labPanel = document.getElementById('lab-panel');
+  var agendaPanel = document.getElementById('agenda-panel');
+  var chartPanel = document.getElementById('chart-panel');
+  var settingsPanel = document.getElementById('settings-panel');
+  if (labPanel && labPanel.classList.contains('visible')) renderLabEntries();
+  if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
+  if (chartPanel && chartPanel.classList.contains('visible')) renderChart(currentChartKey || 'creatinine');
+  if (settingsPanel && settingsPanel.classList.contains('visible')) renderSettings();
 }
 
 async function pushLabToSupabase(entry) {
@@ -671,18 +685,9 @@ function showPanel(name) {
   document.getElementById(name + '-panel').classList.add('visible');
   setActiveBtn(name);
   if (name === 'history') renderHistoryList();
-  if (name === 'lab') {
-    renderLabEntries();
-    if (currentUser) syncFromSupabase().then(function() { renderLabEntries(); });
-  }
-  if (name === 'chart') {
-    renderChart(currentChartKey);
-    if (currentUser) syncFromSupabase().then(function() { renderChart(currentChartKey); });
-  }
-  if (name === 'agenda') {
-    renderAgenda();
-    if (currentUser) syncFromSupabase().then(function() { renderAgenda(); });
-  }
+  if (name === 'lab') { renderLabEntries(); if (currentUser) syncFromSupabase(); }
+  if (name === 'chart') { renderChart(currentChartKey); if (currentUser) syncFromSupabase(); }
+  if (name === 'agenda') { renderAgenda(); if (currentUser) syncFromSupabase(); }
   if (name === 'settings') renderSettings();
 }
 

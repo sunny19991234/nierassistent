@@ -47,6 +47,7 @@
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 20;
     }
+    #app.auth-mode #tab-bar { display: none !important; }
     .tab-btn {
       flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 8px 2px 6px; gap: 3px;
@@ -396,7 +397,7 @@
   </div>
 
   <!-- Bottom tab bar -->
-  <div id="tab-bar" style="display:none;">
+  <div id="tab-bar">
     <button class="tab-btn active" id="btn-chat" onclick="showChat()">
       <svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
       Chat
@@ -422,6 +423,7 @@
       Profiel
     </button>
   </div>
+
 </div>
 <div id="error-toast"></div>
 <div id="success-toast"></div>
@@ -622,28 +624,28 @@ async function signOut() {
 
 // ── UI state ──
 function showAuthScreen() {
+  document.getElementById('app').classList.add('auth-mode');
   document.getElementById('auth-screen').classList.add('visible');
   document.getElementById('api-screen').classList.remove('visible');
   document.getElementById('chat-area').style.display = 'none';
   document.getElementById('input-bar').style.display = 'none';
-  document.getElementById('tab-bar').style.display = 'none';
   ALL_PANELS.forEach(function(p) { document.getElementById(p + '-panel').classList.remove('visible'); });
 }
 
 function showApiScreen() {
+  document.getElementById('app').classList.add('auth-mode');
   document.getElementById('auth-screen').classList.remove('visible');
   document.getElementById('api-screen').classList.add('visible');
   document.getElementById('chat-area').style.display = 'none';
   document.getElementById('input-bar').style.display = 'none';
-  document.getElementById('tab-bar').style.display = 'none';
 }
 
 function showApp() {
+  document.getElementById('app').classList.remove('auth-mode');
   document.getElementById('auth-screen').classList.remove('visible');
   document.getElementById('api-screen').classList.remove('visible');
   document.getElementById('chat-area').style.display = 'flex';
   document.getElementById('input-bar').style.display = 'flex';
-  document.getElementById('tab-bar').style.display = 'flex';
   setActiveBtn('chat');
 }
 

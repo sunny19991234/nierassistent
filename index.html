@@ -367,6 +367,11 @@
         <div class="section-title">API sleutel (Claude)</div>
         <div class="settings-field"><label>Anthropic API sleutel</label><input type="password" id="s-apikey" placeholder="sk-ant-api03-..." autocomplete="off" /></div>
       </div>
+      <div class="settings-section" id="debug-section">
+        <div class="section-title">Verbindingstest</div>
+        <div id="debug-output" style="font-size:12px;color:var(--text-muted);line-height:1.8;word-break:break-all;"></div>
+        <button class="full-btn" onclick="runDebug()">Test Supabase verbinding</button>
+      </div>
       <button class="full-btn" onclick="saveSettings()">Opslaan</button>
       <button class="btn-danger" style="margin-top:4px;" onclick="signOut()">Uitloggen</button>
     </div>
@@ -473,7 +478,9 @@ function refreshVisiblePanel() {
 }
 
 async function pushLabToSupabase(entry) {
-  if (!currentUser) return;
+  if (!currentUser) { showError('Niet ingelogd — meting niet gesynchroniseerd'); return; }
+  var statusEl = document.getElementById('sync-status');
+  if (statusEl) statusEl.textContent = '⟳ opslaan...';
   try {
     var res = await supa.from('lab_entries').insert({
       user_id: currentUser.id, entry_date: new Date(entry.date).toISOString(),
@@ -481,8 +488,18 @@ async function pushLabToSupabase(entry) {
       tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
       weight: entry.weight||null, temp: entry.temp||null
     });
-    if (res.error) { console.error('Lab push error:', res.error); showError('Sync fout: ' + res.error.message); }
-  } catch(e) { console.error('Lab push error:', e); showError('Sync fout: ' + e.message); }
+    if (res.error) {
+      console.error('Lab push error:', res.error);
+      if (statusEl) statusEl.textContent = '✗ fout';
+      showError('Supabase fout: ' + res.error.message);
+    } else {
+      if (statusEl) { statusEl.textContent = '✓ opgeslagen'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
+    }
+  } catch(e) {
+    console.error('Lab push error:', e);
+    if (statusEl) statusEl.textContent = '✗ fout';
+    showError('Verbindingsfout: ' + e.message);
+  }
 }
 
 async function deleteLabFromSupabase(entry) {
@@ -1132,6 +1149,56 @@ async function sendMessage(){
     currentHistory.push({role:'assistant',content:fullReply}); saveCurrentConversation();
   }catch(err){bubble.textContent='Er ging iets mis: '+(err.message||'Probeer opnieuw.'); currentHistory.pop();}
   finally{isLoading=false; document.getElementById('send-btn').disabled=false; document.getElementById('user-input').focus();}
+}
+
+async function runDebug() {
+  var out = document.getElementById('debug-output');
+  out.innerHTML = 'Bezig...';
+  var lines = [];
+
+  // Check currentUser
+  if (!currentUser) {
+    lines.push('❌ currentUser is NULL — je bent niet ingelogd in de app');
+  } else {
+    lines.push('✓ Ingelogd als: ' + currentUser.email);
+    lines.push('✓ User ID: ' + currentUser.id);
+  }
+
+  // Check Supabase session
+  try {
+    var sess = await supa.auth.getSession();
+    if (sess.data && sess.data.session) {
+      lines.push('✓ Supabase sessie actief');
+    } else {
+      lines.push('❌ Geen Supabase sessie gevonden');
+    }
+  } catch(e) {
+    lines.push('❌ Sessie check fout: ' + e.message);
+  }
+
+  // Try a test insert
+  if (currentUser) {
+    try {
+      var testDate = new Date().toISOString();
+      var res = await supa.from('lab_entries').insert({
+        user_id: currentUser.id,
+        entry_date: testDate,
+        creatinine: '999'
+      });
+      if (res.error) {
+        lines.push('❌ Test insert mislukt: ' + JSON.stringify(res.error));
+      } else {
+        lines.push('✓ Test insert geslaagd! Data staat in Supabase.');
+        // Clean up test entry
+        await supa.from('lab_entries').delete().eq('creatinine', '999').eq('user_id', currentUser.id);
+        lines.push('✓ Testdata opgeruimd');
+      }
+    } catch(e) {
+      lines.push('❌ Insert exception: ' + e.message);
+    }
+  }
+
+  out.innerHTML = lines.join('<br>');
 }
 
 init();

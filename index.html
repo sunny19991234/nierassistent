@@ -230,6 +230,7 @@
   <div id="header">
     <div class="header-dot"></div>
     <h1>Sunny's NierRobot</h1>
+    <div id="sync-status" style="font-size:10px;color:var(--text-muted);padding:0 2px;flex-shrink:0;" title="Sync status"></div>
     <div id="header-actions">
       <button class="hdr-btn active" id="btn-chat" onclick="showChat()">Chat</button>
       <button class="hdr-btn" id="btn-lab" onclick="showPanel('lab')">Lab</button>
@@ -418,6 +419,8 @@ function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&l
 // ── Supabase sync ──
 async function syncFromSupabase() {
   if (!currentUser) return;
+  var statusEl = document.getElementById('sync-status');
+  if (statusEl) statusEl.textContent = '⟳ sync...';
   try {
     // Lab entries — always overwrite local, even if array is empty
     var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
@@ -450,7 +453,12 @@ async function syncFromSupabase() {
 
     // Refresh whichever panel is currently visible
     refreshVisiblePanel();
-  } catch(e) { console.error('Sync error:', e); }
+    if (statusEl) { statusEl.textContent = '✓ gesynchroniseerd'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
+  } catch(e) {
+    console.error('Sync error:', e);
+    if (statusEl) statusEl.textContent = '✗ sync fout';
+    showError('Sync mislukt: ' + (e.message||e));
+  }
 }
 
 function refreshVisiblePanel() {
@@ -467,13 +475,14 @@ function refreshVisiblePanel() {
 async function pushLabToSupabase(entry) {
   if (!currentUser) return;
   try {
-    await supa.from('lab_entries').insert({
-      user_id: currentUser.id, entry_date: entry.date,
+    var res = await supa.from('lab_entries').insert({
+      user_id: currentUser.id, entry_date: new Date(entry.date).toISOString(),
       creatinine: entry.creatinine||null, egfr: entry.egfr||null,
       tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
       weight: entry.weight||null, temp: entry.temp||null
     });
-  } catch(e) { console.error('Lab push error:', e); }
+    if (res.error) { console.error('Lab push error:', res.error); showError('Sync fout: ' + res.error.message); }
+  } catch(e) { console.error('Lab push error:', e); showError('Sync fout: ' + e.message); }
 }
 
 async function deleteLabFromSupabase(entry) {
@@ -484,7 +493,8 @@ async function deleteLabFromSupabase(entry) {
 async function pushVraagToSupabase(item) {
   if (!currentUser) return;
   try {
-    await supa.from('agenda_vragen').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: item.date, done: item.done});
+    var res = await supa.from('agenda_vragen').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), done: item.done});
+    if (res.error) { console.error('Vraag push error:', res.error); showError('Sync fout: ' + res.error.message); }
   } catch(e) { console.error('Vraag push error:', e); }
 }
 
@@ -501,7 +511,8 @@ async function deleteVraagFromSupabase(item) {
 async function pushKlachtToSupabase(item) {
   if (!currentUser) return;
   try {
-    await supa.from('agenda_klachten').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: item.date, urgency: item.urgency});
+    var res = await supa.from('agenda_klachten').insert({user_id: currentUser.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), urgency: item.urgency});
+    if (res.error) { console.error('Klacht push error:', res.error); showError('Sync fout: ' + res.error.message); }
   } catch(e) { console.error('Klacht push error:', e); }
 }
 

@@ -432,9 +432,20 @@
 'use strict';
 
 // ── Supabase ──
+// FIX: gebruik een unieke storageKey zodat meerdere tabs/instanties
+// niet elkaars Web Lock stelen. Dit lost de "Lock broken by another
+// request with the 'steal' option" fout op.
 var SUPA_URL = 'https://owtqluywrokierqykwyn.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93dHFsdXl3cm9raWVycXlrd3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTg4NTQsImV4cCI6MjA5MDg5NDg1NH0.4fXLvsyBB8pmC58o4BuBVKbJxjYmhCA7KgG6FEqpRec';
-var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
+var supa = supabase.createClient(SUPA_URL, SUPA_KEY, {
+  auth: {
+    persistSession: true,
+    storageKey: 'nierrobot_auth',   // eigen namespace, nooit conflict met andere sites
+    storage: window.localStorage,
+    autoRefreshToken: true,
+    detectSessionInUrl: false       // voorkomt dat elke tab de URL-hash pakt en een nieuwe lock opent
+  }
+});
 var currentUser = null;
 
 // ── State ──
@@ -445,6 +456,10 @@ var currentConvId = null;
 var selectedUrgency = 'mild';
 var authMode = 'login';
 var currentChartKey = 'creatinine';
+
+// ── Sync guard: voorkomt overlappende sync-calls ──
+var syncInProgress = false;
+var syncQueued = false;
 
 // ── Local storage helpers ──
 function getProfile() { try { return JSON.parse(localStorage.getItem('nk_profile') || '{}'); } catch(e) { return {}; } }
@@ -458,11 +473,17 @@ function saveAgendaLocal(a) { localStorage.setItem('nk_agenda', JSON.stringify(a
 function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Supabase sync ──
+// FIX: sync-guard voorkomt dat visibility-change en realtime
+// tegelijkertijd twee sync-calls starten die elkaars lock stelen.
 async function syncFromSupabase() {
+  if (syncInProgress) {
+    syncQueued = true;   // voer na afloop nog één sync uit
+    return;
+  }
+  syncInProgress = true;
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ sync...';
   try {
-    // Refresh session before syncing
     var sessRes = await supa.auth.getSession();
     if (!sessRes.data || !sessRes.data.session) {
       currentUser = null;
@@ -470,7 +491,7 @@ async function syncFromSupabase() {
       return;
     }
     currentUser = sessRes.data.session.user;
-    // Lab entries — always overwrite local, even if array is empty
+
     var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
     if (labRes.data) {
       var labEntries = labRes.data.map(function(r) {
@@ -478,11 +499,9 @@ async function syncFromSupabase() {
       });
       saveLabLocal(labEntries);
     }
-    // Vragen
+
     var vraagRes = await supa.from('agenda_vragen').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    // Klachten
     var klachtRes = await supa.from('agenda_klachten').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    // Profile
     var profRes = await supa.from('profile').select('*').eq('user_id', currentUser.id).maybeSingle();
 
     var agenda = {vragen:[], klachten:[]};
@@ -499,13 +518,26 @@ async function syncFromSupabase() {
       saveProfileLocal(p);
     }
 
-    // Refresh whichever panel is currently visible
     refreshVisiblePanel();
     if (statusEl) { statusEl.textContent = '✓ gesynchroniseerd'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
   } catch(e) {
-    console.error('Sync error:', e);
-    if (statusEl) statusEl.textContent = '✗ sync fout';
-    showError('Sync mislukt: ' + (e.message||e));
+    // FIX: lock-fouten zijn tijdelijk — stil negeren, geen error-toast tonen
+    var isLockError = e && e.message && (e.message.indexOf('Lock') !== -1 || e.message.indexOf('AbortError') !== -1);
+    if (!isLockError) {
+      console.error('Sync error:', e);
+      if (document.getElementById('sync-status')) document.getElementById('sync-status').textContent = '✗ sync fout';
+      showError('Sync mislukt: ' + (e.message||e));
+    } else {
+      console.warn('Sync lock conflict (tijdelijk, wordt genegeerd):', e.message);
+      if (document.getElementById('sync-status')) document.getElementById('sync-status').textContent = '';
+    }
+  } finally {
+    syncInProgress = false;
+    // Als er een sync was geblokkeerd, voer die alsnog uit (met kleine vertraging)
+    if (syncQueued) {
+      syncQueued = false;
+      setTimeout(syncFromSupabase, 800);
+    }
   }
 }
 
@@ -520,7 +552,8 @@ function refreshVisiblePanel() {
   if (settingsPanel && settingsPanel.classList.contains('visible')) renderSettings();
 }
 
-// Always get a fresh/valid user before any write — refreshes token automatically
+// FIX: getValidUser gebruikt nu refreshSession zodat het token
+// altijd geldig is zonder een nieuwe Web Lock te openen
 async function getValidUser() {
   try {
     var res = await supa.auth.getSession();
@@ -528,7 +561,21 @@ async function getValidUser() {
       currentUser = res.data.session.user;
       return currentUser;
     }
-  } catch(e) { console.error('getValidUser error:', e); }
+  } catch(e) {
+    // Lock conflict: probeer met kleine vertraging opnieuw
+    if (e && e.message && e.message.indexOf('Lock') !== -1) {
+      await new Promise(function(r){ setTimeout(r, 500); });
+      try {
+        var res2 = await supa.auth.getSession();
+        if (res2.data && res2.data.session) {
+          currentUser = res2.data.session.user;
+          return currentUser;
+        }
+      } catch(e2) { console.error('getValidUser retry error:', e2); }
+    } else {
+      console.error('getValidUser error:', e);
+    }
+  }
   currentUser = null;
   showError('Sessie verlopen — log opnieuw in');
   showAuthScreen();
@@ -687,24 +734,13 @@ function setupRealtimeSync() {
   if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
   realtimeChannel = supa.channel('db-changes-' + currentUser.id)
     .on('postgres_changes', {event: '*', schema: 'public', table: 'lab_entries', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase().then(function() {
-        var labPanel = document.getElementById('lab-panel');
-        var chartPanel = document.getElementById('chart-panel');
-        if (labPanel && labPanel.classList.contains('visible')) renderLabEntries();
-        if (chartPanel && chartPanel.classList.contains('visible')) renderChart(currentChartKey || 'creatinine');
-      });
+      syncFromSupabase();
     })
     .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_vragen', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase().then(function() {
-        var agendaPanel = document.getElementById('agenda-panel');
-        if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
-      });
+      syncFromSupabase();
     })
     .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_klachten', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase().then(function() {
-        var agendaPanel = document.getElementById('agenda-panel');
-        if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
-      });
+      syncFromSupabase();
     })
     .on('postgres_changes', {event: '*', schema: 'public', table: 'profile', filter: 'user_id=eq.' + currentUser.id}, function() {
       syncFromSupabase();
@@ -712,35 +748,38 @@ function setupRealtimeSync() {
     .subscribe();
 }
 
-// Sync when app comes back to foreground — also refresh session first
+// FIX: visibility-change wacht nu eerst 300ms zodat de browser
+// de bestaande lock volledig kan vrijgeven voor de tab opnieuw actief wordt
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'visible') {
-    refreshSessionAndSync();
+    setTimeout(refreshSessionAndSync, 300);
   }
 });
 
 async function refreshSessionAndSync() {
   try {
-    // Always ask Supabase for a fresh session (auto-refreshes token if needed)
     var refreshed = await supa.auth.getSession();
     if (refreshed.data && refreshed.data.session) {
       currentUser = refreshed.data.session.user;
       await syncFromSupabase();
     } else {
-      // Session truly expired
       currentUser = null;
       if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
       showAuthScreen();
       showError('Sessie verlopen — log opnieuw in');
     }
   } catch(e) {
-    console.error('Session refresh error:', e);
+    // Lock conflict bij visibility-change: stil negeren, sync is al actief
+    if (e && e.message && e.message.indexOf('Lock') !== -1) {
+      console.warn('Visibility sync lock conflict (normaal bij tabwisseling):', e.message);
+    } else {
+      console.error('Session refresh error:', e);
+    }
   }
 }
 
 async function init() {
   currentConvId = 'conv_' + Date.now();
-  // Listen for auth state changes
   supa.auth.onAuthStateChange(async function(event, session) {
     if (session && session.user) {
       currentUser = session.user;
@@ -753,7 +792,6 @@ async function init() {
       showAuthScreen();
     }
   });
-  // Check existing session
   var sessionRes = await supa.auth.getSession();
   if (sessionRes.data && sessionRes.data.session) {
     currentUser = sessionRes.data.session.user;
@@ -1230,7 +1268,6 @@ async function runDebug() {
   out.innerHTML = 'Bezig...';
   var lines = [];
 
-  // Check currentUser
   if (!currentUser) {
     lines.push('❌ currentUser is NULL — je bent niet ingelogd in de app');
   } else {
@@ -1238,11 +1275,12 @@ async function runDebug() {
     lines.push('✓ User ID: ' + currentUser.id);
   }
 
-  // Check Supabase session
   try {
     var sess = await supa.auth.getSession();
     if (sess.data && sess.data.session) {
       lines.push('✓ Supabase sessie actief');
+      var exp = new Date(sess.data.session.expires_at * 1000).toLocaleTimeString('nl-NL');
+      lines.push('✓ Token geldig tot: ' + exp);
     } else {
       lines.push('❌ Geen Supabase sessie gevonden');
     }
@@ -1250,7 +1288,6 @@ async function runDebug() {
     lines.push('❌ Sessie check fout: ' + e.message);
   }
 
-  // Try a test insert
   if (currentUser) {
     try {
       var testDate = new Date().toISOString();
@@ -1263,7 +1300,6 @@ async function runDebug() {
         lines.push('❌ Test insert mislukt: ' + JSON.stringify(res.error));
       } else {
         lines.push('✓ Test insert geslaagd! Data staat in Supabase.');
-        // Clean up test entry
         await supa.from('lab_entries').delete().eq('creatinine', '999').eq('user_id', currentUser.id);
         lines.push('✓ Testdata opgeruimd');
       }

@@ -391,7 +391,7 @@
 
 // ── Supabase ──
 var SUPA_URL = 'https://owtqluywrokierqykwyn.supabase.co';
-var SUPA_KEY = 'sb_publishable_GDV6_sx4BWqf2DvN3-O3TQ_s5eRNCeY';
+var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93dHFsdXl3cm9raWVycXlrd3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTg4NTQsImV4cCI6MjA5MDg5NDg1NH0.4fXLvsyBB8pmC58o4BuBVKbJxjYmhCA7KgG6FEqpRec';
 var supa = supabase.createClient(SUPA_URL, SUPA_KEY);
 var currentUser = null;
 
@@ -402,6 +402,7 @@ var isLoading = false;
 var currentConvId = null;
 var selectedUrgency = 'mild';
 var authMode = 'login';
+var currentChartKey = 'creatinine';
 
 // ── Local storage helpers ──
 function getProfile() { try { return JSON.parse(localStorage.getItem('nk_profile') || '{}'); } catch(e) { return {}; } }
@@ -575,6 +576,51 @@ function saveApiKey() {
 
 // ── Init ──
 var ALL_PANELS = ['history','lab','chart','agenda','settings'];
+var realtimeChannel = null;
+
+function setupRealtimeSync() {
+  if (!currentUser) return;
+  if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
+  realtimeChannel = supa.channel('db-changes-' + currentUser.id)
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'lab_entries', filter: 'user_id=eq.' + currentUser.id}, function() {
+      syncFromSupabase().then(function() {
+        var labPanel = document.getElementById('lab-panel');
+        var chartPanel = document.getElementById('chart-panel');
+        if (labPanel && labPanel.classList.contains('visible')) renderLabEntries();
+        if (chartPanel && chartPanel.classList.contains('visible')) renderChart(currentChartKey || 'creatinine');
+      });
+    })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_vragen', filter: 'user_id=eq.' + currentUser.id}, function() {
+      syncFromSupabase().then(function() {
+        var agendaPanel = document.getElementById('agenda-panel');
+        if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
+      });
+    })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_klachten', filter: 'user_id=eq.' + currentUser.id}, function() {
+      syncFromSupabase().then(function() {
+        var agendaPanel = document.getElementById('agenda-panel');
+        if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
+      });
+    })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'profile', filter: 'user_id=eq.' + currentUser.id}, function() {
+      syncFromSupabase();
+    })
+    .subscribe();
+}
+
+// Sync when app comes back to foreground (e.g. switching browser tabs or home screen app)
+document.addEventListener('visibilitychange', function() {
+  if (document.visibilityState === 'visible' && currentUser) {
+    syncFromSupabase().then(function() {
+      var labPanel = document.getElementById('lab-panel');
+      var agendaPanel = document.getElementById('agenda-panel');
+      var chartPanel = document.getElementById('chart-panel');
+      if (labPanel && labPanel.classList.contains('visible')) renderLabEntries();
+      if (agendaPanel && agendaPanel.classList.contains('visible')) renderAgenda();
+      if (chartPanel && chartPanel.classList.contains('visible')) renderChart(currentChartKey || 'creatinine');
+    });
+  }
+});
 
 async function init() {
   currentConvId = 'conv_' + Date.now();
@@ -583,9 +629,11 @@ async function init() {
     if (session && session.user) {
       currentUser = session.user;
       await syncFromSupabase();
+      setupRealtimeSync();
       if (!apiKey) { showApiScreen(); } else { showApp(); }
     } else {
       currentUser = null;
+      if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
       showAuthScreen();
     }
   });
@@ -594,6 +642,7 @@ async function init() {
   if (sessionRes.data && sessionRes.data.session) {
     currentUser = sessionRes.data.session.user;
     await syncFromSupabase();
+    setupRealtimeSync();
     if (!apiKey) { showApiScreen(); } else { showApp(); }
   } else {
     showAuthScreen();
@@ -622,9 +671,18 @@ function showPanel(name) {
   document.getElementById(name + '-panel').classList.add('visible');
   setActiveBtn(name);
   if (name === 'history') renderHistoryList();
-  if (name === 'lab') renderLabEntries();
-  if (name === 'chart') renderChart('creatinine');
-  if (name === 'agenda') renderAgenda();
+  if (name === 'lab') {
+    renderLabEntries();
+    if (currentUser) syncFromSupabase().then(function() { renderLabEntries(); });
+  }
+  if (name === 'chart') {
+    renderChart(currentChartKey);
+    if (currentUser) syncFromSupabase().then(function() { renderChart(currentChartKey); });
+  }
+  if (name === 'agenda') {
+    renderAgenda();
+    if (currentUser) syncFromSupabase().then(function() { renderAgenda(); });
+  }
   if (name === 'settings') renderSettings();
 }
 
@@ -820,6 +878,7 @@ function getChartValue(entry, key) {
 }
 
 function switchChartTab(key, btn) {
+  currentChartKey = key;
   document.querySelectorAll('.chart-tab').forEach(function(t) { t.classList.remove('active'); });
   btn.classList.add('active'); renderChart(key);
 }

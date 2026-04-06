@@ -482,40 +482,100 @@ function readSession() {
   } catch(e) { return null; }
 }
 
-// ── Token handmatig vernieuwen via fetch (geen Web Lock) ──
+// ── Token handmatig vernieuwen via fetch (GEEN setSession, GEEN Web Lock) ──
+var refreshInFlight = false;
 async function refreshTokenViaFetch(refreshToken) {
+  if (refreshInFlight) return readSession();
+  refreshInFlight = true;
   try {
     var res = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY },
       body: JSON.stringify({ refresh_token: refreshToken })
     });
-    if (!res.ok) return null;
+    if (!res.ok) { console.warn('Refresh mislukt:', res.status); return null; }
     var data = await res.json();
     if (!data.access_token) return null;
-    // Sla nieuwe sessie op in localStorage zodat Supabase client hem oppikt
     localStorage.setItem('nierrobot_auth', JSON.stringify(data));
-    // Vertel de Supabase client de nieuwe tokens (geen lock nodig)
-    await supa.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+    console.log('Token vernieuwd, geldig tot:', new Date((data.expires_at||0)*1000).toLocaleTimeString('nl-NL'));
     return data;
   } catch(e) {
     console.warn('Token refresh via fetch mislukt:', e.message);
     return null;
+  } finally {
+    refreshInFlight = false;
   }
 }
 
-// ── Geldige sessie ophalen — nooit via getSession() die locks gebruikt ──
+// ── Geldige sessie ophalen ──
 async function ensureSession() {
   var s = readSession();
   if (!s) return null;
   var nowSec = Math.floor(Date.now() / 1000);
-  // Vernieuwen als token binnen 120 seconden verloopt
-  if ((s.expires_at || 0) - nowSec < 120) {
+  if ((s.expires_at || 0) - nowSec < 300) {
     if (!s.refresh_token) return null;
     s = await refreshTokenViaFetch(s.refresh_token);
-    if (!s) return null;
   }
   return s;
+}
+
+// ── Directe DB-fetch (omzeilt Supabase client auth volledig) ──
+// Supabase REST API aanroepen met onze eigen token — geen Web Lock mogelijk.
+async function dbFetch(path, opts) {
+  var s = await ensureSession();
+  if (!s) throw new Error('Geen geldige sessie');
+  var url = SUPA_URL + '/rest/v1/' + path;
+  var headers = Object.assign({
+    'apikey': SUPA_KEY,
+    'Authorization': 'Bearer ' + s.access_token,
+    'Content-Type': 'application/json',
+    'Prefer': opts && opts.prefer ? opts.prefer : ''
+  }, opts && opts.headers ? opts.headers : {});
+  var res = await fetch(url, {
+    method: opts && opts.method ? opts.method : 'GET',
+    headers: headers,
+    body: opts && opts.body ? JSON.stringify(opts.body) : undefined
+  });
+  if (!res.ok) {
+    var errText = await res.text().catch(function(){ return res.status; });
+    throw new Error('DB fout ' + res.status + ': ' + errText);
+  }
+  var text = await res.text();
+  return text ? JSON.parse(text) : null;
+}
+
+// ── Proactieve token-timer: vernieuw elke 45 minuten ──
+var tokenRefreshTimer = null;
+function startTokenRefreshTimer() {
+  if (tokenRefreshTimer) clearInterval(tokenRefreshTimer);
+  tokenRefreshTimer = setInterval(async function() {
+    var s = readSession();
+    if (s && s.refresh_token) {
+      console.log('Proactieve token refresh...');
+      await refreshTokenViaFetch(s.refresh_token);
+    }
+  }, 45 * 60 * 1000);
+}
+function stopTokenRefreshTimer() {
+  if (tokenRefreshTimer) { clearInterval(tokenRefreshTimer); tokenRefreshTimer = null; }
+}
+
+// ── Proactieve token-timer: vernieuw elke 45 minuten ──
+// Tokens leven 1 uur. Door elke 45 min te vernieuwen hoeven we
+// nooit te wachten op een verlopen token tijdens een sync.
+var tokenRefreshTimer = null;
+function startTokenRefreshTimer() {
+  if (tokenRefreshTimer) clearInterval(tokenRefreshTimer);
+  tokenRefreshTimer = setInterval(async function() {
+    var s = readSession();
+    if (s && s.refresh_token) {
+      console.log('Proactieve token refresh...');
+      await refreshTokenViaFetch(s.refresh_token);
+    }
+  }, 45 * 60 * 1000); // 45 minuten
+}
+function stopTokenRefreshTimer() {
+  if (tokenRefreshTimer) { clearInterval(tokenRefreshTimer); tokenRefreshTimer = null; }
 }
 
 // ── State ──
@@ -543,7 +603,6 @@ function saveAgendaLocal(a) { localStorage.setItem('nk_agenda', JSON.stringify(a
 function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Supabase sync ──
-// Harde veiligheidstimer: syncInProgress kan nooit langer dan 15s vast zitten.
 var syncSafetyTimer = null;
 
 async function syncFromSupabase() {
@@ -552,44 +611,40 @@ async function syncFromSupabase() {
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ sync...';
 
-  // Veiligheidsklep: als de sync na 15s nog niet klaar is, reset alles
   if (syncSafetyTimer) clearTimeout(syncSafetyTimer);
   syncSafetyTimer = setTimeout(function() {
     console.warn('Sync timeout — geforceerde reset');
-    syncInProgress = false;
-    syncQueued = false;
+    syncInProgress = false; syncQueued = false;
     var el = document.getElementById('sync-status');
     if (el) el.textContent = '';
   }, 15000);
 
   try {
     var session = await ensureSession();
-    if (!session || !session.user) {
-      currentUser = null;
-      return;
-    }
+    if (!session || !session.user) { currentUser = null; return; }
     currentUser = session.user;
+    var uid = currentUser.id;
 
-    var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    if (labRes.data) {
-      saveLabLocal(labRes.data.map(function(r) {
+    var labData = await dbFetch('lab_entries?user_id=eq.' + uid + '&order=entry_date.desc');
+    if (labData) {
+      saveLabLocal(labData.map(function(r) {
         return { date: r.entry_date, creatinine: r.creatinine||'', egfr: r.egfr||'', tacrolimus: r.tacrolimus||'', bp: r.bp||'', weight: r.weight||'', temp: r.temp||'', sbId: r.id };
       }));
     }
 
-    var vraagRes = await supa.from('agenda_vragen').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    var klachtRes = await supa.from('agenda_klachten').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
-    var profRes = await supa.from('profile').select('*').eq('user_id', currentUser.id).maybeSingle();
+    var vraagData = await dbFetch('agenda_vragen?user_id=eq.' + uid + '&order=entry_date.desc');
+    var klachtData = await dbFetch('agenda_klachten?user_id=eq.' + uid + '&order=entry_date.desc');
 
     var agenda = {vragen:[], klachten:[]};
-    if (vraagRes.data) agenda.vragen = vraagRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
-    if (klachtRes.data) agenda.klachten = klachtRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
+    if (vraagData) agenda.vragen = vraagData.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
+    if (klachtData) agenda.klachten = klachtData.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
     saveAgendaLocal(agenda);
 
-    if (profRes.data) {
+    var profData = await dbFetch('profile?user_id=eq.' + uid + '&limit=1');
+    if (profData && profData[0]) {
+      var pd = profData[0];
       var p = getProfile();
-      var pd = profRes.data;
-      saveProfileLocal(Object.assign(p, {stent: pd.stent, notes: pd.notes, meds: pd.meds || []}));
+      saveProfileLocal(Object.assign(p, {notes: pd.notes, meds: pd.meds || []}));
     }
 
     refreshVisiblePanel();
@@ -629,71 +684,67 @@ async function getValidUser() {
 }
 
 async function pushLabToSupabase(entry) {
-  var user = await getValidUser();
-  if (!user) return;
+  var user = await getValidUser(); if (!user) return;
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ opslaan...';
   try {
-    var res = await supa.from('lab_entries').insert({
-      user_id: user.id, entry_date: new Date(entry.date).toISOString(),
-      creatinine: entry.creatinine||null, egfr: entry.egfr||null,
-      tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
-      weight: entry.weight||null, temp: entry.temp||null
+    await dbFetch('lab_entries', {
+      method: 'POST', prefer: 'return=minimal',
+      body: { user_id: user.id, entry_date: new Date(entry.date).toISOString(),
+        creatinine: entry.creatinine||null, egfr: entry.egfr||null,
+        tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
+        weight: entry.weight||null, temp: entry.temp||null }
     });
-    if (res.error) {
-      console.error('Lab push error:', res.error);
-      if (statusEl) statusEl.textContent = '✗ fout';
-      showError('Supabase fout: ' + res.error.message);
-    } else {
-      if (statusEl) { statusEl.textContent = '✓ opgeslagen'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
-    }
+    if (statusEl) { statusEl.textContent = '✓ opgeslagen'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
   } catch(e) {
     console.error('Lab push error:', e);
     if (statusEl) statusEl.textContent = '✗ fout';
-    showError('Verbindingsfout: ' + e.message);
+    showError('Opslaan mislukt: ' + e.message);
   }
 }
 
 async function deleteLabFromSupabase(entry) {
   if (!currentUser || !entry.sbId) return;
-  try { await supa.from('lab_entries').delete().eq('id', entry.sbId); } catch(e) {}
+  try { await dbFetch('lab_entries?id=eq.' + entry.sbId, {method:'DELETE', prefer:'return=minimal'}); } catch(e) { console.warn('deletelab:', e.message); }
 }
 
 async function pushVraagToSupabase(item) {
   var user = await getValidUser(); if (!user) return;
   try {
-    var res = await supa.from('agenda_vragen').insert({user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), done: item.done});
-    if (res.error) { console.error('Vraag push error:', res.error); showError('Sync fout: ' + res.error.message); }
-  } catch(e) { console.error('Vraag push error:', e); }
+    await dbFetch('agenda_vragen', {method:'POST', prefer:'return=minimal',
+      body: {user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), done: item.done}});
+  } catch(e) { console.error('Vraag push error:', e); showError('Sync fout: ' + e.message); }
 }
 
 async function updateVraagDoneSupabase(item) {
   if (!currentUser || !item.sbId) return;
-  try { await supa.from('agenda_vragen').update({done: item.done}).eq('id', item.sbId); } catch(e) {}
+  try { await dbFetch('agenda_vragen?id=eq.' + item.sbId, {method:'PATCH', prefer:'return=minimal', body:{done: item.done}}); } catch(e) { console.warn('updatevraag:', e.message); }
 }
 
 async function deleteVraagFromSupabase(item) {
   if (!currentUser || !item.sbId) return;
-  try { await supa.from('agenda_vragen').delete().eq('id', item.sbId); } catch(e) {}
+  try { await dbFetch('agenda_vragen?id=eq.' + item.sbId, {method:'DELETE', prefer:'return=minimal'}); } catch(e) { console.warn('deletevraag:', e.message); }
 }
 
 async function pushKlachtToSupabase(item) {
   var user = await getValidUser(); if (!user) return;
   try {
-    var res = await supa.from('agenda_klachten').insert({user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), urgency: item.urgency});
-    if (res.error) { console.error('Klacht push error:', res.error); showError('Sync fout: ' + res.error.message); }
-  } catch(e) { console.error('Klacht push error:', e); }
+    await dbFetch('agenda_klachten', {method:'POST', prefer:'return=minimal',
+      body: {user_id: user.id, local_id: item.id, text: item.text, entry_date: new Date(item.date).toISOString(), urgency: item.urgency}});
+  } catch(e) { console.error('Klacht push error:', e); showError('Sync fout: ' + e.message); }
 }
 
 async function deleteKlachtFromSupabase(item) {
   if (!currentUser || !item.sbId) return;
-  try { await supa.from('agenda_klachten').delete().eq('id', item.sbId); } catch(e) {}
+  try { await dbFetch('agenda_klachten?id=eq.' + item.sbId, {method:'DELETE', prefer:'return=minimal'}); } catch(e) { console.warn('deleteklacht:', e.message); }
 }
 
 async function pushProfileToSupabase(p) {
   if (!currentUser) return;
   try {
-    await supa.from('profile').upsert({user_id: currentUser.id, stent: p.stent, notes: p.notes, meds: p.meds, updated_at: new Date().toISOString()}, {onConflict: 'user_id'});
+    await dbFetch('profile?user_id=eq.' + currentUser.id, {method:'DELETE', prefer:'return=minimal'});
+    await dbFetch('profile', {method:'POST', prefer:'return=minimal',
+      body: {user_id: currentUser.id, stent: p.stent||null, notes: p.notes||null, meds: p.meds||[], updated_at: new Date().toISOString()}});
   } catch(e) { console.error('Profile push error:', e); }
 }
 
@@ -734,8 +785,16 @@ async function handleAuth() {
 
 async function doSignOut() {
   try {
+    stopTokenRefreshTimer();
     if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
-    await supa.auth.signOut();
+    var s = readSession();
+    if (s && s.access_token) {
+      await fetch(SUPA_URL + '/auth/v1/logout', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY, 'Authorization': 'Bearer ' + s.access_token }
+      });
+    }
+    localStorage.removeItem('nierrobot_auth');
   } catch(e) { console.warn('signOut error:', e); }
   currentUser = null;
   showAuthScreen();
@@ -813,23 +872,24 @@ async function init() {
   supa.auth.onAuthStateChange(async function(event, session) {
     if (event === 'SIGNED_IN' && session && session.user) {
       currentUser = session.user;
+      localStorage.setItem('nierrobot_auth', JSON.stringify(session));
+      startTokenRefreshTimer();
       setupRealtimeSync();
       await syncFromSupabase();
       if (!apiKey) { showApiScreen(); } else { showApp(); }
     } else if (event === 'SIGNED_OUT') {
       currentUser = null;
+      stopTokenRefreshTimer();
       if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
       showAuthScreen();
     }
-    // TOKEN_REFRESHED en andere events negeren we — we beheren het token zelf
   });
 
   // Bij opstarten: sessie direct uit localStorage, geen getSession() = geen lock
   var session = await ensureSession();
   if (session && session.user) {
     currentUser = session.user;
-    // Vertel de Supabase client de sessie zodat DB-calls werken
-    try { await supa.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token }); } catch(e) {}
+    startTokenRefreshTimer();
     setupRealtimeSync();
     await syncFromSupabase();
     if (!apiKey) { showApiScreen(); } else { showApp(); }
@@ -1342,19 +1402,11 @@ async function runDebug() {
 
   if (currentUser) {
     try {
-      var testDate = new Date().toISOString();
-      var res = await supa.from('lab_entries').insert({
-        user_id: currentUser.id,
-        entry_date: testDate,
-        creatinine: '999'
-      });
-      if (res.error) {
-        lines.push('❌ Test insert mislukt: ' + JSON.stringify(res.error));
-      } else {
-        lines.push('✓ Test insert geslaagd! Data staat in Supabase.');
-        await supa.from('lab_entries').delete().eq('creatinine', '999').eq('user_id', currentUser.id);
-        lines.push('✓ Testdata opgeruimd');
-      }
+      await dbFetch('lab_entries', {method:'POST', prefer:'return=minimal',
+        body: {user_id: currentUser.id, entry_date: new Date().toISOString(), creatinine: '999'}});
+      lines.push('✓ Test insert geslaagd! Data staat in Supabase.');
+      await dbFetch('lab_entries?creatinine=eq.999&user_id=eq.' + currentUser.id, {method:'DELETE', prefer:'return=minimal'});
+      lines.push('✓ Testdata opgeruimd');
     } catch(e) {
       lines.push('❌ Insert exception: ' + e.message);
     }

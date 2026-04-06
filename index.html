@@ -12,13 +12,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.min.js"></script>
   <style>
     :root {
-      --bg: #0d1117; --surface: #161b22; --surface2: #1c2330;
-      --border: #30363d; --accent: #4fc3f7; --accent-dim: #1a3a4a;
-      --text: #e6edf3; --text-muted: #7d8590;
-      --user-bg: #1a3a4a; --user-border: #4fc3f7;
-      --ai-bg: #1c2330; --ai-border: #30363d;
-      --danger: #f85149; --success: #3fb950; --warning: #d29922;
-      --radius: 16px; --radius-sm: 10px;
+      --bg: #0a0f18;
+      --surface: #101828;
+      --surface2: #162035;
+      --border: #1e3a50;
+      --border-dim: #172840;
+      --accent: #4fc3f7;
+      --accent2: #7c6af7;
+      --accent-dim: #0e2233;
+      --accent2-dim: #1a1540;
+      --text: #e6edf3;
+      --text-muted: #7d8590;
+      --user-bg: #0e2233;
+      --user-border: #4fc3f7;
+      --ai-bg: #101828;
+      --ai-border: #1e3a50;
+      --danger: #f85149;
+      --success: #3fb950;
+      --warning: #d29922;
+      --radius: 16px;
+      --radius-sm: 10px;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     html, body {
@@ -31,19 +44,68 @@
       height: 100vh; height: -webkit-fill-available;
       max-width: 680px; margin: 0 auto;
     }
-    /* Header */
+
+    /* ── Header ── */
     #header {
-      padding: 10px 14px 8px; background: var(--bg);
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px; flex-shrink: 0; z-index: 10;
+      padding: 0 14px;
+      background: var(--bg);
+      border-bottom: 1px solid var(--border-dim);
+      display: flex; flex-direction: column;
+      flex-shrink: 0; z-index: 10;
     }
-    .header-icon { width: 26px; height: 26px; flex-shrink: 0; filter: drop-shadow(0 0 6px rgba(79,195,247,0.55)); }
-    #header h1 { font-family: 'Crimson Pro', serif; font-size: 17px; font-weight: 600; color: var(--text); letter-spacing: -0.2px; }
+    .header-row1 {
+      display: flex; align-items: center; gap: 9px;
+      padding: 9px 0 7px;
+    }
+
+    /* Nier logo SVG */
+    .header-icon { width: 28px; height: 28px; flex-shrink: 0; }
+
+    #header h1 {
+      font-family: 'Crimson Pro', serif; font-size: 17px; font-weight: 600;
+      color: var(--text); letter-spacing: -0.2px;
+    }
+    .header-phase-chip {
+      margin-left: auto;
+      font-size: 10px; font-weight: 500;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 3px 10px;
+      color: var(--accent);
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+
+    /* Phase progress bar */
+    .phase-bar-wrap {
+      padding: 0 0 9px 0;
+    }
+    .phase-track {
+      height: 3px;
+      background: var(--surface2);
+      border-radius: 2px;
+      overflow: hidden;
+      margin-bottom: 4px;
+    }
+    .phase-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--accent), var(--accent2));
+      transition: width 0.4s ease;
+    }
+    .phase-labels {
+      display: flex; justify-content: space-between;
+    }
+    .phase-lbl {
+      font-size: 9px; color: var(--text-muted);
+    }
     #header-actions { display: none; }
-    /* Bottom tab bar */
+
+    /* ── Bottom tab bar ── */
     #tab-bar {
       display: flex; flex-shrink: 0;
-      background: var(--surface); border-top: 1px solid var(--border);
+      background: var(--surface); border-top: 1px solid var(--border-dim);
       padding-bottom: env(safe-area-inset-bottom);
       z-index: 20;
     }
@@ -58,20 +120,22 @@
     .tab-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
     .tab-btn.active { color: var(--accent); }
     .tab-btn.active svg { filter: drop-shadow(0 0 4px rgba(79,195,247,0.5)); }
-    /* Panels */
+
+    /* ── Panels ── */
     .panel { display: none; flex-direction: column; flex: 1; overflow: hidden; }
     .panel.visible { display: flex; }
-    .panel-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border); font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 600; flex-shrink: 0; }
+    .panel-header { padding: 14px 16px 12px; border-bottom: 1px solid var(--border-dim); font-family: 'Crimson Pro', serif; font-size: 18px; font-weight: 600; flex-shrink: 0; }
     .panel-body { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
     .panel-body::-webkit-scrollbar { width: 4px; }
     .panel-body::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .panel-footer { padding: 10px 14px; border-top: 1px solid var(--border); display: flex; gap: 8px; flex-shrink: 0; }
-    .btn-primary { background: var(--accent); color: #0d1117; border: none; font-weight: 500; }
+    .panel-footer { padding: 10px 14px; border-top: 1px solid var(--border-dim); display: flex; gap: 8px; flex-shrink: 0; }
+    .btn-primary { background: var(--accent); color: #0a0f18; border: none; font-weight: 500; }
     .btn-secondary { background: none; border: 1px solid var(--border); color: var(--text-muted); }
     .btn-danger { background: none; border: 1px solid var(--danger); color: var(--danger); }
     .btn-primary, .btn-secondary, .btn-danger { flex: 1; padding: 10px; border-radius: var(--radius-sm); font-size: 13px; font-family: 'DM Sans', sans-serif; cursor: pointer; transition: opacity 0.2s; }
     .btn-primary:hover, .btn-secondary:hover, .btn-danger:hover { opacity: 0.8; }
-    /* Auth screen */
+
+    /* ── Auth screen ── */
     #auth-screen {
       display: none; flex-direction: column; align-items: center; justify-content: center;
       flex: 1; padding: 32px 24px; gap: 20px; text-align: center;
@@ -87,12 +151,13 @@
     }
     .auth-form input:focus { border-color: var(--accent); }
     .auth-form input::placeholder { color: var(--text-muted); }
-    .auth-submit { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .auth-submit { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0f18; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
     .auth-submit:hover { opacity: 0.85; }
     .auth-toggle { font-size: 13px; color: var(--text-muted); cursor: pointer; }
     .auth-toggle span { color: var(--accent); text-decoration: underline; }
-    .auth-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 360px; text-align: left; }
-    /* API screen */
+    .auth-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 360px; text-align: left; }
+
+    /* ── API screen ── */
     #api-screen { display: none; flex-direction: column; align-items: center; justify-content: center; flex: 1; padding: 32px 24px; gap: 20px; text-align: center; }
     #api-screen.visible { display: flex; }
     #api-screen h2 { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; }
@@ -101,51 +166,80 @@
     .api-input-wrap { width: 100%; max-width: 400px; display: flex; flex-direction: column; gap: 12px; }
     .api-input-wrap input { width: 100%; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 16px; color: var(--text); font-family: monospace; font-size: 13px; outline: none; transition: border-color 0.2s; }
     .api-input-wrap input:focus { border-color: var(--accent); }
-    .api-input-wrap button { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .api-input-wrap button { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0f18; border: none; border-radius: var(--radius-sm); padding: 14px; font-weight: 500; font-size: 15px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
     .api-input-wrap button:hover { opacity: 0.85; }
-    .privacy-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 400px; text-align: left; }
-    /* Sync indicator */
-    #sync-indicator { font-size: 10px; color: var(--text-muted); padding: 0 4px; }
-    #sync-indicator.syncing { color: var(--warning); }
-    #sync-indicator.synced { color: var(--success); }
-    /* Shared */
+    .privacy-note { font-size: 11px; color: var(--text-muted); background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 10px 14px; max-width: 400px; text-align: left; }
+
+    /* ── Sync indicator ── */
+    #sync-status { font-size: 10px; color: var(--text-muted); padding: 0 4px; }
+
+    /* ── Shared ── */
     .list-empty { color: var(--text-muted); font-size: 13px; text-align: center; padding: 30px 0; }
     .section-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; }
     .icon-btn { background: none; border: none; color: var(--text-muted); cursor: pointer; font-size: 16px; padding: 0 2px; flex-shrink: 0; transition: color 0.18s; }
     .icon-btn:hover { color: var(--danger); }
-    .full-btn { background: var(--accent); color: #0d1117; border: none; border-radius: 8px; padding: 10px; font-weight: 500; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
+    .full-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0f18; border: none; border-radius: 8px; padding: 10px; font-weight: 500; font-size: 14px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: opacity 0.2s; }
     .full-btn:hover { opacity: 0.85; }
-    /* History */
-    .history-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer; transition: border-color 0.18s; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
+
+    /* ── History ── */
+    .history-item { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 12px 14px; cursor: pointer; transition: border-color 0.18s; display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; }
     .history-item:hover { border-color: var(--accent); }
     .history-item-text { flex: 1; min-width: 0; }
     .history-item-preview { font-size: 13px; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .history-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
-    /* Lab */
-    .lab-form { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
-    .lab-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-    .lab-field { display: flex; flex-direction: column; gap: 4px; }
-    .lab-field label { font-size: 11px; color: var(--text-muted); }
-    .lab-field input { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+
+    /* ── Lab ── */
+    .lab-form { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+    .lab-fields { display: flex; flex-direction: column; gap: 0; }
+    .lab-field { display: flex; flex-direction: column; gap: 3px; padding: 10px 0; border-bottom: 1px solid var(--border-dim); }
+    .lab-field:last-child { border-bottom: none; padding-bottom: 0; }
+    .lab-field-header { display: flex; justify-content: space-between; align-items: baseline; }
+    .lab-field label { font-size: 12px; color: var(--text-muted); font-weight: 500; }
+    .lab-field-hint { font-size: 10px; color: var(--accent2); opacity: 0.8; }
+    .lab-field-input-row { display: flex; align-items: center; gap: 8px; margin-top: 4px; }
+    .lab-field input {
+      flex: 1; background: var(--bg); border: 1px solid var(--border-dim);
+      border-radius: 8px; padding: 8px 10px; color: var(--text);
+      font-size: 15px; font-family: 'DM Sans', sans-serif; outline: none;
+      transition: border-color 0.2s;
+    }
     .lab-field input:focus { border-color: var(--accent); }
-    .lab-field input::placeholder { color: var(--text-muted); font-size: 12px; }
-    .lab-entry { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
+    .lab-field input::placeholder { color: var(--text-muted); font-size: 13px; }
+    .lab-field input.val-ok { border-color: var(--success); }
+    .lab-field input.val-warn { border-color: var(--warning); }
+    .lab-field input.val-danger { border-color: var(--danger); }
+    .lab-field-unit { font-size: 11px; color: var(--text-muted); white-space: nowrap; flex-shrink: 0; min-width: 60px; }
+    .lab-field-dot {
+      width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0;
+      transition: background 0.3s;
+    }
+    .lab-field-dot.ok { background: var(--success); box-shadow: 0 0 6px rgba(63,185,80,0.4); }
+    .lab-field-dot.warn { background: var(--warning); box-shadow: 0 0 6px rgba(210,153,34,0.4); }
+    .lab-field-dot.danger { background: var(--danger); box-shadow: 0 0 6px rgba(248,81,73,0.4); }
+    .lab-field-dot.empty { background: var(--border); }
+    .lab-field-feedback { font-size: 10px; line-height: 1.4; margin-top: 3px; min-height: 14px; }
+    .lab-field-feedback.ok { color: var(--success); }
+    .lab-field-feedback.warn { color: var(--warning); }
+    .lab-field-feedback.danger { color: var(--danger); }
+
+    .lab-entry { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 12px 14px; display: flex; justify-content: space-between; align-items: flex-start; gap: 8px; }
     .lab-entry-values { flex: 1; display: flex; flex-wrap: wrap; gap: 6px; }
-    .lab-badge { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); color: var(--text-muted); white-space: nowrap; }
+    .lab-badge { font-size: 12px; padding: 3px 8px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border-dim); color: var(--text-muted); white-space: nowrap; }
     .lab-badge span { color: var(--text); font-weight: 500; }
     .lab-badge.alert { border-color: var(--danger); color: var(--danger); }
     .lab-badge.alert span { color: var(--danger); }
     .lab-entry-meta { display: flex; align-items: flex-start; gap: 6px; flex-shrink: 0; }
     .lab-entry-date { font-size: 11px; color: var(--text-muted); white-space: nowrap; }
-    /* Charts */
-    .chart-tabs { display: flex; gap: 5px; flex-wrap: wrap; padding: 10px 14px 0; border-bottom: 1px solid var(--border); flex-shrink: 0; }
-    .chart-tab { background: none; border: 1px solid var(--border); color: var(--text-muted); border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 8px; }
+
+    /* ── Charts ── */
+    .chart-tabs { display: flex; gap: 5px; flex-wrap: wrap; padding: 10px 14px 0; border-bottom: 1px solid var(--border-dim); flex-shrink: 0; }
+    .chart-tab { background: none; border: 1px solid var(--border-dim); color: var(--text-muted); border-radius: 20px; padding: 4px 11px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.18s; margin-bottom: 8px; }
     .chart-tab:hover { border-color: var(--accent); color: var(--accent); }
     .chart-tab.active { background: var(--accent-dim); border-color: var(--accent); color: var(--accent); }
     .chart-wrap { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 14px; }
     .chart-wrap::-webkit-scrollbar { width: 4px; }
     .chart-wrap::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    .chart-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; }
+    .chart-card { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 16px; }
     .chart-card-title { font-size: 11px; font-weight: 500; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
     .chart-card-latest { font-family: 'Crimson Pro', serif; font-size: 24px; font-weight: 600; margin-bottom: 12px; }
     .chart-card-latest .unit { font-size: 13px; font-weight: 300; color: var(--text-muted); margin-left: 4px; }
@@ -153,42 +247,44 @@
     .chart-canvas-wrap { width: 100%; height: 160px; }
     canvas { display: block; }
     .chart-note { font-size: 11px; color: var(--text-muted); margin-top: 8px; }
-    /* Settings */
-    .settings-section { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+    /* ── Settings ── */
+    .settings-section { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
     .settings-field { display: flex; flex-direction: column; gap: 5px; }
     .settings-field label { font-size: 12px; color: var(--text-muted); }
-    .settings-field input, .settings-field select, .settings-field textarea { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
+    .settings-field input, .settings-field select, .settings-field textarea { background: var(--bg); border: 1px solid var(--border-dim); border-radius: 8px; padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; transition: border-color 0.2s; }
     .settings-field input:focus, .settings-field select:focus, .settings-field textarea:focus { border-color: var(--accent); }
     .settings-field select { appearance: none; cursor: pointer; }
     .settings-field textarea { resize: none; min-height: 76px; }
     .med-list { display: flex; flex-direction: column; gap: 6px; }
-    .med-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; }
+    .med-item { display: flex; align-items: center; gap: 8px; background: var(--bg); border: 1px solid var(--border-dim); border-radius: 8px; padding: 8px 12px; }
     .med-item-name { flex: 1; font-size: 13px; }
     .med-item-dose { font-size: 12px; color: var(--text-muted); }
     .med-add-row { display: flex; gap: 6px; }
-    .med-add-row input { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
+    .med-add-row input { flex: 1; background: var(--bg); border: 1px solid var(--border-dim); border-radius: 8px; padding: 8px 10px; color: var(--text); font-size: 13px; font-family: 'DM Sans', sans-serif; outline: none; }
     .med-add-row input:focus { border-color: var(--accent); }
-    .med-add-row button { background: var(--accent); color: #0d1117; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
-    /* Agenda */
+    .med-add-row button { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0f18; border: none; border-radius: 8px; padding: 8px 12px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; }
+
+    /* ── Agenda ── */
     .agenda-add-row { display: flex; gap: 8px; align-items: flex-end; }
-    .agenda-textarea { flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 44px; max-height: 100px; line-height: 1.5; transition: border-color 0.2s; }
+    .agenda-textarea { flex: 1; background: var(--bg); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 10px 12px; color: var(--text); font-size: 14px; font-family: 'DM Sans', sans-serif; outline: none; resize: none; min-height: 44px; max-height: 100px; line-height: 1.5; transition: border-color 0.2s; }
     .agenda-textarea:focus { border-color: var(--accent); }
     .agenda-textarea::placeholder { color: var(--text-muted); }
-    .add-btn { background: var(--accent); color: #0d1117; border: none; border-radius: var(--radius-sm); padding: 10px 13px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0; transition: opacity 0.2s; }
+    .add-btn { background: linear-gradient(135deg, var(--accent), var(--accent2)); color: #0a0f18; border: none; border-radius: var(--radius-sm); padding: 10px 13px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: 'DM Sans', sans-serif; white-space: nowrap; flex-shrink: 0; transition: opacity 0.2s; }
     .add-btn:hover { opacity: 0.85; }
-    .agenda-divider { border: none; border-top: 1px solid var(--border); margin: 2px 0; }
+    .agenda-divider { border: none; border-top: 1px solid var(--border-dim); margin: 2px 0; }
     .urgency-row { display: flex; gap: 6px; }
-    .urgency-btn { padding: 4px 11px; border-radius: 20px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border); background: none; color: var(--text-muted); transition: all 0.18s; }
+    .urgency-btn { padding: 4px 11px; border-radius: 20px; font-size: 12px; cursor: pointer; font-family: 'DM Sans', sans-serif; border: 1px solid var(--border-dim); background: none; color: var(--text-muted); transition: all 0.18s; }
     .urgency-btn.sel-mild { background: #1a3a2a; border-color: var(--success); color: var(--success); }
     .urgency-btn.sel-matig { background: #2a2010; border-color: var(--warning); color: var(--warning); }
     .urgency-btn.sel-ernstig { background: #2a1010; border-color: var(--danger); color: var(--danger); }
     .agenda-list { display: flex; flex-direction: column; gap: 7px; }
-    .agenda-item { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 11px 13px; display: flex; gap: 9px; align-items: flex-start; }
+    .agenda-item { background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius-sm); padding: 11px 13px; display: flex; gap: 9px; align-items: flex-start; }
     .agenda-item.done { opacity: 0.4; }
     .agenda-item.done .agenda-item-text { text-decoration: line-through; }
     .check-circle { width: 19px; height: 19px; border-radius: 50%; border: 2px solid var(--border); background: none; cursor: pointer; flex-shrink: 0; margin-top: 2px; transition: all 0.18s; display: flex; align-items: center; justify-content: center; }
     .check-circle.checked { background: var(--success); border-color: var(--success); }
-    .check-circle.checked::after { content: ''; width: 5px; height: 8px; border: 2px solid #0d1117; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
+    .check-circle.checked::after { content: ''; width: 5px; height: 8px; border: 2px solid #0a0f18; border-top: none; border-left: none; transform: rotate(45deg) translate(-1px,-1px); display: block; }
     .agenda-item-body { flex: 1; min-width: 0; }
     .agenda-item-text { font-size: 14px; line-height: 1.5; word-break: break-word; }
     .agenda-item-date { font-size: 11px; color: var(--text-muted); margin-top: 3px; }
@@ -196,12 +292,27 @@
     .urgency-badge.mild { background: #1a3a2a; color: var(--success); }
     .urgency-badge.matig { background: #2a2010; color: var(--warning); }
     .urgency-badge.ernstig { background: #2a1010; color: var(--danger); }
-    /* Chat */
+
+    /* ── Chat ── */
     #chat-area { flex: 1; overflow-y: auto; padding: 18px 14px; display: flex; flex-direction: column; gap: 15px; scroll-behavior: smooth; -webkit-overflow-scrolling: touch; }
     #chat-area::-webkit-scrollbar { width: 4px; }
     #chat-area::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
-    #welcome { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 40px 8px 20px; }
-    #welcome h2 { font-family: 'Crimson Pro', serif; font-size: 21px; font-weight: 400; color: var(--text-muted); }
+    #welcome { display: flex; flex-direction: column; align-items: center; text-align: center; padding: 30px 8px 16px; }
+    #welcome h2 { font-family: 'Crimson Pro', serif; font-size: 21px; font-weight: 400; color: var(--text-muted); margin-bottom: 16px; }
+    .quick-prompts { display: flex; flex-direction: column; gap: 7px; width: 100%; max-width: 400px; }
+    .quick-btn {
+      background: var(--surface); border: 1px solid var(--border-dim);
+      border-radius: var(--radius-sm); padding: 10px 13px;
+      color: var(--text-muted); font-size: 13px; font-family: 'DM Sans', sans-serif;
+      text-align: left; cursor: pointer; transition: border-color 0.18s, color 0.18s;
+      display: flex; align-items: center; gap: 9px;
+    }
+    .quick-btn:hover { border-color: var(--accent); color: var(--text); }
+    .quick-btn::before {
+      content: ''; width: 6px; height: 6px; border-radius: 50%;
+      background: linear-gradient(135deg, var(--accent), var(--accent2));
+      flex-shrink: 0;
+    }
     .msg { display: flex; flex-direction: column; gap: 4px; animation: fadeUp 0.22s ease; }
     @keyframes fadeUp { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
     .msg.user { align-items: flex-end; }
@@ -218,24 +329,26 @@
     .bubble li { font-size: 14px; line-height: 1.6; }
     .bubble code { font-family: monospace; font-size: 12px; background: rgba(79,195,247,0.1); border: 1px solid rgba(79,195,247,0.2); border-radius: 4px; padding: 1px 5px; }
     .bubble blockquote { border-left: 3px solid var(--accent); padding-left: 12px; color: var(--text-muted); margin: 7px 0; font-style: italic; }
-    .bubble hr { border: none; border-top: 1px solid var(--border); margin: 11px 0; }
+    .bubble hr { border: none; border-top: 1px solid var(--border-dim); margin: 11px 0; }
     .msg-label { font-size: 10px; color: var(--text-muted); padding: 0 4px; font-weight: 300; }
     .typing-bubble { display: flex; gap: 5px; align-items: center; padding: 13px 17px; }
     .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); opacity: 0.4; animation: pulse 1.2s infinite; }
     .dot:nth-child(2) { animation-delay: 0.2s; } .dot:nth-child(3) { animation-delay: 0.4s; }
     @keyframes pulse { 0%,80%,100% { opacity:0.4; transform:scale(1); } 40% { opacity:1; transform:scale(1.3); } }
-    #input-bar { padding: 10px 14px; background: var(--bg); border-top: 1px solid var(--border); display: flex; gap: 9px; align-items: flex-end; flex-shrink: 0; }
-    #user-input { flex: 1; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 11px 15px; color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; resize: none; outline: none; min-height: 46px; max-height: 140px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto; }
+    #input-bar { padding: 10px 14px; background: var(--bg); border-top: 1px solid var(--border-dim); display: flex; gap: 9px; align-items: flex-end; flex-shrink: 0; }
+    #user-input { flex: 1; background: var(--surface); border: 1px solid var(--border-dim); border-radius: var(--radius); padding: 11px 15px; color: var(--text); font-size: 15px; font-family: 'DM Sans', sans-serif; resize: none; outline: none; min-height: 46px; max-height: 140px; line-height: 1.5; transition: border-color 0.2s; overflow-y: auto; }
     #user-input:focus { border-color: var(--accent); }
     #user-input::placeholder { color: var(--text-muted); }
-    #send-btn { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 12px rgba(79,195,247,0.25); }
+    #send-btn { width: 46px; height: 46px; border-radius: 50%; background: linear-gradient(135deg, var(--accent), var(--accent2)); border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.2s; box-shadow: 0 0 14px rgba(79,195,247,0.2); }
     #send-btn:hover { opacity: 0.85; transform: scale(1.05); }
     #send-btn:active { transform: scale(0.95); }
     #send-btn:disabled { opacity: 0.35; cursor: not-allowed; transform: none; }
-    #send-btn svg { width: 20px; height: 20px; fill: #0d1117; }
+    #send-btn svg { width: 20px; height: 20px; fill: #0a0f18; }
+
+    /* ── Toasts ── */
     #error-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--danger); color: white; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center; }
     #error-toast.show { opacity: 1; }
-    #success-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--success); color: #0d1117; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center; }
+    #success-toast { position: fixed; bottom: 80px; left: 50%; transform: translateX(-50%); background: var(--success); color: #0a0f18; padding: 9px 18px; border-radius: var(--radius-sm); font-size: 13px; opacity: 0; pointer-events: none; transition: opacity 0.3s; z-index: 100; white-space: nowrap; max-width: 90vw; text-align: center; }
     #success-toast.show { opacity: 1; }
   </style>
 </head>
@@ -243,18 +356,56 @@
 <div id="app">
 
   <div id="header">
-    <svg class="header-icon" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
-      <path d="M35,15 C20,15 10,28 10,45 C10,62 18,75 30,80 C36,83 40,80 43,75 C46,70 48,65 50,65 C52,65 54,70 57,75 C60,80 64,83 70,80 C82,75 90,62 90,45 C90,28 80,15 65,15 C56,15 53,22 50,22 C47,22 44,15 35,15 Z" fill="none" stroke="#4fc3f7" stroke-width="5.5" stroke-linejoin="round"/>
-      <circle cx="36" cy="43" r="5" fill="#4fc3f7" opacity="0.45"/>
-      <circle cx="51" cy="38" r="3.5" fill="#4fc3f7" opacity="0.3"/>
-    </svg>
-    <h1>Sunny's NierRobot</h1>
-    <div id="sync-status" style="font-size:10px;color:var(--text-muted);padding:0 2px;margin-left:auto;flex-shrink:0;" title="Sync status"></div>
-    <div id="header-actions"></div>
+    <div class="header-row1">
+      <!-- Nier logo: bean-vorm met data-lijnen -->
+      <svg class="header-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="nierGrad" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#4fc3f7"/>
+            <stop offset="100%" stop-color="#7c6af7"/>
+          </linearGradient>
+        </defs>
+        <path d="M12,6 C6,6 3,12 3,20 C3,29 8,36 15,36 C18,36 19.5,33 20,30 C20.5,33 22,36 25,36 C32,36 37,29 37,20 C37,12 34,6 28,6 C23,6 21,10 20,12 C19,10 17,6 12,6 Z"
+              fill="none" stroke="url(#nierGrad)" stroke-width="2" stroke-linejoin="round"/>
+        <line x1="13" y1="16" x2="13" y2="26" stroke="#4fc3f7" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
+        <line x1="17.5" y1="13" x2="17.5" y2="29" stroke="#4fc3f7" stroke-width="1.4" stroke-linecap="round" opacity=".35"/>
+        <line x1="22.5" y1="13" x2="22.5" y2="29" stroke="#7c6af7" stroke-width="1.4" stroke-linecap="round" opacity=".35"/>
+        <line x1="27" y1="16" x2="27" y2="26" stroke="#7c6af7" stroke-width="1.4" stroke-linecap="round" opacity=".55"/>
+      </svg>
+      <h1>Sunny's NierRobot</h1>
+      <div id="sync-status" style="font-size:10px;color:var(--text-muted);padding:0 2px;" title="Sync status"></div>
+      <div id="phase-chip" class="header-phase-chip" style="display:none"></div>
+      <div id="header-actions"></div>
+    </div>
+    <!-- Fase voortgangsbalk -->
+    <div class="phase-bar-wrap" id="phase-bar-wrap" style="display:none">
+      <div class="phase-track">
+        <div class="phase-fill" id="phase-fill" style="width:0%"></div>
+      </div>
+      <div class="phase-labels">
+        <span class="phase-lbl">Transplantatie</span>
+        <span class="phase-lbl" id="phase-label-mid">Maand 1</span>
+        <span class="phase-lbl">Maand 3</span>
+      </div>
+    </div>
   </div>
 
   <!-- Auth screen -->
   <div id="auth-screen">
+    <svg width="48" height="48" viewBox="0 0 40 40" style="margin-bottom:4px">
+      <defs>
+        <linearGradient id="nierGrad2" x1="0" y1="0" x2="1" y2="1">
+          <stop offset="0%" stop-color="#4fc3f7"/>
+          <stop offset="100%" stop-color="#7c6af7"/>
+        </linearGradient>
+      </defs>
+      <path d="M12,6 C6,6 3,12 3,20 C3,29 8,36 15,36 C18,36 19.5,33 20,30 C20.5,33 22,36 25,36 C32,36 37,29 37,20 C37,12 34,6 28,6 C23,6 21,10 20,12 C19,10 17,6 12,6 Z"
+            fill="none" stroke="url(#nierGrad2)" stroke-width="2.2" stroke-linejoin="round"/>
+      <line x1="13" y1="16" x2="13" y2="26" stroke="#4fc3f7" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+      <line x1="17.5" y1="13" x2="17.5" y2="29" stroke="#4fc3f7" stroke-width="1.5" stroke-linecap="round" opacity=".4"/>
+      <line x1="22.5" y1="13" x2="22.5" y2="29" stroke="#7c6af7" stroke-width="1.5" stroke-linecap="round" opacity=".4"/>
+      <line x1="27" y1="16" x2="27" y2="26" stroke="#7c6af7" stroke-width="1.5" stroke-linecap="round" opacity=".6"/>
+    </svg>
     <h2 id="auth-title">Inloggen</h2>
     <p id="auth-subtitle">Log in om je data op al je apparaten te synchroniseren.</p>
     <div class="auth-form">
@@ -294,12 +445,78 @@
       <div class="lab-form">
         <div class="section-title">Nieuwe meting</div>
         <div class="lab-fields">
-          <div class="lab-field"><label>Creatinine (µmol/L)</label><input type="number" id="lab-creatinine" placeholder="bijv. 142" step="0.1" /></div>
-          <div class="lab-field"><label>eGFR (ml/min/1.73m²)</label><input type="number" id="lab-egfr" placeholder="bijv. 52" step="0.1" /></div>
-          <div class="lab-field"><label>Tacrolimus (ng/mL)</label><input type="number" id="lab-tacrolimus" placeholder="bijv. 11.2" step="0.1" /></div>
-          <div class="lab-field"><label>Bloeddruk (sys/dia)</label><input type="text" id="lab-bp" placeholder="bijv. 128/82" /></div>
-          <div class="lab-field"><label>Gewicht (kg)</label><input type="number" id="lab-weight" placeholder="bijv. 74.5" step="0.1" /></div>
-          <div class="lab-field"><label>Temperatuur (°C)</label><input type="number" id="lab-temp" placeholder="bijv. 37.1" step="0.1" /></div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>Creatinine</label>
+              <span class="lab-field-hint" id="hint-creatinine">normaal &lt;100 µmol/L</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="number" id="lab-creatinine" placeholder="bijv. 142" step="0.1" oninput="validateLab('creatinine')" />
+              <span class="lab-field-unit">µmol/L</span>
+              <div class="lab-field-dot empty" id="dot-creatinine"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-creatinine"></div>
+          </div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>eGFR</label>
+              <span class="lab-field-hint" id="hint-egfr">streef: stabiel of stijgend</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="number" id="lab-egfr" placeholder="bijv. 52" step="0.1" oninput="validateLab('egfr')" />
+              <span class="lab-field-unit">ml/min/1.73m²</span>
+              <div class="lab-field-dot empty" id="dot-egfr"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-egfr"></div>
+          </div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>Tacrolimus</label>
+              <span class="lab-field-hint" id="hint-tacrolimus">streef: 10–15 ng/mL (vroege fase)</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="number" id="lab-tacrolimus" placeholder="bijv. 11.2" step="0.1" oninput="validateLab('tacrolimus')" />
+              <span class="lab-field-unit">ng/mL</span>
+              <div class="lab-field-dot empty" id="dot-tacrolimus"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-tacrolimus"></div>
+          </div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>Bloeddruk</label>
+              <span class="lab-field-hint">streef: &lt;130/80 mmHg</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="text" id="lab-bp" placeholder="bijv. 128/82" oninput="validateLab('bp')" />
+              <span class="lab-field-unit">mmHg</span>
+              <div class="lab-field-dot empty" id="dot-bp"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-bp"></div>
+          </div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>Gewicht</label>
+              <span class="lab-field-hint">let op: &gt;1 kg/dag = vochtretentie</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="number" id="lab-weight" placeholder="bijv. 74.5" step="0.1" oninput="validateLab('weight')" />
+              <span class="lab-field-unit">kg</span>
+              <div class="lab-field-dot empty" id="dot-weight"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-weight"></div>
+          </div>
+          <div class="lab-field">
+            <div class="lab-field-header">
+              <label>Temperatuur</label>
+              <span class="lab-field-hint">alarm: ≥37,8°C</span>
+            </div>
+            <div class="lab-field-input-row">
+              <input type="number" id="lab-temp" placeholder="bijv. 37.1" step="0.1" oninput="validateLab('temp')" />
+              <span class="lab-field-unit">°C</span>
+              <div class="lab-field-dot empty" id="dot-temp"></div>
+            </div>
+            <div class="lab-field-feedback" id="fb-temp"></div>
+          </div>
         </div>
         <button class="full-btn" onclick="saveLabEntry()">Meting opslaan</button>
       </div>
@@ -368,7 +585,7 @@
       </div>
       <div class="settings-section">
         <div class="section-title">Transplantatie</div>
-        <div class="settings-field"><label>Transplantatiedatum</label><input type="date" id="s-txdate" /></div>
+        <div class="settings-field"><label>Transplantatiedatum</label><input type="date" id="s-txdate" oninput="updatePhaseHeader()" /></div>
         <div class="settings-field"><label>Ziekenhuis / centrum</label><input type="text" id="s-hospital" placeholder="bijv. Amsterdam UMC" /></div>
         <div class="settings-field"><label>Type donor</label><select id="s-donor"><option value="levend">Levende donor</option><option value="postmortaal">Postmortale donor</option></select></div>
         <div class="settings-field"><label>Relatie donor</label><input type="text" id="s-donorrel" placeholder="bijv. moeder" /></div>
@@ -402,7 +619,14 @@
 
   <!-- Chat -->
   <div id="chat-area">
-    <div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>
+    <div id="welcome">
+      <h2>Waar kan ik je mee helpen?</h2>
+      <div class="quick-prompts" id="quick-prompts">
+        <button class="quick-btn" onclick="sendQuick('Vraag over mijn tacrolimus')">Vraag over mijn tacrolimus</button>
+        <button class="quick-btn" onclick="sendQuick('Mijn creatinine is gestegen')">Mijn creatinine is gestegen</button>
+        <button class="quick-btn" onclick="sendQuick('Ik voel me niet lekker')">Ik voel me niet lekker</button>
+      </div>
+    </div>
   </div>
   <div id="input-bar">
     <textarea id="user-input" placeholder="Stel een vraag..." rows="1" onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
@@ -447,19 +671,9 @@
 'use strict';
 
 // ── Supabase ──
-// FIX: gebruik een unieke storageKey zodat meerdere tabs/instanties
-// niet elkaars Web Lock stelen. Dit lost de "Lock broken by another
-// request with the 'steal' option" fout op.
 var SUPA_URL = 'https://owtqluywrokierqykwyn.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93dHFsdXl3cm9raWVycXlrd3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTg4NTQsImV4cCI6MjA5MDg5NDg1NH0.4fXLvsyBB8pmC58o4BuBVKbJxjYmhCA7KgG6FEqpRec';
 
-// autoRefreshToken: false — dit is de kernfix.
-// Supabase gebruikt Web Locks om token-refreshes te serialiseren.
-// Die locks zijn origin-breed en overleven een page refresh.
-// Na een paar minuten inactiviteit raakt de lock vast ("ghost lock"),
-// waarna getSession() voor altijd hangt. Browserdata wissen is dan
-// het enige dat helpt. Met autoRefreshToken: false vragen we nooit
-// een Web Lock aan — wij doen de refresh zelf via fetch().
 var supa = supabase.createClient(SUPA_URL, SUPA_KEY, {
   auth: {
     persistSession: true,
@@ -482,7 +696,7 @@ function readSession() {
   } catch(e) { return null; }
 }
 
-// ── Token handmatig vernieuwen via fetch (GEEN setSession, GEEN Web Lock) ──
+// ── Token handmatig vernieuwen via fetch ──
 var refreshInFlight = false;
 async function refreshTokenViaFetch(refreshToken) {
   if (refreshInFlight) return readSession();
@@ -497,7 +711,6 @@ async function refreshTokenViaFetch(refreshToken) {
     var data = await res.json();
     if (!data.access_token) return null;
     localStorage.setItem('nierrobot_auth', JSON.stringify(data));
-    console.log('Token vernieuwd, geldig tot:', new Date((data.expires_at||0)*1000).toLocaleTimeString('nl-NL'));
     return data;
   } catch(e) {
     console.warn('Token refresh via fetch mislukt:', e.message);
@@ -507,7 +720,6 @@ async function refreshTokenViaFetch(refreshToken) {
   }
 }
 
-// ── Geldige sessie ophalen ──
 async function ensureSession() {
   var s = readSession();
   if (!s) return null;
@@ -519,8 +731,6 @@ async function ensureSession() {
   return s;
 }
 
-// ── Directe DB-fetch (omzeilt Supabase client auth volledig) ──
-// Supabase REST API aanroepen met onze eigen token — geen Web Lock mogelijk.
 async function dbFetch(path, opts) {
   var s = await ensureSession();
   if (!s) throw new Error('Geen geldige sessie');
@@ -544,35 +754,15 @@ async function dbFetch(path, opts) {
   return text ? JSON.parse(text) : null;
 }
 
-// ── Proactieve token-timer: vernieuw elke 45 minuten ──
 var tokenRefreshTimer = null;
 function startTokenRefreshTimer() {
   if (tokenRefreshTimer) clearInterval(tokenRefreshTimer);
   tokenRefreshTimer = setInterval(async function() {
     var s = readSession();
     if (s && s.refresh_token) {
-      console.log('Proactieve token refresh...');
       await refreshTokenViaFetch(s.refresh_token);
     }
   }, 45 * 60 * 1000);
-}
-function stopTokenRefreshTimer() {
-  if (tokenRefreshTimer) { clearInterval(tokenRefreshTimer); tokenRefreshTimer = null; }
-}
-
-// ── Proactieve token-timer: vernieuw elke 45 minuten ──
-// Tokens leven 1 uur. Door elke 45 min te vernieuwen hoeven we
-// nooit te wachten op een verlopen token tijdens een sync.
-var tokenRefreshTimer = null;
-function startTokenRefreshTimer() {
-  if (tokenRefreshTimer) clearInterval(tokenRefreshTimer);
-  tokenRefreshTimer = setInterval(async function() {
-    var s = readSession();
-    if (s && s.refresh_token) {
-      console.log('Proactieve token refresh...');
-      await refreshTokenViaFetch(s.refresh_token);
-    }
-  }, 45 * 60 * 1000); // 45 minuten
 }
 function stopTokenRefreshTimer() {
   if (tokenRefreshTimer) { clearInterval(tokenRefreshTimer); tokenRefreshTimer = null; }
@@ -586,8 +776,6 @@ var currentConvId = null;
 var selectedUrgency = 'mild';
 var authMode = 'login';
 var currentChartKey = 'creatinine';
-
-// ── Sync guard: voorkomt overlappende sync-calls ──
 var syncInProgress = false;
 var syncQueued = false;
 
@@ -602,58 +790,208 @@ function getAgenda() { try { return JSON.parse(localStorage.getItem('nk_agenda')
 function saveAgendaLocal(a) { localStorage.setItem('nk_agenda', JSON.stringify(a)); }
 function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
+// ── Phase header ──
+function updatePhaseHeader() {
+  var profile = getProfile();
+  var txDateStr = profile.txdate || '';
+  if (!txDateStr) { document.getElementById('phase-chip').style.display = 'none'; document.getElementById('phase-bar-wrap').style.display = 'none'; return; }
+  var transplantDate = new Date(txDateStr);
+  var today = new Date();
+  var daysSince = Math.floor((today - transplantDate) / (1000 * 60 * 60 * 24));
+  if (daysSince < 0) { document.getElementById('phase-chip').style.display = 'none'; document.getElementById('phase-bar-wrap').style.display = 'none'; return; }
+
+  var faseShort, fillPct, midLabel;
+  if (daysSince <= 30) {
+    faseShort = 'Dag ' + daysSince + ' \u00b7 vroege fase';
+    fillPct = Math.min(100, (daysSince / 30) * 50); // 0-50% = eerste maand
+    midLabel = 'Maand 1';
+  } else if (daysSince <= 90) {
+    faseShort = 'Dag ' + daysSince + ' \u00b7 intermediaire fase';
+    fillPct = 50 + Math.min(50, ((daysSince - 30) / 60) * 50);
+    midLabel = 'Maand 2';
+  } else if (daysSince <= 365) {
+    faseShort = 'Dag ' + daysSince + ' \u00b7 onderhoudsfase';
+    fillPct = 100;
+    midLabel = 'Maand 6';
+  } else {
+    faseShort = 'Dag ' + daysSince + ' \u00b7 chronische fase';
+    fillPct = 100;
+    midLabel = 'Maand 12';
+  }
+
+  var chip = document.getElementById('phase-chip');
+  var fill = document.getElementById('phase-fill');
+  var wrap = document.getElementById('phase-bar-wrap');
+  var midLbl = document.getElementById('phase-label-mid');
+
+  chip.textContent = faseShort;
+  chip.style.display = '';
+  fill.style.width = fillPct + '%';
+  wrap.style.display = '';
+  midLbl.textContent = midLabel;
+
+  // Update tacrolimus hint based on phase
+  var tacHint = document.getElementById('hint-tacrolimus');
+  if (tacHint) {
+    if (daysSince <= 30) tacHint.textContent = 'streef: 10\u201315 ng/mL (vroege fase)';
+    else if (daysSince <= 90) tacHint.textContent = 'streef: 8\u201312 ng/mL (intermediaire fase)';
+    else tacHint.textContent = 'streef: 5\u201310 ng/mL (onderhoudsfase)';
+  }
+}
+
+// ── Lab inline validatie ──
+function getDaysSinceTx() {
+  var profile = getProfile();
+  var txDateStr = profile.txdate || '2026-03-26';
+  var transplantDate = new Date(txDateStr);
+  return Math.floor((new Date() - transplantDate) / (1000 * 60 * 60 * 24));
+}
+
+function getTacrRangeForPhase() {
+  var d = getDaysSinceTx();
+  if (d <= 30) return {low: 10, high: 15};
+  if (d <= 90) return {low: 8, high: 12};
+  return {low: 5, high: 10};
+}
+
+function getLowestCreatinine() {
+  var entries = getLabEntries();
+  var vals = entries.map(function(e){ return parseFloat(e.creatinine); }).filter(function(v){ return !isNaN(v) && v > 0; });
+  return vals.length > 0 ? Math.min.apply(null, vals) : null;
+}
+
+function setFieldState(key, state, msg) {
+  var input = document.getElementById('lab-' + key);
+  var dot = document.getElementById('dot-' + key);
+  var fb = document.getElementById('fb-' + key);
+  if (!input || !dot || !fb) return;
+  input.className = state === 'ok' ? 'val-ok' : state === 'warn' ? 'val-warn' : state === 'danger' ? 'val-danger' : '';
+  dot.className = 'lab-field-dot ' + (state || 'empty');
+  fb.className = 'lab-field-feedback ' + (state || '');
+  fb.textContent = msg || '';
+}
+
+function validateLab(key) {
+  var input = document.getElementById('lab-' + key);
+  var val = input.value.trim();
+  if (!val || val === '0') { setFieldState(key, 'empty', ''); return; }
+
+  if (key === 'creatinine') {
+    var v = parseFloat(val);
+    if (isNaN(v)) { setFieldState(key, 'empty', ''); return; }
+    var lowest = getLowestCreatinine();
+    if (lowest && v > lowest * 1.2) {
+      setFieldState(key, 'danger', '\u2191 ' + Math.round(((v - lowest) / lowest) * 100) + '% boven jouw laagste (' + lowest + ') \u2014 bespreek met Amsterdam UMC');
+    } else if (v > 200) {
+      setFieldState(key, 'warn', 'Hoge waarde \u2014 vergelijk met je eigen trend');
+    } else {
+      setFieldState(key, 'ok', '\u2713 Binnen verwacht bereik');
+    }
+  } else if (key === 'egfr') {
+    var v = parseFloat(val);
+    if (isNaN(v)) { setFieldState(key, 'empty', ''); return; }
+    if (v < 30) setFieldState(key, 'danger', 'eGFR &lt;30: ernstige nierschade \u2014 direct bespreken');
+    else if (v < 45) setFieldState(key, 'warn', 'eGFR &lt;45: verhoogd risico, monitor nauwlettend');
+    else setFieldState(key, 'ok', '\u2713 eGFR acceptabel');
+  } else if (key === 'tacrolimus') {
+    var v = parseFloat(val);
+    if (isNaN(v)) { setFieldState(key, 'empty', ''); return; }
+    var range = getTacrRangeForPhase();
+    if (v < range.low) {
+      setFieldState(key, 'danger', '\u2193 Onder streefspiegel (' + range.low + '\u2013' + range.high + ' ng/mL) \u2014 contact Amsterdam UMC');
+    } else if (v > range.high) {
+      setFieldState(key, 'warn', '\u2191 Boven streefspiegel (' + range.low + '\u2013' + range.high + ' ng/mL) \u2014 meld bij volgende controle');
+    } else {
+      setFieldState(key, 'ok', '\u2713 Binnen streefspiegel (' + range.low + '\u2013' + range.high + ' ng/mL)');
+    }
+  } else if (key === 'bp') {
+    var m = val.match(/^(\d+)[\/\-,](\d+)$/);
+    if (!m) { setFieldState(key, 'empty', ''); return; }
+    var sys = parseInt(m[1]); var dia = parseInt(m[2]);
+    if (sys >= 160 || dia >= 100) setFieldState(key, 'danger', 'Hypertensie graad 2 \u2014 contact Amsterdam UMC');
+    else if (sys >= 130 || dia >= 80) setFieldState(key, 'warn', 'Iets boven streef (&lt;130/80) \u2014 bespreek bij volgende afspraak');
+    else setFieldState(key, 'ok', '\u2713 Binnen streefwaarde');
+  } else if (key === 'weight') {
+    var v = parseFloat(val);
+    if (isNaN(v)) { setFieldState(key, 'empty', ''); return; }
+    var entries = getLabEntries();
+    var lastWeight = null;
+    for (var i = 0; i < entries.length; i++) {
+      var lw = parseFloat(entries[i].weight);
+      if (!isNaN(lw) && lw > 0) { lastWeight = lw; break; }
+    }
+    if (lastWeight && (v - lastWeight) >= 1) {
+      setFieldState(key, 'warn', '\u2191 ' + (v - lastWeight).toFixed(1) + ' kg t.o.v. vorige meting \u2014 kan op vochtretentie wijzen');
+    } else {
+      setFieldState(key, 'ok', '\u2713 Gewicht genoteerd');
+    }
+  } else if (key === 'temp') {
+    var v = parseFloat(val);
+    if (isNaN(v)) { setFieldState(key, 'empty', ''); return; }
+    var days = getDaysSinceTx();
+    if (v >= 38.5) {
+      setFieldState(key, 'danger', 'Hoge koorts \u2014 direct contact Amsterdam UMC');
+    } else if (v >= 37.8) {
+      if (days <= 90) setFieldState(key, 'danger', 'Koorts in vroege fase \u2014 direct contact Amsterdam UMC (020 566 9111)');
+      else setFieldState(key, 'warn', 'Lichte koorts \u2014 monitor nauwlettend, bij verergering contact Amsterdam UMC');
+    } else if (v >= 37.5) {
+      setFieldState(key, 'warn', 'Licht verhoogd \u2014 houd in de gaten');
+    } else {
+      setFieldState(key, 'ok', '\u2713 Normaal');
+    }
+  }
+}
+
+function resetLabValidation() {
+  ['creatinine','egfr','tacrolimus','bp','weight','temp'].forEach(function(key) {
+    setFieldState(key, 'empty', '');
+  });
+}
+
 // ── Supabase sync ──
 var syncSafetyTimer = null;
-
 async function syncFromSupabase() {
   if (syncInProgress) { syncQueued = true; return; }
   syncInProgress = true;
   var statusEl = document.getElementById('sync-status');
-  if (statusEl) statusEl.textContent = '⟳ sync...';
-
+  if (statusEl) statusEl.textContent = '\u29d7 sync...';
   if (syncSafetyTimer) clearTimeout(syncSafetyTimer);
   syncSafetyTimer = setTimeout(function() {
-    console.warn('Sync timeout — geforceerde reset');
     syncInProgress = false; syncQueued = false;
     var el = document.getElementById('sync-status');
     if (el) el.textContent = '';
   }, 15000);
-
   try {
     var session = await ensureSession();
     if (!session || !session.user) { currentUser = null; return; }
     currentUser = session.user;
     var uid = currentUser.id;
-
     var labData = await dbFetch('lab_entries?user_id=eq.' + uid + '&order=entry_date.desc');
     if (labData) {
       saveLabLocal(labData.map(function(r) {
         return { date: r.entry_date, creatinine: r.creatinine||'', egfr: r.egfr||'', tacrolimus: r.tacrolimus||'', bp: r.bp||'', weight: r.weight||'', temp: r.temp||'', sbId: r.id };
       }));
     }
-
     var vraagData = await dbFetch('agenda_vragen?user_id=eq.' + uid + '&order=entry_date.desc');
     var klachtData = await dbFetch('agenda_klachten?user_id=eq.' + uid + '&order=entry_date.desc');
-
     var agenda = {vragen:[], klachten:[]};
     if (vraagData) agenda.vragen = vraagData.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
     if (klachtData) agenda.klachten = klachtData.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
     saveAgendaLocal(agenda);
-
     var profData = await dbFetch('profile?user_id=eq.' + uid + '&limit=1');
     if (profData && profData[0]) {
       var pd = profData[0];
       var p = getProfile();
       saveProfileLocal(Object.assign(p, {notes: pd.notes, meds: pd.meds || []}));
     }
-
     refreshVisiblePanel();
-    if (statusEl) { statusEl.textContent = '✓ gesynchroniseerd'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
+    updatePhaseHeader();
+    if (statusEl) { statusEl.textContent = '\u2713'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
   } catch(e) {
     console.error('Sync error:', e.message || e);
   } finally {
     clearTimeout(syncSafetyTimer);
-    if (statusEl && statusEl.textContent === '⟳ sync...') statusEl.textContent = '';
+    if (statusEl && statusEl.textContent === '\u29d7 sync...') statusEl.textContent = '';
     syncInProgress = false;
     if (syncQueued) { syncQueued = false; setTimeout(syncFromSupabase, 600); }
   }
@@ -670,15 +1008,11 @@ function refreshVisiblePanel() {
   if (settingsPanel && settingsPanel.classList.contains('visible')) renderSettings();
 }
 
-// Geldige user ophalen zonder Web Lock
 async function getValidUser() {
   var session = await ensureSession();
-  if (session && session.user) {
-    currentUser = session.user;
-    return currentUser;
-  }
+  if (session && session.user) { currentUser = session.user; return currentUser; }
   currentUser = null;
-  showError('Sessie verlopen — log opnieuw in');
+  showError('Sessie verlopen \u2014 log opnieuw in');
   showAuthScreen();
   return null;
 }
@@ -686,7 +1020,7 @@ async function getValidUser() {
 async function pushLabToSupabase(entry) {
   var user = await getValidUser(); if (!user) return;
   var statusEl = document.getElementById('sync-status');
-  if (statusEl) statusEl.textContent = '⟳ opslaan...';
+  if (statusEl) statusEl.textContent = '\u29d7 opslaan...';
   try {
     await dbFetch('lab_entries', {
       method: 'POST', prefer: 'return=minimal',
@@ -695,10 +1029,10 @@ async function pushLabToSupabase(entry) {
         tacrolimus: entry.tacrolimus||null, bp: entry.bp||null,
         weight: entry.weight||null, temp: entry.temp||null }
     });
-    if (statusEl) { statusEl.textContent = '✓ opgeslagen'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
+    if (statusEl) { statusEl.textContent = '\u2713'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
   } catch(e) {
     console.error('Lab push error:', e);
-    if (statusEl) statusEl.textContent = '✗ fout';
+    if (statusEl) statusEl.textContent = '\u2715 fout';
     showError('Opslaan mislukt: ' + e.message);
   }
 }
@@ -801,6 +1135,8 @@ async function doSignOut() {
 }
 
 // ── UI state ──
+var ALL_PANELS = ['history','lab','chart','agenda','settings'];
+
 function showAuthScreen() {
   document.getElementById('app').classList.add('auth-mode');
   document.getElementById('auth-screen').classList.add('visible');
@@ -825,6 +1161,7 @@ function showApp() {
   document.getElementById('chat-area').style.display = 'flex';
   document.getElementById('input-bar').style.display = 'flex';
   setActiveBtn('chat');
+  updatePhaseHeader();
 }
 
 function saveApiKey() {
@@ -834,41 +1171,27 @@ function saveApiKey() {
 }
 
 // ── Init ──
-var ALL_PANELS = ['history','lab','chart','agenda','settings'];
 var realtimeChannel = null;
 
 function setupRealtimeSync() {
   if (!currentUser) return;
   if (realtimeChannel) { supa.removeChannel(realtimeChannel); realtimeChannel = null; }
   realtimeChannel = supa.channel('db-changes-' + currentUser.id)
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'lab_entries', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase();
-    })
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_vragen', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase();
-    })
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_klachten', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase();
-    })
-    .on('postgres_changes', {event: '*', schema: 'public', table: 'profile', filter: 'user_id=eq.' + currentUser.id}, function() {
-      syncFromSupabase();
-    })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'lab_entries', filter: 'user_id=eq.' + currentUser.id}, function() { syncFromSupabase(); })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_vragen', filter: 'user_id=eq.' + currentUser.id}, function() { syncFromSupabase(); })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'agenda_klachten', filter: 'user_id=eq.' + currentUser.id}, function() { syncFromSupabase(); })
+    .on('postgres_changes', {event: '*', schema: 'public', table: 'profile', filter: 'user_id=eq.' + currentUser.id}, function() { syncFromSupabase(); })
     .subscribe();
 }
 
-// Tab wordt weer zichtbaar: sync data bij.
-// Geen wachttijd nodig — we gebruiken geen Web Locks meer.
 document.addEventListener('visibilitychange', function() {
-  if (document.visibilityState === 'visible' && currentUser) {
-    syncFromSupabase();
-  }
+  if (document.visibilityState === 'visible' && currentUser) { syncFromSupabase(); }
 });
 
 async function init() {
   currentConvId = 'conv_' + Date.now();
+  updatePhaseHeader();
 
-  // onAuthStateChange alleen gebruiken voor login/logout events.
-  // Geen sync hier — voorkomt dubbele sync bij opstarten.
   supa.auth.onAuthStateChange(async function(event, session) {
     if (event === 'SIGNED_IN' && session && session.user) {
       currentUser = session.user;
@@ -885,7 +1208,6 @@ async function init() {
     }
   });
 
-  // Bij opstarten: sessie direct uit localStorage, geen getSession() = geen lock
   var session = await ensureSession();
   if (session && session.user) {
     currentUser = session.user;
@@ -920,7 +1242,7 @@ function showPanel(name) {
   document.getElementById(name + '-panel').classList.add('visible');
   setActiveBtn(name);
   if (name === 'history') renderHistoryList();
-  if (name === 'lab') { renderLabEntries(); if (currentUser) syncFromSupabase(); }
+  if (name === 'lab') { resetLabValidation(); renderLabEntries(); if (currentUser) syncFromSupabase(); }
   if (name === 'chart') { renderChart(currentChartKey); if (currentUser) syncFromSupabase(); }
   if (name === 'agenda') { renderAgenda(); if (currentUser) syncFromSupabase(); }
   if (name === 'settings') renderSettings();
@@ -934,7 +1256,6 @@ function showSuccess(msg) { var t = document.getElementById('success-toast'); t.
 function getSystemPrompt() {
   var today = new Date();
   var profile = getProfile();
-  // Transplantatiedatum: uit profiel, anders hardcoded default
   var txDateStr = profile.txdate || '2026-03-26';
   var transplantDate = new Date(txDateStr);
   var daysSince = Math.floor((today - transplantDate) / (1000 * 60 * 60 * 24));
@@ -1004,7 +1325,7 @@ function saveCurrentConversation() {
 
 function newConversation() {
   currentHistory = []; currentConvId = 'conv_' + Date.now();
-  document.getElementById('chat-area').innerHTML = '<div id="welcome"><h2>Waar kan ik je mee helpen?</h2></div>';
+  document.getElementById('chat-area').innerHTML = '<div id="welcome"><h2>Waar kan ik je mee helpen?</h2><div class="quick-prompts"><button class="quick-btn" onclick="sendQuick(\'Vraag over mijn tacrolimus\')">Vraag over mijn tacrolimus</button><button class="quick-btn" onclick="sendQuick(\'Mijn creatinine is gestegen\')">Mijn creatinine is gestegen</button><button class="quick-btn" onclick="sendQuick(\'Ik voel me niet lekker\')">Ik voel me niet lekker</button></div></div>';
   showChat();
 }
 
@@ -1055,6 +1376,7 @@ async function saveLabEntry() {
   var entry = {date: Date.now(), creatinine: creatinine, egfr: egfr, tacrolimus: tacrolimus, bp: bp, weight: weight, temp: temp};
   var entries = getLabEntries(); entries.unshift(entry); saveLabLocal(entries.slice(0,200));
   ['lab-creatinine','lab-egfr','lab-tacrolimus','lab-bp','lab-weight','lab-temp'].forEach(function(id) { document.getElementById(id).value = ''; });
+  resetLabValidation();
   renderLabEntries();
   showSuccess('Meting opgeslagen');
   await pushLabToSupabase(entry);
@@ -1112,7 +1434,7 @@ function exportLabCSV() {
 var CHART_CFG = {
   creatinine: { label:'Creatinine', unit:'\u00b5mol/L', color:'#4fc3f7', alertHigh:null, alertLow:null, refs:[{value:110,label:'Bovengrens normaal',color:'#3fb950'}], note:'Stijging >20% boven laagste waarde is een alarmsignaal.' },
   egfr:       { label:'eGFR', unit:'ml/min/1.73m\u00b2', color:'#7ee787', alertLow:30, alertHigh:null, refs:[{value:60,label:'Grens CKD3',color:'#d29922'}], note:'eGFR <30 wijst op ernstige nierschade.' },
-  tacrolimus: { label:'Tacrolimus', unit:'ng/mL', color:'#d2a8ff', alertHigh:15, alertLow:6, refs:[{value:10,label:'Streef hoog',color:'#4fc3f7'},{value:8,label:'Streef laag',color:'#d29922'}], note:'Streefwaarden zijn fase-afhankelijk.' },
+  tacrolimus: { label:'Tacrolimus', unit:'ng/mL', color:'#a78bfa', alertHigh:15, alertLow:6, refs:[{value:10,label:'Streef hoog',color:'#4fc3f7'},{value:8,label:'Streef laag',color:'#d29922'}], note:'Streefwaarden zijn fase-afhankelijk.' },
   bp:         { label:'Bloeddruk systolisch', unit:'mmHg', color:'#ffa657', alertHigh:160, alertLow:null, refs:[{value:130,label:'Streef <130',color:'#d29922'}], note:'Post-tx streef <130/80 mmHg.' },
   weight:     { label:'Gewicht', unit:'kg', color:'#79c0ff', alertHigh:null, alertLow:null, refs:[], note:'Toename >1\u20132 kg/dag kan wijzen op vochtretentie.' },
   temp:       { label:'Temperatuur', unit:'\u00b0C', color:'#ff7b72', alertHigh:37.8, alertLow:null, refs:[{value:37.8,label:'Alarmgrens post-tx',color:'#f85149'}], note:'Bij \u226537,8\u00b0C in eerste 3 maanden: direct contact Amsterdam UMC.' }
@@ -1162,7 +1484,7 @@ function drawChart(values, labels, cfg) {
   var minVal = Math.min.apply(null,allVals)*0.92; var maxVal = Math.max.apply(null,allVals)*1.08; var range = maxVal-minVal||1;
   function toX(i) { return pad.left + (values.length===1 ? gW/2 : (i/(values.length-1))*gW); }
   function toY(v) { return pad.top+gH-((v-minVal)/range)*gH; }
-  ctx.strokeStyle='#30363d'; ctx.lineWidth=1;
+  ctx.strokeStyle='#1e3a50'; ctx.lineWidth=1;
   for (var i=0;i<=4;i++) { var y=pad.top+(i/4)*gH; ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(pad.left+gW,y); ctx.stroke(); var v=maxVal-(i/4)*range; ctx.fillStyle='#7d8590'; ctx.font='10px sans-serif'; ctx.textAlign='right'; ctx.fillText(v.toFixed(v<10?1:0),pad.left-4,y+3); }
   cfg.refs.forEach(function(ref) { var ry=toY(ref.value); ctx.save(); ctx.strokeStyle=ref.color; ctx.lineWidth=1; ctx.setLineDash([4,4]); ctx.beginPath(); ctx.moveTo(pad.left,ry); ctx.lineTo(pad.left+gW,ry); ctx.stroke(); ctx.restore(); });
   if (values.length>1) {
@@ -1227,6 +1549,7 @@ async function saveSettings() {
   var keyVal = document.getElementById('s-apikey').value.trim();
   if (keyVal && !keyVal.startsWith('sk-ant')) return showError('Geen geldige API sleutel');
   if (keyVal) { apiKey=keyVal; localStorage.setItem('nk_api_key',apiKey); }
+  updatePhaseHeader();
   showSuccess('Opgeslagen');
   showChat();
 }
@@ -1320,6 +1643,11 @@ function renderAgenda() {
 function handleKey(e){if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();sendMessage();}}
 function autoResize(el){el.style.height='auto';el.style.height=Math.min(el.scrollHeight,140)+'px';}
 
+function sendQuick(text) {
+  document.getElementById('user-input').value = text;
+  sendMessage();
+}
+
 function renderMessage(role,text){
   var chat=document.getElementById('chat-area');
   var div=document.createElement('div'); div.className='msg '+role;
@@ -1378,40 +1706,36 @@ async function runDebug() {
   var out = document.getElementById('debug-output');
   out.innerHTML = 'Bezig...';
   var lines = [];
-
   if (!currentUser) {
-    lines.push('❌ currentUser is NULL — je bent niet ingelogd in de app');
+    lines.push('\u274c currentUser is NULL \u2014 je bent niet ingelogd in de app');
   } else {
-    lines.push('✓ Ingelogd als: ' + currentUser.email);
-    lines.push('✓ User ID: ' + currentUser.id);
+    lines.push('\u2713 Ingelogd als: ' + currentUser.email);
+    lines.push('\u2713 User ID: ' + currentUser.id);
   }
-
   try {
     var sess = await ensureSession();
     if (sess && sess.access_token) {
-      lines.push('✓ Sessie actief (uit localStorage, geen Web Lock)');
+      lines.push('\u2713 Sessie actief (uit localStorage, geen Web Lock)');
       var exp = new Date((sess.expires_at || 0) * 1000).toLocaleTimeString('nl-NL');
       var secsLeft = (sess.expires_at || 0) - Math.floor(Date.now() / 1000);
-      lines.push('✓ Token geldig tot: ' + exp + ' (' + secsLeft + 's resterend)');
+      lines.push('\u2713 Token geldig tot: ' + exp + ' (' + secsLeft + 's resterend)');
     } else {
-      lines.push('❌ Geen geldige sessie gevonden');
+      lines.push('\u274c Geen geldige sessie gevonden');
     }
   } catch(e) {
-    lines.push('❌ Sessie check fout: ' + e.message);
+    lines.push('\u274c Sessie check fout: ' + e.message);
   }
-
   if (currentUser) {
     try {
       await dbFetch('lab_entries', {method:'POST', prefer:'return=minimal',
         body: {user_id: currentUser.id, entry_date: new Date().toISOString(), creatinine: '999'}});
-      lines.push('✓ Test insert geslaagd! Data staat in Supabase.');
+      lines.push('\u2713 Test insert geslaagd! Data staat in Supabase.');
       await dbFetch('lab_entries?creatinine=eq.999&user_id=eq.' + currentUser.id, {method:'DELETE', prefer:'return=minimal'});
-      lines.push('✓ Testdata opgeruimd');
+      lines.push('\u2713 Testdata opgeruimd');
     } catch(e) {
-      lines.push('❌ Insert exception: ' + e.message);
+      lines.push('\u274c Insert exception: ' + e.message);
     }
   }
-
   out.innerHTML = lines.join('<br>');
 }
 

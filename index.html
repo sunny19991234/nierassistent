@@ -452,16 +452,71 @@
 // request with the 'steal' option" fout op.
 var SUPA_URL = 'https://owtqluywrokierqykwyn.supabase.co';
 var SUPA_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im93dHFsdXl3cm9raWVycXlrd3luIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzUzMTg4NTQsImV4cCI6MjA5MDg5NDg1NH0.4fXLvsyBB8pmC58o4BuBVKbJxjYmhCA7KgG6FEqpRec';
+
+// autoRefreshToken: false — dit is de kernfix.
+// Supabase gebruikt Web Locks om token-refreshes te serialiseren.
+// Die locks zijn origin-breed en overleven een page refresh.
+// Na een paar minuten inactiviteit raakt de lock vast ("ghost lock"),
+// waarna getSession() voor altijd hangt. Browserdata wissen is dan
+// het enige dat helpt. Met autoRefreshToken: false vragen we nooit
+// een Web Lock aan — wij doen de refresh zelf via fetch().
 var supa = supabase.createClient(SUPA_URL, SUPA_KEY, {
   auth: {
     persistSession: true,
     storageKey: 'nierrobot_auth',
     storage: window.localStorage,
-    autoRefreshToken: true,
+    autoRefreshToken: false,
     detectSessionInUrl: false
   }
 });
 var currentUser = null;
+
+// ── Sessie direct uit localStorage lezen (geen Web Lock) ──
+function readSession() {
+  try {
+    var raw = localStorage.getItem('nierrobot_auth');
+    if (!raw) return null;
+    var s = JSON.parse(raw);
+    if (!s || !s.access_token) return null;
+    return s;
+  } catch(e) { return null; }
+}
+
+// ── Token handmatig vernieuwen via fetch (geen Web Lock) ──
+async function refreshTokenViaFetch(refreshToken) {
+  try {
+    var res = await fetch(SUPA_URL + '/auth/v1/token?grant_type=refresh_token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPA_KEY },
+      body: JSON.stringify({ refresh_token: refreshToken })
+    });
+    if (!res.ok) return null;
+    var data = await res.json();
+    if (!data.access_token) return null;
+    // Sla nieuwe sessie op in localStorage zodat Supabase client hem oppikt
+    localStorage.setItem('nierrobot_auth', JSON.stringify(data));
+    // Vertel de Supabase client de nieuwe tokens (geen lock nodig)
+    await supa.auth.setSession({ access_token: data.access_token, refresh_token: data.refresh_token });
+    return data;
+  } catch(e) {
+    console.warn('Token refresh via fetch mislukt:', e.message);
+    return null;
+  }
+}
+
+// ── Geldige sessie ophalen — nooit via getSession() die locks gebruikt ──
+async function ensureSession() {
+  var s = readSession();
+  if (!s) return null;
+  var nowSec = Math.floor(Date.now() / 1000);
+  // Vernieuwen als token binnen 120 seconden verloopt
+  if ((s.expires_at || 0) - nowSec < 120) {
+    if (!s.refresh_token) return null;
+    s = await refreshTokenViaFetch(s.refresh_token);
+    if (!s) return null;
+  }
+  return s;
+}
 
 // ── State ──
 var apiKey = localStorage.getItem('nk_api_key') || '';
@@ -488,28 +543,38 @@ function saveAgendaLocal(a) { localStorage.setItem('nk_agenda', JSON.stringify(a
 function escapeHtml(t) { return String(t).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 // ── Supabase sync ──
+// Harde veiligheidstimer: syncInProgress kan nooit langer dan 15s vast zitten.
+var syncSafetyTimer = null;
+
 async function syncFromSupabase() {
-  if (syncInProgress) {
-    syncQueued = true;
-    return;
-  }
+  if (syncInProgress) { syncQueued = true; return; }
   syncInProgress = true;
   var statusEl = document.getElementById('sync-status');
   if (statusEl) statusEl.textContent = '⟳ sync...';
+
+  // Veiligheidsklep: als de sync na 15s nog niet klaar is, reset alles
+  if (syncSafetyTimer) clearTimeout(syncSafetyTimer);
+  syncSafetyTimer = setTimeout(function() {
+    console.warn('Sync timeout — geforceerde reset');
+    syncInProgress = false;
+    syncQueued = false;
+    var el = document.getElementById('sync-status');
+    if (el) el.textContent = '';
+  }, 15000);
+
   try {
-    var sessRes = await supa.auth.getSession();
-    if (!sessRes.data || !sessRes.data.session) {
+    var session = await ensureSession();
+    if (!session || !session.user) {
       currentUser = null;
       return;
     }
-    currentUser = sessRes.data.session.user;
+    currentUser = session.user;
 
     var labRes = await supa.from('lab_entries').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
     if (labRes.data) {
-      var labEntries = labRes.data.map(function(r) {
+      saveLabLocal(labRes.data.map(function(r) {
         return { date: r.entry_date, creatinine: r.creatinine||'', egfr: r.egfr||'', tacrolimus: r.tacrolimus||'', bp: r.bp||'', weight: r.weight||'', temp: r.temp||'', sbId: r.id };
-      });
-      saveLabLocal(labEntries);
+      }));
     }
 
     var vraagRes = await supa.from('agenda_vragen').select('*').eq('user_id', currentUser.id).order('entry_date', {ascending: false});
@@ -517,33 +582,25 @@ async function syncFromSupabase() {
     var profRes = await supa.from('profile').select('*').eq('user_id', currentUser.id).maybeSingle();
 
     var agenda = {vragen:[], klachten:[]};
-    if (vraagRes.data) {
-      agenda.vragen = vraagRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
-    }
-    if (klachtRes.data) {
-      agenda.klachten = klachtRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
-    }
+    if (vraagRes.data) agenda.vragen = vraagRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, done: r.done, sbId: r.id}; });
+    if (klachtRes.data) agenda.klachten = klachtRes.data.map(function(r) { return {id: r.local_id, text: r.text, date: r.entry_date, urgency: r.urgency, sbId: r.id}; });
     saveAgendaLocal(agenda);
 
     if (profRes.data) {
-      var p = {stent: profRes.data.stent, notes: profRes.data.notes, meds: profRes.data.meds || []};
-      saveProfileLocal(p);
+      var p = getProfile();
+      var pd = profRes.data;
+      saveProfileLocal(Object.assign(p, {stent: pd.stent, notes: pd.notes, meds: pd.meds || []}));
     }
 
     refreshVisiblePanel();
     if (statusEl) { statusEl.textContent = '✓ gesynchroniseerd'; setTimeout(function(){ if(statusEl) statusEl.textContent=''; }, 3000); }
   } catch(e) {
-    // Lock-fouten en AbortErrors zijn tijdelijk bij tab-wisseling — stil negeren
-    var isLockErr = e && e.message && (e.message.indexOf('Lock') !== -1 || e.message.indexOf('AbortError') !== -1 || e.message.indexOf('abort') !== -1);
-    if (!isLockErr) console.error('Sync error:', e);
+    console.error('Sync error:', e.message || e);
   } finally {
-    // Altijd de status clearen — nooit vast blijven staan op "⟳ sync..."
+    clearTimeout(syncSafetyTimer);
     if (statusEl && statusEl.textContent === '⟳ sync...') statusEl.textContent = '';
     syncInProgress = false;
-    if (syncQueued) {
-      syncQueued = false;
-      setTimeout(syncFromSupabase, 600);
-    }
+    if (syncQueued) { syncQueued = false; setTimeout(syncFromSupabase, 600); }
   }
 }
 
@@ -558,16 +615,12 @@ function refreshVisiblePanel() {
   if (settingsPanel && settingsPanel.classList.contains('visible')) renderSettings();
 }
 
-// Leest geldige user op — altijd via getSession (geen Web Lock issue want session is al gecached)
+// Geldige user ophalen zonder Web Lock
 async function getValidUser() {
-  try {
-    var res = await supa.auth.getSession();
-    if (res.data && res.data.session) {
-      currentUser = res.data.session.user;
-      return currentUser;
-    }
-  } catch(e) {
-    console.warn('getValidUser fout:', e.message);
+  var session = await ensureSession();
+  if (session && session.user) {
+    currentUser = session.user;
+    return currentUser;
   }
   currentUser = null;
   showError('Sessie verlopen — log opnieuw in');
@@ -744,12 +797,11 @@ function setupRealtimeSync() {
     .subscribe();
 }
 
-// Tab wordt weer zichtbaar: sync data bij. Geen sessie-refresh nodig —
-// autoRefreshToken doet dat al op de achtergrond. Wij wachten gewoon 400ms
-// zodat eventuele lock-operaties van Supabase eerst klaar kunnen zijn.
+// Tab wordt weer zichtbaar: sync data bij.
+// Geen wachttijd nodig — we gebruiken geen Web Locks meer.
 document.addEventListener('visibilitychange', function() {
   if (document.visibilityState === 'visible' && currentUser) {
-    setTimeout(syncFromSupabase, 400);
+    syncFromSupabase();
   }
 });
 
@@ -772,19 +824,16 @@ async function init() {
     // TOKEN_REFRESHED en andere events negeren we — we beheren het token zelf
   });
 
-  // Bij opstarten: lees sessie via Supabase (gebruikt gecachede sessie, geen extra netwerk-request)
-  try {
-    var sessionRes = await supa.auth.getSession();
-    if (sessionRes.data && sessionRes.data.session) {
-      currentUser = sessionRes.data.session.user;
-      setupRealtimeSync();
-      await syncFromSupabase();
-      if (!apiKey) { showApiScreen(); } else { showApp(); }
-    } else {
-      showAuthScreen();
-    }
-  } catch(e) {
-    console.error('Init sessie fout:', e);
+  // Bij opstarten: sessie direct uit localStorage, geen getSession() = geen lock
+  var session = await ensureSession();
+  if (session && session.user) {
+    currentUser = session.user;
+    // Vertel de Supabase client de sessie zodat DB-calls werken
+    try { await supa.auth.setSession({ access_token: session.access_token, refresh_token: session.refresh_token }); } catch(e) {}
+    setupRealtimeSync();
+    await syncFromSupabase();
+    if (!apiKey) { showApiScreen(); } else { showApp(); }
+  } else {
     showAuthScreen();
   }
 }
@@ -1278,15 +1327,14 @@ async function runDebug() {
   }
 
   try {
-    var sessRes = await supa.auth.getSession();
-    if (sessRes.data && sessRes.data.session) {
-      var sess = sessRes.data.session;
-      lines.push('✓ Supabase sessie actief');
-      var exp = new Date(sess.expires_at * 1000).toLocaleTimeString('nl-NL');
-      var secsLeft = sess.expires_at - Math.floor(Date.now() / 1000);
+    var sess = await ensureSession();
+    if (sess && sess.access_token) {
+      lines.push('✓ Sessie actief (uit localStorage, geen Web Lock)');
+      var exp = new Date((sess.expires_at || 0) * 1000).toLocaleTimeString('nl-NL');
+      var secsLeft = (sess.expires_at || 0) - Math.floor(Date.now() / 1000);
       lines.push('✓ Token geldig tot: ' + exp + ' (' + secsLeft + 's resterend)');
     } else {
-      lines.push('❌ Geen sessie gevonden');
+      lines.push('❌ Geen geldige sessie gevonden');
     }
   } catch(e) {
     lines.push('❌ Sessie check fout: ' + e.message);

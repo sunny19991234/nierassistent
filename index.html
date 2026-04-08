@@ -1454,7 +1454,7 @@ function switchChartTab(key, btn) {
 function renderChart(key) {
   var wrap = document.getElementById('chart-wrap');
   var cfg = CHART_CFG[key];
-  var filtered = getLabEntries().filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return a.date - b.date; }).slice(-15);
+  var filtered = getLabEntries().filter(function(e) { return getChartValue(e,key) !== null; }).sort(function(a,b) { return new Date(a.date).getTime() - new Date(b.date).getTime(); }).slice(-15);
   if (filtered.length === 0) { wrap.innerHTML = '<div class="chart-card"><div class="chart-card-title">' + cfg.label + '</div><div class="list-empty" style="padding:30px 0">Nog geen metingen voor ' + cfg.label + '.</div></div>'; return; }
   var values = filtered.map(function(e) { return getChartValue(e,key); });
   var labels = filtered.map(function(e) { return new Date(e.date).toLocaleDateString('nl-NL',{day:'numeric',month:'short'}); });

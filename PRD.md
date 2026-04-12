@@ -1,6 +1,6 @@
 # Product Requirement Document — Sunny's NierRobot
 
-**Versie:** 1.4  
+**Versie:** 1.5  
 **Datum:** april 2026  
 **Status:** Actief  
 **Platform:** GitHub Pages PWA  
@@ -108,22 +108,25 @@ Sunny's NierRobot is een persoonlijke medische kennisassistent, specifiek gebouw
 | Tab | Functie |
 |---|---|
 | **Chat** | Streaming medische Q&A met Claude, markdown-rendering, gespreksgeheugen (max 30 gesprekken in localStorage) |
-| **Lab** | 6 meetwaarden invoeren, rode alertbadges bij alarmwaarden, CSV-export, max 200 entries |
-| **Grafiek** | Canvas-lijngrafiek per metric (laatste 15 metingen), referentielijnen, delta t.o.v. vorige meting met kleurcodering |
+| **Lab** | 6 meetwaarden invoeren met datumkiezer, rode alertbadges bij alarmwaarden, CSV-export, max 200 entries |
+| **Grafiek** | Canvas-lijngrafiek per metric (laatste 15 metingen), referentielijnen, delta t.o.v. vorige meting met kleurcodering; bloeddruk toont twee aparte lijnen |
 | **Notities** | Doktersvragen (afvinken, wissen), klachtenlog met urgentieniveaus Mild / Matig / Ernstig |
 | **Log** | Historische gesprekken inzien, herladen en verwijderen; preview van eerste vraag |
-| **Profiel** | Naam, geboortedatum, transplantatiedatum, ziekenhuis, donortype, donorrelatie, medicatielijst, bijzonderheden, API-sleutel, verbindingstest, uitloggen |
+| **Profiel** | Naam, geboortedatum, transplantatiedatum, ziekenhuis, donortype, donorrelatie, medicatielijst (met dosis, eenheid en innametijden), bijzonderheden, API-sleutel, verbindingstest, uitloggen |
 
 ### Labdagboek — meetwaarden
 
 | Veld | Eenheid | Alarmlogica |
 |---|---|---|
+| Datum meting | — | Datumkiezer, standaard vandaag, aanpasbaar naar het verleden |
 | Creatinine | µmol/L | Rood bij >120% van persoonlijk minimum |
 | eGFR | ml/min/1.73m² | — |
 | Tacrolimus | ng/mL | Rood bij <8 of >15 ng/mL |
 | Bloeddruk | sys/dia mmHg | — |
 | Gewicht | kg | — |
 | Temperatuur | °C | Rood bij ≥37,8 °C |
+
+**Datumopslag:** metingen worden opgeslagen als `YYYY-MM-DD`-string (niet als timestamp), zodat de datum altijd correct wordt weergegeven ongeacht tijdzone. Bij opslaan naar Supabase wordt `T12:00:00.000Z` toegevoegd om UTC-interpretatie te voorkomen.
 
 ### Trendgrafiek — referentielijnen per metric
 
@@ -132,9 +135,24 @@ Sunny's NierRobot is een persoonlijke medische kennisassistent, specifiek gebouw
 | Creatinine | 110 µmol/L (bovengrens normaal) | — |
 | eGFR | 60 ml/min (grens CKD3) | <30 |
 | Tacrolimus | 10 + 8 ng/mL (streefspiegels) | >15 of <6 |
-| Bloeddruk | 130 mmHg | >160 |
+| Bloeddruk | 130 mmHg (sys) + 80 mmHg (dia) | sys >160 of dia >100 |
 | Gewicht | — | — |
 | Temperatuur | 37,8 °C | >37,8 |
+
+**Bloeddruk grafiek:** toont systolisch (oranje, doorgetrokken lijn) en diastolisch (blauw, gestippelde lijn) als twee aparte lijnen op één canvas, met eigen referentielijnen en legenda. Alarmkleuring rood bij systolisch ≥160 of diastolisch ≥100.
+
+### Medicatielijst — gegevensstructuur
+
+Elk medicijn heeft de volgende velden:
+
+| Veld | Type | Beschrijving |
+|---|---|---|
+| `name` | string | Naam van het medicijn |
+| `dose` | string | Hoeveelheid (bijv. `5`, `0.5`) |
+| `unit` | string | Eenheid (bijv. `mg`, `mcg`, `ml`) |
+| `times` | string[] | Innametijden in HH:MM-formaat (bijv. `["08:00", "20:00"]`) |
+
+Eén medicijn kan meerdere innametijden hebben. Tijden worden gesorteerd weergegeven als blauwe badges onder de medicijnnaam. Bestaande entries zonder `unit`/`times` worden zonder fout weergegeven (terugwaartse compatibiliteit). De medicatielijst wordt gesynchroniseerd naar Supabase via het `profile`-object (veld `meds`).
 
 ---
 
@@ -151,7 +169,7 @@ De system prompt wordt live samengesteld en bevat:
   - Dag 31–90: intermediaire fase — streef daalt richting 8–12 ng/mL
   - Dag 91–365: late vroege fase — onderhoud, streef 5–10 ng/mL
   - Dag >365: chronische fase
-- Profieldata: naam, transplantatiedatum, donor, ziekenhuis, medicatielijst, bijzonderheden
+- Profieldata: naam, transplantatiedatum, donor, ziekenhuis, medicatielijst (inclusief dosis, eenheid en innametijden), bijzonderheden
 - Laatste 5 labmetingen als trendcontext voor het model
 
 ### Vaste patiëntcontext (hardcoded als fallback)
@@ -194,8 +212,8 @@ De system prompt wordt live samengesteld en bevat:
 | Sleutel | Inhoud | Gesynchroniseerd naar Supabase |
 |---|---|---|
 | `nk_api_key` | Anthropic API-sleutel | **Nooit** |
-| `nk_profile` | Volledig profiel incl. profielvelden | Gedeeltelijk (notes + meds) |
-| `nk_lab` | Max 200 labmetingen | Ja |
+| `nk_profile` | Volledig profiel incl. profielvelden en medicatielijst | Gedeeltelijk (notes + meds) |
+| `nk_lab` | Max 200 labmetingen (datum als YYYY-MM-DD string) | Ja |
 | `nk_agenda` | Vragen + klachten | Ja |
 | `nk_convs` | Max 30 gesprekken | **Nooit** |
 | `nierrobot_auth` | Supabase sessie-token | n.v.t. |
@@ -228,6 +246,13 @@ De kernoplossing voor het "eeuwig hangende sync"-probleem na browser-inactivitei
 ---
 
 ## 8. Changelog
+
+### v1.5 — april 2026
+**Medicatielijst uitgebreid, labdatum aanpasbaar, bloeddrukgrafiek dubbele lijn**
+
+- **Medicatielijst:** elk medicijn heeft nu afzonderlijke velden voor dosis (getal), eenheid (bijv. mg, mcg) en innametijden. Meerdere tijden per medicijn mogelijk, weergegeven als gesorteerde blauwe badges. Terugwaartse compatibiliteit met bestaande entries zonder deze velden gegarandeerd. Medicatietijden worden ook doorgegeven aan de system prompt van de AI.
+- **Lab — datumkiezer:** nieuw datumveld boven de meetvelden, standaard ingesteld op vandaag. Aanpasbaar naar een eerdere datum zodat metingen van een ziekenhuisbezoek achteraf correct geregistreerd kunnen worden. Datum opgeslagen als `YYYY-MM-DD`-string; reset automatisch naar vandaag na opslaan.
+- **Bloeddrukgrafiek:** systolisch en diastolisch worden nu als twee afzonderlijke lijnen getoond op één canvas. Systolisch: oranje doorgetrokken lijn. Diastolisch: blauwe gestippelde lijn. Eigen referentielijnen voor 130 (sys) en 80 (dia) mmHg. Legenda toegevoegd. Alarmkleuring bij sys ≥160 of dia ≥100.
 
 ### v1.4 — april 2026
 **Profiel uitgebreid & dynamische system prompt**
